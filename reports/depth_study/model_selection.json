@@ -1,0 +1,47 @@
+{
+  "selected_depth": 4,
+  "selected_arm": "depth_4",
+  "baseline_retained": false,
+  "criterion": "mean best-validation NDCG@10, then HR@10, then fewer layers",
+  "rows": [
+    {
+      "depth": 1,
+      "name": "depth_1",
+      "validation_ndcg10": 0.015774978240945196,
+      "validation_hr10": 0.029733333333333334
+    },
+    {
+      "depth": 2,
+      "name": "depth_2",
+      "validation_ndcg10": 0.016315529360391223,
+      "validation_hr10": 0.03106666666666667
+    },
+    {
+      "depth": 4,
+      "name": "depth_4",
+      "validation_ndcg10": 0.01649792658039995,
+      "validation_hr10": 0.03146666666666667
+    }
+  ],
+  "selection_split": "val",
+  "repeated_validation_development": true,
+  "test_targets_read": false,
+  "deployed": false,
+  "input_checkpoint_sha256": {
+    "depth_1": [
+      "88d5513f03c3cfdfb6bc460c0d73304a16c3e2bf0c7a60c3bfa64137a35e6a05",
+      "445ea1f51fd65fc6af1df301f4856512e7d5ed1d0f0de0050fb86005a259b532",
+      "c4e93dcd43026ddeefc905d01d208ec68f5286b9c1a2f5782842d67c34f65e3b"
+    ],
+    "depth_2": [
+      "5e0ae08db0448c485b3092222fa1a9ff102d047179b9b2321126c2c0f4a5a41a",
+      "eece4ff75b80f3fed0b55ba4bc84a0e9b9b2b9f586b5b99cf23cf6f7af9a69c2",
+      "e319cc125208a535872275d6ec48d49cccfe8732457abefc4a2332d29105b3fe"
+    ],
+    "depth_4": [
+      "71b965313f16aa2c9b6d8ba57f1ed0f3962edffc4b97ef006eca63ff0bf4c720",
+      "a122207ecade23eff497d37c41b8330bb3136564f87965ab40f1d43deb4c2e5c",
+      "5ba5ab13875d6367b56f2485bc602c6eef8fc778d325a5959945c5a5fae81b08"
+    ]
+  }
+}

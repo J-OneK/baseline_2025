@@ -1,0 +1,23 @@
+{
+  "new_complete_training_runs": 6,
+  "reused_one_layer_runs": 3,
+  "nested_initial_parameter_hashes_matched": true,
+  "first_two_layers_shared_between_depth2_and_depth4": true,
+  "same_rows_targets_and_history": true,
+  "same_candidate_catalog": true,
+  "per_user_metrics_recomputed": true,
+  "full_five_epochs": true,
+  "validation_only_checkpoint_and_depth_selection": true,
+  "original_model_or_index_replaced": false,
+  "independent_test_confirmation": false,
+  "report_source_sha256": "3e88584cfd8dddcb229eb13cee91d815b7f2ad69601c85d9e69aab6aa5b5cf38",
+  "unit_tests": 70,
+  "unit_tests_passed": true,
+  "reference_complete_runs": 3,
+  "steps_per_new_run": 10980,
+  "training_source_hashes_verified": 11,
+  "documentation_links_checked": 198,
+  "source_snippets_checked": 27,
+  "shared_initialization_tensor_pairs_checked": 3,
+  "main_model_or_faiss_replaced": false
+}

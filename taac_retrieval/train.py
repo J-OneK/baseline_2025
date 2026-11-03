@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader
 from .data import PreparedData, SequenceDataset, sample_negatives
 from .metrics import evaluate, evaluate_popularity, to_device
 from .model import SequenceRetriever
+from .initialization import apply_depth_initialization
 from .objectives import supervision_weights, weighted_bce, sampled_info_nce
 
 
@@ -64,6 +65,8 @@ def train(args):
                             sampling='uniform train-visible items, excluding the user training prefix'))
     model = SequenceRetriever(data, args.hidden, args.blocks, args.heads, args.dropout,
                               use_actions=args.variant == 'actions')
+    if args.initial_weights:
+        config.update(apply_depth_initialization(model, args.initial_weights, data))
     config['shared_initialization_sha256'] = initialization_hash(model)
     config['parameters'] = sum(p.numel() for p in model.parameters())
     (output / 'config.json').write_text(json.dumps(config, indent=2) + '\n')
@@ -197,6 +200,8 @@ def parser():
     result.add_argument('--temperature', type=float, default=1.0)
     result.add_argument('--skip-test', action='store_true', help='Development runs must only read validation targets.')
     result.add_argument('--eval-indices', default=None, help='Frozen cohort .npy file; does not change training data.')
+    result.add_argument('--initial-weights', default=None,
+                        help='Verified shared initial state for controlled depth comparisons.')
     return result
 
 

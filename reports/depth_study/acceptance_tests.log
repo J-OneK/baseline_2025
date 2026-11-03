@@ -1,0 +1,87 @@
+test_filter_reports_too_few_candidates (test_ann.ANNLogicTests) ... ok
+test_recall_and_selection_do_not_use_recommendation_labels (test_ann.ANNLogicTests) ... ok
+test_zero_based_index_ids_are_not_padding_or_double_mapped (test_ann.ANNLogicTests) ... ok
+test_asymmetric_lift_preserves_ip_scores_and_order (test_ann.FaissIntegrationTests) ... ok
+test_benchmark_exports_selection_and_verified_test_scores (test_ann.FaissIntegrationTests) ... 2026-11-03 04:02:27 Building flat over 500 vectors
+2026-11-03 04:02:27 Building hnsw over 500 vectors
+2026-11-03 04:02:27 HNSW build: 500/500 items
+2026-11-03 04:02:27 Measuring warm FlatIP single-query latency
+2026-11-03 04:02:27 {"efSearch": 64, "single_query_p50_ms": 0.0645275, "single_query_p95_ms": 0.07238735, "single_query_mean_ms": 0.06575275, "measured_single_queries": 8, "single_query_threads": 1, "batch_qps_8_threads": 56748.823217646444, "batch_queries": 8, "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network", "ANNRecall@10": 0.9875, "validation_recommendation": {"HR@10": 0.0, "NDCG@10": 0.0}}
+2026-11-03 04:02:27 {"efSearch": 128, "single_query_p50_ms": 0.0813485, "single_query_p95_ms": 0.10706729999999999, "single_query_mean_ms": 0.085691, "measured_single_queries": 8, "single_query_threads": 1, "batch_qps_8_threads": 50780.08974961501, "batch_queries": 8, "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network", "ANNRecall@10": 1.0, "validation_recommendation": {"HR@10": 0.0, "NDCG@10": 0.0}}
+2026-11-03 04:02:27 Benchmark complete: /tmp/tmp6ynutt0o/index/benchmark.json
+ok
+test_hnsw_persistence_filtering_and_exact_reference (test_ann.FaissIntegrationTests) ... ok
+test_inner_product_is_not_silently_normalized (test_ann.FaissIntegrationTests) ... ok
+test_input_identity_and_validation_only_metadata_are_required (test_candidate_fusion.CandidateFusionTests) ... ok
+test_quota_keeps_prefix_and_deduplicates_padding_before_refill (test_candidate_fusion.CandidateFusionTests) ... ok
+test_selection_enforces_all_groups_and_retains_zero_on_tie (test_candidate_fusion.CandidateFusionTests) ... ok
+test_union_is_labeled_with_larger_budget_and_extra_hits (test_candidate_fusion.CandidateFusionTests) ... ok
+test_zero_quota_is_exact_baseline_and_top10_is_protected (test_candidate_fusion.CandidateFusionTests) ... ok
+test_exact_retention_boundary_is_eligible (test_cold_start_report.ColdStartSelectionTests) ... ok
+test_invalid_metrics_and_ambiguous_control_are_rejected (test_cold_start_report.ColdStartSelectionTests) ... ok
+test_macro_cannot_hide_one_rare_bucket_regression (test_cold_start_report.ColdStartSelectionTests) ... ok
+test_overall_quality_gate_rejects_larger_rare_macro (test_cold_start_report.ColdStartSelectionTests) ... ok
+test_strict_improvement_and_smaller_probability_tie_break (test_cold_start_report.ColdStartSelectionTests) ... ok
+test_bad_content_is_excluded_and_history_is_filtered (test_content_recall.ContentRecallTests) ... ok
+test_click_mean_precedes_exposure_and_uses_raw_magnitudes (test_content_recall.ContentRecallTests) ... ok
+test_empty_query_counts_as_a_miss_not_an_excluded_user (test_content_recall.ContentRecallTests) ... ok
+test_union_budget_and_identity_are_explicit (test_content_recall.ContentRecallTests) ... ok
+test_diagnostic_refuses_any_existing_output_before_loading_models (test_coverage.CoverageTests) ... ok
+test_empty_group_is_distinct_from_no_hits (test_coverage.CoverageTests) ... ok
+test_invalid_candidates_or_budget_are_not_silently_accepted (test_coverage.CoverageTests) ... ok
+test_rank_bands_conditional_coverage_and_frequency_boundaries (test_coverage.CoverageTests) ... ok
+test_streaming_larger_topk_matches_bruteforce_after_history_filter (test_coverage.CoverageTests) ... ok
+test_duplicate_missing_control_and_nonfinite_are_rejected (test_depth_report.DepthReportTests) ... ok
+test_hr_breaks_ndcg_tie_then_smaller_depth (test_depth_report.DepthReportTests) ... ok
+test_interpretation_uses_selected_arm_and_fixed_epoch_evidence (test_depth_report.DepthReportTests) ... ok
+test_missing_shared_parameters_are_rejected (test_depth_report.DepthReportTests) ... ok
+test_nested_initialization_includes_added_second_layer (test_depth_report.DepthReportTests) ... ok
+test_primary_ndcg_precedes_hr_or_depth (test_depth_report.DepthReportTests) ... ok
+test_cache_shape_and_existing_identity_are_checked (test_initialization.DepthInitializationTests) ... ok
+test_generation_preserves_external_rng_and_never_touches_cuda (test_initialization.DepthInitializationTests) ... ok
+test_nested_weights_and_original_hash_are_preserved (test_initialization.DepthInitializationTests) ... ok
+test_disabled_mask_preserves_initialization_and_rng (test_item_id_dropout.ItemIDDropoutTests) ... ok
+test_full_mask_retains_content_and_eval_restores_full_ids (test_item_id_dropout.ItemIDDropoutTests) ... ok
+test_one_item_decision_is_shared_and_dedicated_rng_is_used (test_item_id_dropout.ItemIDDropoutTests) ... ok
+test_matching_seed_and_checkpoint_are_required (test_masked_candidate_fusion.MaskedCandidateFusionTests) ... ok
+test_exposures_clicks_unknowns_are_distinct (test_objectives.ObjectiveTests) ... ok
+test_frozen_cohort_excludes_previously_tested_users (test_objectives.ObjectiveTests) ... ok
+test_info_nce_has_correct_uniform_value_and_gradient_directions (test_objectives.ObjectiveTests) ... ok
+test_info_nce_supervision_scope_controls_exposure_gradients (test_objectives.ObjectiveTests) ... ok
+test_invalid_temperature_or_unsupervised_batch_is_rejected (test_objectives.ObjectiveTests) ... ok
+test_negative_count_does_not_rescale_bce (test_objectives.ObjectiveTests) ... ok
+test_unlabelled_positions_have_zero_gradient (test_objectives.ObjectiveTests) ... ok
+test_all_rare_baseline_or_no_extra_keeps_every_candidate (test_protected_fusion.ProtectedFusionTests) ... ok
+test_invalid_catalog_or_incomplete_baseline_is_rejected (test_protected_fusion.ProtectedFusionTests) ... ok
+test_only_new_rare_extra_items_are_admitted_and_zero_quota_is_identity (test_protected_fusion.ProtectedFusionTests) ... ok
+test_preserves_all_old_rare_candidates_and_top_prefix (test_protected_fusion.ProtectedFusionTests) ... ok
+test_replacement_count_is_capped_by_available_removable_items (test_protected_fusion.ProtectedFusionTests) ... ok
+test_causal_mask_and_padding_have_finite_gradients (test_retrieval.RetrievalTests) ... ok
+test_chronological_holdout_has_no_target_or_future_history (test_retrieval.RetrievalTests) ... ok
+test_chunked_search_matches_exhaustive_inner_product (test_retrieval.RetrievalTests) ... ok
+test_content_oid_join_and_user_token_separation (test_retrieval.RetrievalTests) ... ok
+test_downloaded_candidate_schema_and_cold_start (test_retrieval.RetrievalTests) ... ok
+test_eval_keeps_last_observed_event (test_retrieval.RetrievalTests) ... ok
+test_legacy_arrow_batch_offsets_and_null_actions (test_retrieval.RetrievalTests) ... all the rows: 2
+Loading Seqs:   0%|          | 0/2 [00:00<?, ? rows/s]Loading Seqs: 100%|██████████| 2/2 [00:00<00:00, 1604.55 rows/s]
+ok
+test_legacy_test_input_keeps_final_event_for_noncontiguous_user_id (test_retrieval.RetrievalTests) ... ok
+test_metric_known_ranks (test_retrieval.RetrievalTests) ... ok
+test_negative_pool_exhaustion_is_reported (test_retrieval.RetrievalTests) ... ok
+test_negative_sampling_excludes_training_history (test_retrieval.RetrievalTests) ... ok
+test_only_action_variant_responds_to_action_changes (test_retrieval.RetrievalTests) ... ok
+test_previously_exposed_ad_is_not_a_holdout_target (test_retrieval.RetrievalTests) ... ok
+test_timestamp_ties_are_excluded_and_unknown_actions_are_preserved (test_retrieval.RetrievalTests) ... ok
+test_training_samples_use_only_prefix (test_retrieval.RetrievalTests) ... ok
+test_seed_uncertainty_is_not_hidden_by_user_bootstrap (test_study.StudyTests) ... ok
+test_selection_uses_validation_and_cannot_be_silently_changed (test_study.StudyTests) ... Memory Usage: 0.00 MB (Events Only)
+Total users: 2
+Locked using validation only: click_infonce64; confirmation comparison: click_infonce64
+ok
+test_difference_direction_is_all_minus_click (test_supervision_report.SupervisionReportTests) ... ok
+test_saved_scores_and_user_identity_are_checked (test_supervision_report.SupervisionReportTests) ... ok
+
+----------------------------------------------------------------------
+Ran 70 tests in 1.800s
+
+OK

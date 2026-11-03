@@ -1,0 +1,269 @@
+{
+  "specification": {
+    "reference_root": "artifacts/objective_study",
+    "cache": "artifacts/objective_study/scale_data",
+    "evaluation_indices": "artifacts/objective_study/confirm_eval_indices.npy",
+    "depths": [
+      1,
+      2,
+      4
+    ],
+    "seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "epochs": 5,
+    "hidden": 32,
+    "heads": 1,
+    "ffn_hidden": 32,
+    "dropout": 0.2,
+    "objective": "click_infonce",
+    "num_negatives": 64,
+    "temperature": 1.0,
+    "batch_size": 128,
+    "lr": 0.001,
+    "item_id_dropout": 0.0,
+    "initialization": "Reconstruct the historical one-layer initial model and verify its SHA; seed extra layers with CPU-only seed+101 in a four-layer template; overwrite all one-layer parameters from the verified initial model; load nested subsets for two/four layers; no trained weights used.",
+    "rng": "Restore CPU RNG after original one-layer construction; CUDA/shuffle/negative seeds unchanged; depth naturally changes subsequent ordinary dropout draw consumption, so full dropout trajectories are not claimed identical.",
+    "checkpoint_selection": "overall validation NDCG@10, then HR@10, earliest epoch on ties",
+    "depth_selection": "highest three-seed mean best-validation NDCG@10, then HR@10, then fewer layers",
+    "retrieval_budgets": [
+      10,
+      100,
+      500
+    ],
+    "evaluation_policy": "validation-only architecture development on the reused 10k cohort; no new test labels, no automatic model/index replacement",
+    "budget": "same five epochs, users, batches, objective, negative policy and shared initial parameters; deeper models have more compute and different dropout draw trajectories"
+  },
+  "references": [
+    {
+      "seed": 2026,
+      "folder": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirmation/selected_seed2026",
+      "files": {
+        "config.json": "3151b18db7b0b49a64b35f0eaa646573cdfd8fd5a44cf43f9f3181fd7202e34b",
+        "history.json": "6b5c20b954ff5205fe894224e1f0f15de67fe4350e30bea16d8aa9ca63353ee0",
+        "result.json": "6d634891e63878936da6486388157219cc87f7e91b973bb8976fbe334aecd34a",
+        "best.pt": "88d5513f03c3cfdfb6bc460c0d73304a16c3e2bf0c7a60c3bfa64137a35e6a05"
+      }
+    },
+    {
+      "seed": 2027,
+      "folder": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirmation/selected_seed2027",
+      "files": {
+        "config.json": "4e9a99202801b7e0690d7ca0be977cf2a4b16ba3729748d3c2cf7381e294f708",
+        "history.json": "2cc25e51fc43f24765365af63340fef45355353e682e6a043de82e8cc55c5b0a",
+        "result.json": "9fba41a3616ce5085ada0f795a290d2a3e8c1c3582c630e2ff4f5e0c58130f7a",
+        "best.pt": "445ea1f51fd65fc6af1df301f4856512e7d5ed1d0f0de0050fb86005a259b532"
+      }
+    },
+    {
+      "seed": 2028,
+      "folder": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirmation/selected_seed2028",
+      "files": {
+        "config.json": "ef4b8a441646dfe71e4c39dbe8a924a963555ee4ce232e681d3251941d8ced62",
+        "history.json": "c94d7908328216fcecd7631973b448085f341c414f8d13cf4cfe451a2aa2ef2e",
+        "result.json": "806cd429c2fb1856af7d6ebdb67ff6a031e401fbe581757f243317833bd74ada",
+        "best.pt": "c4e93dcd43026ddeefc905d01d208ec68f5286b9c1a2f5782842d67c34f65e3b"
+      }
+    }
+  ],
+  "initializations": [
+    {
+      "seed": 2026,
+      "file": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2026.pt",
+      "manifest": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2026.json",
+      "manifest_sha256": "2eda0573c19ae8c496568e20a9d8c0c8685d46cc008835a4a11c0148c15ab9c8"
+    },
+    {
+      "seed": 2027,
+      "file": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2027.pt",
+      "manifest": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2027.json",
+      "manifest_sha256": "e12945282e6b138a1d9b311a5a0101ef5ffa7f2ec729f6f5331de858decd1767"
+    },
+    {
+      "seed": 2028,
+      "file": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2028.pt",
+      "manifest": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2028.json",
+      "manifest_sha256": "6d1d84384a6976823004a75a77f84406ffec5b25d65b1a053c3b188001d064b8"
+    }
+  ],
+  "jobs": [
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_2_seed2026",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2026,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 2,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2026.pt"
+      }
+    },
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_4_seed2026",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2026,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 4,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2026.pt"
+      }
+    },
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_2_seed2027",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2027,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 2,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2027.pt"
+      }
+    },
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_4_seed2027",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2027,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 4,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2027.pt"
+      }
+    },
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_2_seed2028",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2028,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 2,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2028.pt"
+      }
+    },
+    {
+      "folder": "/home/jyk/project/baseline_2025/artifacts/depth_study/training/depth_4_seed2028",
+      "arguments": {
+        "variant": "baseline",
+        "seed": 2028,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "objective": "click_infonce",
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "blocks": 4,
+        "item_id_dropout": 0.0,
+        "initial_weights": "/home/jyk/project/baseline_2025/artifacts/depth_study/initialization/seed2028.pt"
+      }
+    }
+  ],
+  "source_sha256": {
+    "model.py": "ef0536aee1bbfe29c77bb3fc031583c2b9cedcc855350af0f55e5f0773bd54c0",
+    "taac_retrieval/model.py": "6b0c111d3526141afec5618acb4eec88464d040a50b56c6f49b52e2e389de696",
+    "taac_retrieval/train.py": "32b42c4ccf256485d27fa5d64b7ecac2b44a53b350eab4b53390d4fd8bee0fe9",
+    "taac_retrieval/data.py": "d78e70868643ed4ff5a2cdd0dad39334c65f186d644642d9b02fce591d82f428",
+    "taac_retrieval/objectives.py": "3eedcba049d1ded0f5383413e197f5d65dc0b64f96580b4a095afbabf3875883",
+    "taac_retrieval/metrics.py": "c15e68465809a4afc7a90505db16a03f6b04384e1a9f979e5bd9b54b259cb91b",
+    "taac_retrieval/initialization.py": "f595d0d5cadd966cab0f17f710f5e58c3d1dded2c134b7c4d6eda5b06b62f826",
+    "taac_retrieval/evaluate_checkpoint.py": "c46bc026762a91a947cb47eb50adca3e0dd0a884848edc6f78dd1ff47fe1f272",
+    "taac_retrieval/coverage.py": "2355b917c54013b3bffb79a638e3e8897b606bf1c83393783ba841588466686b",
+    "taac_retrieval/study.py": "2d24078e49243bb5ab9a39a3d6e3b1d9c763dddf800719ad1e8cd9cdf75a2c8d",
+    "scripts/run_depth_study.py": "7b0d15e13077684b2bfd286307ae380b3fa6167662429b91b93b3c0a6e4364a3"
+  },
+  "registered_at_utc": "2026-11-03T03:44:32.622284+00:00"
+}
