@@ -1,0 +1,11 @@
+{
+  "unit_tests": 30,
+  "acceptance_tests_passed": true,
+  "completed_development_runs": 10,
+  "completed_confirmation_runs": 6,
+  "fresh_test_cohort_overlap_with_previous": 0,
+  "validation_only_model_and_index_selection": true,
+  "checkpoint_inference_and_persisted_ann_demo_passed": true,
+  "source_data_modified": false,
+  "full_workflow_finished": true
+}

@@ -1,0 +1,11 @@
+# Tested with Python 3.10.22 on Linux. Install a PyTorch build for your hardware.
+# These are the tested public versions; no CUDA-specific package source is required.
+torch==2.14.1
+numpy==2.2.6
+pyarrow==25.0.1
+faiss-cpu==1.15.1
+matplotlib==3.10.9
+threadpoolctl==3.7.0
+tqdm==4.70.1
+tensorboard==2.21.0
+scikit-learn==1.7.2

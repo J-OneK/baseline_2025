@@ -1,0 +1,47 @@
+{
+  "description": "Validation-selected click-only InfoNCE-64 retrieval model; one seed for the showcase workflow. Three-seed confirmation is reproduced separately by run_objective_study.py.",
+  "preparation": {
+    "reference_max_users": 100000,
+    "reference_eval_users": 2000,
+    "max_users": 300000,
+    "eval_users": 10000,
+    "seed": 2026,
+    "max_history": 100,
+    "min_history": 5,
+    "cohort_seed": 3107
+  },
+  "model": {
+    "variant": "baseline",
+    "objective": "click_infonce",
+    "num_negatives": 64,
+    "seed": 2026,
+    "epochs": 5,
+    "batch_size": 128,
+    "eval_batch_size": 256,
+    "candidate_chunk": 32768,
+    "workers": 2,
+    "hidden": 32,
+    "blocks": 1,
+    "heads": 1,
+    "dropout": 0.2,
+    "lr": 0.001,
+    "exposure_weight": 0.1,
+    "temperature": 1.0
+  },
+  "faiss": {
+    "primary_seed": 2026,
+    "metric": "inner_product_without_normalization",
+    "M": 32,
+    "efConstruction": 100,
+    "efSearch": [
+      2048
+    ],
+    "minimum_validation_ann_recall": 0.98,
+    "latency_queries": 512,
+    "warmup_queries": 32,
+    "latency_repeats": 3,
+    "latency_threads": 1,
+    "build_threads": 16,
+    "hnsw_geometry": "mips_l2"
+  }
+}

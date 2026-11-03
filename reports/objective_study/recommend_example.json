@@ -1,0 +1,52 @@
+{
+  "user_rid": 12,
+  "recommendations": [
+    {
+      "item_oid": 20001009388,
+      "score": 10.630966186523438
+    },
+    {
+      "item_oid": 20000184097,
+      "score": 10.536529541015625
+    },
+    {
+      "item_oid": 20005469879,
+      "score": 10.256950378417969
+    },
+    {
+      "item_oid": 20005770786,
+      "score": 9.81781005859375
+    },
+    {
+      "item_oid": 20005657636,
+      "score": 9.045951843261719
+    },
+    {
+      "item_oid": 20004289211,
+      "score": 8.947013854980469
+    },
+    {
+      "item_oid": 20000769622,
+      "score": 8.88421630859375
+    },
+    {
+      "item_oid": 20004791999,
+      "score": 8.866607666015625
+    },
+    {
+      "item_oid": 20002959740,
+      "score": 8.805854797363281
+    },
+    {
+      "item_oid": 20001854733,
+      "score": 8.798667907714844
+    }
+  ],
+  "timings_ms": {
+    "encoder_and_transfer": 2.435561968013644,
+    "index_and_history_filter": 5.604912992566824,
+    "warm_request_total": 8.040474960580468
+  },
+  "timing_note": "One warmed local request; startup/model/index loading excluded; not a p95 measurement.",
+  "offline_target_oid": 20002205421
+}

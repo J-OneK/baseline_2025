@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import struct
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -92,6 +93,13 @@ def process_cold_start_feat(feat):
     return processed_feat
 
 
+def parse_candidate_feature(value):
+    """Downloaded candidate fields use cold_start, not the legacy is_str key."""
+    if not value or value.get('cold_start') != 0 or value.get('feature_value') is None:
+        return 0
+    return int(value['feature_value'])
+
+
 def get_candidate_emb_parquet(indexer, feat_types, feat_default_value, mm_emb_dict, model):
     EMB_SHAPE_DICT = {"81": 32, "82": 1024, "83": 3584, "84": 4096, "85": 3584, "86": 3584}
 
@@ -100,7 +108,7 @@ def get_candidate_emb_parquet(indexer, feat_types, feat_default_value, mm_emb_di
 
     item_feature_ids = ['100', '101', '102', '112', '114', '115', '116', '117', '118', '119', '120', '121', '122']
 
-    scanner = candidates.scanner(columns=['creative_id', 'reid_creative_id', 'retrieval_id', *item_feature_ids], batch_size=100000)
+    scanner = candidates.scanner(columns=['item_id', 'retrieval_id', *item_feature_ids], batch_size=100000)
 
     total_rows = candidates.count_rows()
     print(f"all the candidates rows: {total_rows}")
@@ -112,14 +120,14 @@ def get_candidate_emb_parquet(indexer, feat_types, feat_default_value, mm_emb_di
 
         for batch in scanner.to_batches():
             
-            creative_ids = batch.column('creative_id')
+            creative_ids = batch.column('item_id')
             retrieval_ids = batch.column('retrieval_id') 
 
             for i in range(len(batch)):
                 feature = {}
                 creative_id = creative_ids[i].as_py()
                 retrieval_id = retrieval_ids[i].as_py() 
-                item_id = indexer[creative_id] if creative_id in indexer else 0
+                item_id = indexer.get(creative_id, indexer.get(str(creative_id), 0))
 
                 missing_fields = set(
                     feat_types['item_sparse'] + feat_types['item_array'] + feat_types['item_continual']
@@ -130,11 +138,11 @@ def get_candidate_emb_parquet(indexer, feat_types, feat_default_value, mm_emb_di
                 # process cold start:
                 for feat_id in item_feature_ids:
                     feat_id_dict = batch.column(feat_id)[i].as_py()
-                    feature[feat_id] = int(feat_id_dict['feature_value']) if feat_id_dict['is_str'] == 0 else 0
+                    feature[feat_id] = parse_candidate_feature(feat_id_dict)
 
                 for feat_id in feat_types['item_emb']:
-                    if creative_id in mm_emb_dict[feat_id]:
-                        feature[feat_id] = mm_emb_dict[feat_id][creative_id]
+                    if str(creative_id) in mm_emb_dict[feat_id]:
+                        feature[feat_id] = mm_emb_dict[feat_id][str(creative_id)]
                     else:
                         feature[feat_id] = np.zeros(EMB_SHAPE_DICT[feat_id], dtype=np.float32)
 
@@ -213,6 +221,7 @@ def get_candidate_emb(indexer, feat_types, feat_default_value, mm_emb_dict, mode
     return retrieve_id2creative_id
 
 
+@torch.inference_mode()
 def infer():
     args = get_args()
     
@@ -273,19 +282,15 @@ def infer():
     print("Enter ANN Search")
 
     # ANN 检索
-    ann_cmd = (
-        str(Path("/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/competition_test/python", "faiss-based-ann", "faiss_demo"))
-        + " --dataset_vector_file_path="
-        + str(Path(os.environ.get("EVAL_RESULT_PATH"), "embedding.fbin"))
-        + " --dataset_id_file_path="
-        + str(Path(os.environ.get("EVAL_RESULT_PATH"), "id.u64bin"))
-        + " --query_vector_file_path="
-        + str(Path(os.environ.get("EVAL_RESULT_PATH"), "query.fbin"))
-        + " --result_id_file_path="
-        + str(Path(os.environ.get("EVAL_RESULT_PATH"), "id100.u64bin"))
-        + " --query_ann_top_k=10 --faiss_M=64 --faiss_ef_construction=1280 --query_ef_search=640 --faiss_metric_type=0"
-    )
-    os.system(ann_cmd)
+    binary = os.environ.get('FAISS_BIN', str(Path(__file__).resolve().parent / 'faiss-based-ann/faiss_demo'))
+    result_dir = Path(os.environ['EVAL_RESULT_PATH'])
+    subprocess.run([binary,
+                    f'--dataset_vector_file_path={result_dir / "embedding.fbin"}',
+                    f'--dataset_id_file_path={result_dir / "id.u64bin"}',
+                    f'--query_vector_file_path={result_dir / "query.fbin"}',
+                    f'--result_id_file_path={result_dir / "id100.u64bin"}',
+                    '--query_ann_top_k=10', '--faiss_M=64', '--faiss_ef_construction=1280',
+                    '--query_ef_search=640', '--faiss_metric_type=0'], check=True)
 
     # 取出top-k
     top10s_retrieved = read_result_ids(Path(os.environ.get("EVAL_RESULT_PATH"), "id100.u64bin"))

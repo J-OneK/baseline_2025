@@ -39,11 +39,12 @@ def delete_all_except(directory, exclude_file):
 if __name__ == '__main__':
 
     # os.environ['EVAL_RESULT_PATH'] = '/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/competition_test/python/results'
-    os.environ['EVAL_RESULT_PATH'] = '/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/competition_test/python/epoch2_results'
+    os.environ.setdefault('EVAL_RESULT_PATH', str(Path(__file__).resolve().parent / 'artifacts/legacy_predictions'))
 
-    os.environ['EVAL_DATA_PATH'] = '/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/second/second'
+    os.environ.setdefault('EVAL_DATA_PATH', str(Path(__file__).resolve().parent / 'TencentGR-1M'))
     
-    os.environ["MODEL_OUTPUT_PATH"] = "/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/competition_test/python/checkpoints/global_step35648.valid_loss=0.0959"
+    if not os.environ.get('MODEL_OUTPUT_PATH'):
+        raise ValueError('Set MODEL_OUTPUT_PATH to a directory containing a legacy BaselineModel model.pt')
     # os.environ['EVAL_RESULT_PATH'] = '/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/competition_test/python/epoch1_results'
 
     os.makedirs(os.environ.get('EVAL_RESULT_PATH'), exist_ok=True)

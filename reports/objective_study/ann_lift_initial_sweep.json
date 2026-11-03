@@ -1,0 +1,66 @@
+[
+  {
+    "efSearch": 128,
+    "single_query_p50_ms": 0.22715649999999998,
+    "single_query_p95_ms": 0.31007025,
+    "single_query_mean_ms": 0.23565078450520835,
+    "measured_single_queries": 1536,
+    "single_query_threads": 1,
+    "batch_qps_8_threads": 31655.38768463693,
+    "batch_queries": 512,
+    "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+    "ANNRecall@10": 0.8720703125,
+    "validation_recommendation": {
+      "HR@10": 0.03125,
+      "NDCG@10": 0.014115269637342361
+    }
+  },
+  {
+    "efSearch": 256,
+    "single_query_p50_ms": 0.3687855,
+    "single_query_p95_ms": 0.4860305,
+    "single_query_mean_ms": 0.3774118372395834,
+    "measured_single_queries": 1536,
+    "single_query_threads": 1,
+    "batch_qps_8_threads": 20369.169702252202,
+    "batch_queries": 512,
+    "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+    "ANNRecall@10": 0.92109375,
+    "validation_recommendation": {
+      "HR@10": 0.033203125,
+      "NDCG@10": 0.015002132480001975
+    }
+  },
+  {
+    "efSearch": 512,
+    "single_query_p50_ms": 0.6054605,
+    "single_query_p95_ms": 0.7752957500000001,
+    "single_query_mean_ms": 0.6148895559895834,
+    "measured_single_queries": 1536,
+    "single_query_threads": 1,
+    "batch_qps_8_threads": 12234.494419744207,
+    "batch_queries": 512,
+    "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+    "ANNRecall@10": 0.951953125,
+    "validation_recommendation": {
+      "HR@10": 0.03515625,
+      "NDCG@10": 0.01569784964232233
+    }
+  },
+  {
+    "efSearch": 1024,
+    "single_query_p50_ms": 1.2796094999999998,
+    "single_query_p95_ms": 1.54046475,
+    "single_query_mean_ms": 1.2894661061197918,
+    "measured_single_queries": 1536,
+    "single_query_threads": 1,
+    "batch_qps_8_threads": 5906.455948890578,
+    "batch_queries": 512,
+    "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+    "ANNRecall@10": 0.9708984375,
+    "validation_recommendation": {
+      "HR@10": 0.029296875,
+      "NDCG@10": 0.013849603530818636
+    }
+  }
+]

@@ -1,0 +1,37 @@
+# Source dataset and generated model/data/index artifacts
+TencentGR-1M/
+artifacts/
+checkpoints/
+logs/
+tf_events/
+*.pt
+*.pth
+*.ckpt
+*.faiss
+*.npy
+*.npz
+*.fbin
+*.u64bin
+
+# Local environments, credentials and Python/tool caches
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+.download_venv/
+.project_venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Download and preparation progress
+download*.log
+download*.pid
+download_status.json
+download.complete
+.download.lock
+artifacts_prepare.log
