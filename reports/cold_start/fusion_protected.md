@@ -38,9 +38,9 @@
 ## 证据与复现
 
 - [首次融合失败记录](fusion.md)、[固定模型诊断](diagnostics.md)。
-- [修正前固定计划](../../artifacts/cold_start/fusion_protected_plan.json)。
+- 修正前固定计划：`artifacts/cold_start/fusion_protected_plan.json`（本地产物）。
 - [实现](../../taac_retrieval/protected_fusion.py)、[测试](../../tests/test_protected_fusion.py)。
-- [完整指标](../../artifacts/cold_start/fusion_protected/metrics.json)、[选择](../../artifacts/cold_start/fusion_protected/selection.json)。
+- 完整指标：`artifacts/cold_start/fusion_protected/metrics.json`（本地产物）、选择：`artifacts/cold_start/fusion_protected/selection.json`（本地产物）。
 - `artifacts/cold_start/fusion_protected/selected_seed*.npz` 保存同一10,000人队列所选配额的500个候选、历史、目标和逐用户指标。
 
 ```bash

@@ -34,9 +34,9 @@
 ## 来源
 
 - [原固定模型诊断](diagnostics.md)、[首次融合](fusion.md)、[保护式文本融合](fusion_protected.md)。
-- [先登记的 amendment](../../artifacts/cold_start/masked_fusion_plan.json)。
+- 先登记的 amendment：`artifacts/cold_start/masked_fusion_plan.json`（本地产物）。
 - [实现](../../taac_retrieval/masked_candidate_fusion.py)、[复用的保护合并](../../taac_retrieval/protected_fusion.py)。
-- [完整指标](../../artifacts/cold_start/fusion_masked/metrics.json)、[选择](../../artifacts/cold_start/fusion_masked/selection.json)。
+- 完整指标：`artifacts/cold_start/fusion_masked/metrics.json`（本地产物）、选择：`artifacts/cold_start/fusion_masked/selection.json`（本地产物）。
 - 所选候选保存在 `artifacts/cold_start/fusion_masked/selected_seed*.npz`；原有模型、索引和前两次融合结果均保留。
 
 ```bash

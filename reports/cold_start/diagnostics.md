@@ -28,7 +28,7 @@
 | 2027 | 23.2100% | 8.0425% | 0.9050% | 7.7883% | 40.1070% |
 | 2028 | 22.8500% | 8.6495% | 0.7541% | 6.2374% | 40.2654% |
 
-完整逐种子值和 NDCG@10/100/500 均保存在[汇总 JSON](../../artifacts/cold_start/diagnostics/click_summary.json)，本表不根据测试分数挑选种子。
+完整逐种子值和 NDCG@10/100/500 均保存在汇总 JSON：`artifacts/cold_start/diagnostics/click_summary.json`（本地产物），本表不根据测试分数挑选种子。
 
 ## 指标与分桶口径
 
@@ -53,15 +53,15 @@
 原模型与缓存使用按功能命名的真实目录：
 
 - checkpoint：`artifacts/objective_study/confirmation/selected_seed{seed}/best.pt`。
-- 数据缓存：[scale_data/metadata.json](../../artifacts/objective_study/scale_data/metadata.json)。
-- 冻结用户：[confirm_eval_indices.npy](../../artifacts/objective_study/confirm_eval_indices.npy)，实际加载时以 checkpoint 保存的队列为准。
+- 数据缓存：scale_data/metadata.json：`artifacts/objective_study/scale_data/metadata.json`（本地产物）。
+- 冻结用户：confirm_eval_indices.npy：`artifacts/objective_study/confirm_eval_indices.npy`（本地产物），实际加载时以 checkpoint 保存的队列为准。
 - 原阶段的选择与结果：[objective_study 报告](../objective_study/README.md)。
 
 三个诊断结果分别为：
 
-- [seed 2026 JSON](../../artifacts/cold_start/diagnostics/click_seed2026.json) / [NPZ](../../artifacts/cold_start/diagnostics/click_seed2026.npz)。
-- [seed 2027 JSON](../../artifacts/cold_start/diagnostics/click_seed2027.json) / [NPZ](../../artifacts/cold_start/diagnostics/click_seed2027.npz)。
-- [seed 2028 JSON](../../artifacts/cold_start/diagnostics/click_seed2028.json) / [NPZ](../../artifacts/cold_start/diagnostics/click_seed2028.npz)。
+- seed 2026 JSON：`artifacts/cold_start/diagnostics/click_seed2026.json`（本地产物） / NPZ：`artifacts/cold_start/diagnostics/click_seed2026.npz`（本地产物）。
+- seed 2027 JSON：`artifacts/cold_start/diagnostics/click_seed2027.json`（本地产物） / NPZ：`artifacts/cold_start/diagnostics/click_seed2027.npz`（本地产物）。
+- seed 2028 JSON：`artifacts/cold_start/diagnostics/click_seed2028.json`（本地产物） / NPZ：`artifacts/cold_start/diagnostics/click_seed2028.npz`（本地产物）。
 
 NPZ 保存前 500 个本地广告 ID、内积分数、用户向量、可见历史、用户行号、目标广告、目标训练频次和逐用户各 K 指标，便于后续复用同一批用户做多路候选融合。JSON 保存 checkpoint SHA、缓存签名、评估队列 SHA、候选口径与代码摘要。
 

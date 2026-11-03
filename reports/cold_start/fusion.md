@@ -51,7 +51,7 @@
 
 - [固定模型诊断](diagnostics.md)、[完整配置](../../configs/cold_start.json)。
 - [融合实现](../../taac_retrieval/candidate_fusion.py)、[测试](../../tests/test_candidate_fusion.py)。
-- [指标与输入摘要](../../artifacts/cold_start/fusion/metrics.json)、[固定选择](../../artifacts/cold_start/fusion/selection.json)。
+- 指标与输入摘要：`artifacts/cold_start/fusion/metrics.json`（本地产物）、固定选择：`artifacts/cold_start/fusion/selection.json`（本地产物）。
 - `artifacts/cold_start/fusion/selected_seed*.npz` 保存所选配额的候选、原始用户下标、目标、历史和逐用户指标。
 
 ```bash
