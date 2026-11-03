@@ -1,0 +1,20 @@
+{
+  "python": "3.10.22 (main, Oct 29 2026, 20:33:25) [GCC 14.3.0]",
+  "platform": "Linux-5.15.0-112-generic-x86_64-with-glibc2.35",
+  "torch": "2.14.1+cu130",
+  "torch_cuda": "13.0",
+  "numpy": "2.2.6",
+  "pyarrow": "25.0.1",
+  "faiss": "1.15.1",
+  "matplotlib": "3.10.9",
+  "gpu_names": [
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti",
+    "NVIDIA GeForce RTX 2080 Ti"
+  ],
+  "cpu_model": "Intel(R) Xeon(R) Gold 6254 CPU @ 3.10GHz"
+}

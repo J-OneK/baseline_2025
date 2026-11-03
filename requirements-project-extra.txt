@@ -1,0 +1,4 @@
+# Install on top of the existing taac/base project requirements.
+faiss-cpu==1.15.1
+matplotlib==3.10.9
+threadpoolctl==3.7.0

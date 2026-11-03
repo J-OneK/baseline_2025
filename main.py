@@ -87,6 +87,9 @@ def get_args():
 
     # Train params
     parser.add_argument('--batch_size', default=2048, type=int)
+    parser.add_argument('--data_dir', default=None, help='Overrides TRAIN_DATA_PATH')
+    parser.add_argument('--seed', default=2026, type=int)
+    parser.add_argument('--num_workers', default=4, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--maxlen', default=101, type=int)
 
@@ -117,13 +120,19 @@ def get_args():
 
 
 if __name__ == '__main__':
+    args = get_args()
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed)
     run_id = time.strftime("%Y%m%d_%H%M%S")
     # run_id = "20260129_102310"
-    os.environ["TRAIN_LOG_PATH"] = f"./logs/{run_id}"
-    os.environ["TRAIN_TF_EVENTS_PATH"] = f"./tf_events/{run_id}"
-    os.environ["TRAIN_CKPT_PATH"] = f"./checkpoints/{run_id}"
+    os.environ.setdefault("TRAIN_LOG_PATH", f"./logs/{run_id}")
+    os.environ.setdefault("TRAIN_TF_EVENTS_PATH", f"./tf_events/{run_id}")
+    os.environ.setdefault("TRAIN_CKPT_PATH", f"./checkpoints/{run_id}")
     # global dataset
-    os.environ["TRAIN_DATA_PATH"] = "/apdcephfs_szgm/share_303492287/ryanylsun/TencentGR/second/second"
+    if args.data_dir:
+        os.environ['TRAIN_DATA_PATH'] = args.data_dir
+    os.environ.setdefault('TRAIN_DATA_PATH', str(Path(__file__).resolve().parent / 'TencentGR-1M'))
 
     Path(os.environ.get('TRAIN_LOG_PATH')).mkdir(parents=True, exist_ok=True)
     Path(os.environ.get('TRAIN_TF_EVENTS_PATH')).mkdir(parents=True, exist_ok=True)
@@ -134,14 +143,14 @@ if __name__ == '__main__':
     
     data_path = os.environ.get('TRAIN_DATA_PATH')
 
-    args = get_args()
     dataset = MyDataset(data_path, args)
-    train_dataset, valid_dataset = torch.utils.data.random_split(dataset, [0.9, 0.1])
+    train_dataset, valid_dataset = torch.utils.data.random_split(
+        dataset, [0.9, 0.1], generator=torch.Generator().manual_seed(args.seed))
     train_loader = DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=16, collate_fn=dataset.collate_fn, pin_memory=True
+        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, collate_fn=dataset.collate_fn, pin_memory=True
     )
     valid_loader = DataLoader(
-        valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4, collate_fn=dataset.collate_fn
+        valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers, collate_fn=dataset.collate_fn
     )
     usernum, itemnum = dataset.usernum, dataset.itemnum
     feat_statistics, feat_types = dataset.feat_statistics, dataset.feature_types

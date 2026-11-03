@@ -1,0 +1,19 @@
+{
+  "reference_root": "artifacts/day4_7",
+  "seeds": [2026, 2027, 2028],
+  "control_objective": "click_infonce",
+  "experimental_objective": "all_infonce",
+  "num_negatives": 64,
+  "temperature": 1.0,
+  "epochs": 5,
+  "primary_comparison": "paired mean best-validation NDCG@10; HR@10 secondary",
+  "checkpoint_selection": "validation NDCG@10, then HR@10; earliest epoch on ties",
+  "supervision": {
+    "click_infonce": "click next-events only; observed exposures remain in history",
+    "all_infonce": "exposure and click next-events with equal per-position weight"
+  },
+  "unknown_and_padding": "excluded from supervised positions in both arms",
+  "budget": "same model, data, initial shared weights, batch size, epochs and optimizer; not equal supervised positions or FLOPs",
+  "negative_sampling": "same uniform train-visible pool and own-prefix rejection policy, 64 draws per position; actual draws differ when the position mask changes",
+  "test_policy": "supplementary post-hoc ablation on a previously inspected cohort, not a new independent confirmation; do not change the original model/index selection"
+}

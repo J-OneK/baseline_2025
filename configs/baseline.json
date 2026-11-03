@@ -1,0 +1,18 @@
+{
+  "max_users": 100000,
+  "data_seed": 2026,
+  "max_history": 100,
+  "min_history": 5,
+  "eval_users": 2000,
+  "training_seeds": [2026, 2027],
+  "epochs": 5,
+  "batch_size": 128,
+  "workers": 2,
+  "hidden": 32,
+  "blocks": 1,
+  "heads": 1,
+  "dropout": 0.2,
+  "lr": 0.001,
+  "eval_batch_size": 256,
+  "candidate_chunk": 32768
+}

@@ -1,0 +1,149 @@
+{
+  "specification": {
+    "reference_root": "artifacts/day4_7",
+    "seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "control_objective": "click_infonce",
+    "experimental_objective": "all_infonce",
+    "num_negatives": 64,
+    "temperature": 1.0,
+    "epochs": 5,
+    "primary_comparison": "paired mean best-validation NDCG@10; HR@10 secondary",
+    "checkpoint_selection": "validation NDCG@10, then HR@10; earliest epoch on ties",
+    "supervision": {
+      "click_infonce": "click next-events only; observed exposures remain in history",
+      "all_infonce": "exposure and click next-events with equal per-position weight"
+    },
+    "unknown_and_padding": "excluded from supervised positions in both arms",
+    "budget": "same model, data, initial shared weights, batch size, epochs and optimizer; not equal supervised positions or FLOPs",
+    "negative_sampling": "same uniform train-visible pool and own-prefix rejection policy, 64 draws per position; actual draws differ when the position mask changes",
+    "test_policy": "supplementary post-hoc ablation on a previously inspected cohort, not a new independent confirmation; do not change the original model/index selection"
+  },
+  "references": [
+    {
+      "seed": 2026,
+      "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2026",
+      "shared_initialization_sha256": "40c0d949fff5ee37d20d3efb5ff82e4bfcb7d86758d511d654cf909b80e7a407",
+      "files": {
+        "config.json": "3151b18db7b0b49a64b35f0eaa646573cdfd8fd5a44cf43f9f3181fd7202e34b",
+        "history.json": "6b5c20b954ff5205fe894224e1f0f15de67fe4350e30bea16d8aa9ca63353ee0",
+        "result.json": "6d634891e63878936da6486388157219cc87f7e91b973bb8976fbe334aecd34a",
+        "best.pt": "88d5513f03c3cfdfb6bc460c0d73304a16c3e2bf0c7a60c3bfa64137a35e6a05"
+      }
+    },
+    {
+      "seed": 2027,
+      "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2027",
+      "shared_initialization_sha256": "6b1c8ddf933960ea8c8ad61e76cd4c9ae4def728b96d7c37fe2e8a0cf75341f8",
+      "files": {
+        "config.json": "4e9a99202801b7e0690d7ca0be977cf2a4b16ba3729748d3c2cf7381e294f708",
+        "history.json": "2cc25e51fc43f24765365af63340fef45355353e682e6a043de82e8cc55c5b0a",
+        "result.json": "9fba41a3616ce5085ada0f795a290d2a3e8c1c3582c630e2ff4f5e0c58130f7a",
+        "best.pt": "445ea1f51fd65fc6af1df301f4856512e7d5ed1d0f0de0050fb86005a259b532"
+      }
+    },
+    {
+      "seed": 2028,
+      "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2028",
+      "shared_initialization_sha256": "1b6a0c00f6119a3f27ef78e345f4a2db9b7b01b745465d4ba91f3e433ab24c71",
+      "files": {
+        "config.json": "ef4b8a441646dfe71e4c39dbe8a924a963555ee4ce232e681d3251941d8ced62",
+        "history.json": "c94d7908328216fcecd7631973b448085f341c414f8d13cf4cfe451a2aa2ef2e",
+        "result.json": "806cd429c2fb1856af7d6ebdb67ff6a031e401fbe581757f243317833bd74ada",
+        "best.pt": "c4e93dcd43026ddeefc905d01d208ec68f5286b9c1a2f5782842d67c34f65e3b"
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2026",
+      "arguments": {
+        "cache": "/home/jyk/project/baseline_2025/artifacts/day4_7/scale_data",
+        "variant": "baseline",
+        "seed": 2026,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "blocks": 1,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirm_eval_indices.npy",
+        "objective": "all_infonce"
+      }
+    },
+    {
+      "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2027",
+      "arguments": {
+        "cache": "/home/jyk/project/baseline_2025/artifacts/day4_7/scale_data",
+        "variant": "baseline",
+        "seed": 2027,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "blocks": 1,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirm_eval_indices.npy",
+        "objective": "all_infonce"
+      }
+    },
+    {
+      "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2028",
+      "arguments": {
+        "cache": "/home/jyk/project/baseline_2025/artifacts/day4_7/scale_data",
+        "variant": "baseline",
+        "seed": 2028,
+        "epochs": 5,
+        "batch_size": 128,
+        "eval_batch_size": 256,
+        "candidate_chunk": 32768,
+        "workers": 2,
+        "hidden": 32,
+        "blocks": 1,
+        "heads": 1,
+        "dropout": 0.2,
+        "lr": 0.001,
+        "max_steps": 0,
+        "num_negatives": 64,
+        "exposure_weight": 0.1,
+        "temperature": 1.0,
+        "skip_test": true,
+        "eval_indices": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirm_eval_indices.npy",
+        "objective": "all_infonce"
+      }
+    }
+  ],
+  "source_sha256": {
+    "model.py": "ef0536aee1bbfe29c77bb3fc031583c2b9cedcc855350af0f55e5f0773bd54c0",
+    "taac_retrieval/data.py": "d78e70868643ed4ff5a2cdd0dad39334c65f186d644642d9b02fce591d82f428",
+    "taac_retrieval/model.py": "83a9174ac2747c704b2e1edf3537914c42f9a9761df54c20b1272f3203499921",
+    "taac_retrieval/objectives.py": "3eedcba049d1ded0f5383413e197f5d65dc0b64f96580b4a095afbabf3875883",
+    "taac_retrieval/train.py": "16898bb80a9937923bffbfe02f9c15a3fc354a43f8483e5e9a82f347f07e0142",
+    "taac_retrieval/metrics.py": "c15e68465809a4afc7a90505db16a03f6b04384e1a9f979e5bd9b54b259cb91b",
+    "taac_retrieval/study.py": "2d24078e49243bb5ab9a39a3d6e3b1d9c763dddf800719ad1e8cd9cdf75a2c8d",
+    "taac_retrieval/evaluate_checkpoint.py": "ae7825dbde3ad6d5cc5ad00cfd8a7541469ef094cb3624f05932811218cf0171",
+    "scripts/run_infonce_supervision.py": "19802a48b0432ab3577917fbda3282a48395b691fd215db8d4644123694c0e01"
+  },
+  "registered_at_utc": "2026-11-02T09:14:11.420211+00:00"
+}

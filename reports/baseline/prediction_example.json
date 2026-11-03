@@ -1,0 +1,59 @@
+{
+  "user_rid": 141,
+  "split": "test",
+  "target_oid": 20003984336,
+  "candidates": 1538730,
+  "history_length": 71,
+  "top10": [
+    {
+      "item_oid": 20003504023,
+      "score": 9.767324447631836,
+      "is_target": false
+    },
+    {
+      "item_oid": 20001290481,
+      "score": 9.507461547851562,
+      "is_target": false
+    },
+    {
+      "item_oid": 20002735992,
+      "score": 9.488897323608398,
+      "is_target": false
+    },
+    {
+      "item_oid": 20001934573,
+      "score": 9.35662841796875,
+      "is_target": false
+    },
+    {
+      "item_oid": 20002561643,
+      "score": 9.265305519104004,
+      "is_target": false
+    },
+    {
+      "item_oid": 20005590335,
+      "score": 9.22546672821045,
+      "is_target": false
+    },
+    {
+      "item_oid": 20005369329,
+      "score": 9.072859764099121,
+      "is_target": false
+    },
+    {
+      "item_oid": 20000668999,
+      "score": 8.91395092010498,
+      "is_target": false
+    },
+    {
+      "item_oid": 20001182157,
+      "score": 8.8970365524292,
+      "is_target": false
+    },
+    {
+      "item_oid": 20004313032,
+      "score": 8.741548538208008,
+      "is_target": false
+    }
+  ]
+}

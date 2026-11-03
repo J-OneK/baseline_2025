@@ -1,0 +1,72 @@
+{
+  "threshold": 0.98,
+  "eligible": false,
+  "validation_configurations": [
+    {
+      "efSearch": 128,
+      "single_query_p50_ms": 0.17883949999999998,
+      "single_query_p95_ms": 0.24225425,
+      "single_query_mean_ms": 0.1848561595052083,
+      "measured_single_queries": 1536,
+      "single_query_threads": 1,
+      "batch_qps_8_threads": 30826.664055591256,
+      "batch_queries": 512,
+      "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+      "ANNRecall@10": 0.7873046875,
+      "validation_recommendation": {
+        "HR@10": 0.02734375,
+        "NDCG@10": 0.014081604001129722
+      }
+    },
+    {
+      "efSearch": 256,
+      "single_query_p50_ms": 0.293151,
+      "single_query_p95_ms": 0.4065325,
+      "single_query_mean_ms": 0.30587201953125,
+      "measured_single_queries": 1536,
+      "single_query_threads": 1,
+      "batch_qps_8_threads": 21226.483615989673,
+      "batch_queries": 512,
+      "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+      "ANNRecall@10": 0.816796875,
+      "validation_recommendation": {
+        "HR@10": 0.025390625,
+        "NDCG@10": 0.013517024262227598
+      }
+    },
+    {
+      "efSearch": 512,
+      "single_query_p50_ms": 0.5294270000000001,
+      "single_query_p95_ms": 0.71936975,
+      "single_query_mean_ms": 0.5480941985677084,
+      "measured_single_queries": 1536,
+      "single_query_threads": 1,
+      "batch_qps_8_threads": 13358.216502884454,
+      "batch_queries": 512,
+      "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+      "ANNRecall@10": 0.834375,
+      "validation_recommendation": {
+        "HR@10": 0.025390625,
+        "NDCG@10": 0.013431430998870467
+      }
+    },
+    {
+      "efSearch": 1024,
+      "single_query_p50_ms": 1.0766265,
+      "single_query_p95_ms": 1.36654125,
+      "single_query_mean_ms": 1.09284879296875,
+      "measured_single_queries": 1536,
+      "single_query_threads": 1,
+      "batch_qps_8_threads": 7296.6956709033,
+      "batch_queries": 512,
+      "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network",
+      "ANNRecall@10": 0.8484375,
+      "validation_recommendation": {
+        "HR@10": 0.025390625,
+        "NDCG@10": 0.013431430998870467
+      }
+    }
+  ],
+  "test_queries_evaluated": false,
+  "reason": "Original M=32, efConstruction=100 raw-IP HNSW did not meet the validation recall threshold."
+}

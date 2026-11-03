@@ -1,0 +1,347 @@
+{
+  "selected_variant": "click_infonce64",
+  "confirmation_candidate": "click_infonce64",
+  "confirmation_settings": {
+    "objective": "click_infonce",
+    "num_negatives": 64,
+    "variant": "baseline"
+  },
+  "criterion": "highest mean development validation NDCG@10, then HR@10; test not read",
+  "test_used_for_selection": false,
+  "ranking": [
+    {
+      "name": "click_infonce64",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_seed2026",
+          "epoch": 2,
+          "metrics": {
+            "HR@10": 0.019,
+            "NDCG@10": 0.010144172969681692,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.02142051860202931,
+              "NDCG@10": 0.01143649714732998
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_seed2027",
+          "epoch": 5,
+          "metrics": {
+            "HR@10": 0.0245,
+            "NDCG@10": 0.013087160512615515,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.02705749718151071,
+              "NDCG@10": 0.014591463471766146
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.004424778761061947,
+              "NDCG@10": 0.0012790479040614509
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.011615666741148604,
+      "validation_hr": 0.02175
+    },
+    {
+      "name": "click_infonce64_actions",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_actions_seed2026",
+          "epoch": 3,
+          "metrics": {
+            "HR@10": 0.0215,
+            "NDCG@10": 0.009152290908968285,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.024239007891770012,
+              "NDCG@10": 0.010318253561407309
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_actions_seed2027",
+          "epoch": 4,
+          "metrics": {
+            "HR@10": 0.023,
+            "NDCG@10": 0.01029947765600858,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.02593010146561443,
+              "NDCG@10": 0.01161158698535353
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.009725884282488433,
+      "validation_hr": 0.02225
+    },
+    {
+      "name": "baseline",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day1_3/baseline_seed2026",
+          "epoch": 4,
+          "metrics": {
+            "HR@10": 0.0175,
+            "NDCG@10": 0.008317307551719387,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.019729425028184894,
+              "NDCG@10": 0.00937689690160021
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day1_3/baseline_seed2027",
+          "epoch": 3,
+          "metrics": {
+            "HR@10": 0.016,
+            "NDCG@10": 0.00851346480426079,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.018038331454340473,
+              "NDCG@10": 0.009598043747757374
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.008415386177990088,
+      "validation_hr": 0.01675
+    },
+    {
+      "name": "weighted_bce",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/weighted_bce_seed2026",
+          "epoch": 4,
+          "metrics": {
+            "HR@10": 0.0195,
+            "NDCG@10": 0.009148305770328817,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.021984216459977453,
+              "NDCG@10": 0.01031376073317792
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/weighted_bce_seed2027",
+          "epoch": 3,
+          "metrics": {
+            "HR@10": 0.0165,
+            "NDCG@10": 0.007383782845554039,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.018602029312288614,
+              "NDCG@10": 0.008324445147186065
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.008266044307941428,
+      "validation_hr": 0.018000000000000002
+    },
+    {
+      "name": "click_bce64",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce64_seed2026",
+          "epoch": 1,
+          "metrics": {
+            "HR@10": 0.0095,
+            "NDCG@10": 0.004545642819209162,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.010710259301014656,
+              "NDCG@10": 0.005124738240371096
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce64_seed2027",
+          "epoch": 1,
+          "metrics": {
+            "HR@10": 0.0095,
+            "NDCG@10": 0.005706186774693811,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.010710259301014656,
+              "NDCG@10": 0.006433130523893812
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.005125914796951486,
+      "validation_hr": 0.0095
+    },
+    {
+      "name": "click_bce",
+      "runs": [
+        {
+          "seed": 2026,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce_seed2026",
+          "epoch": 3,
+          "metrics": {
+            "HR@10": 0.0095,
+            "NDCG@10": 0.004379046418448335,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.010710259301014656,
+              "NDCG@10": 0.0049369181718696
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        },
+        {
+          "seed": 2027,
+          "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce_seed2027",
+          "epoch": 1,
+          "metrics": {
+            "HR@10": 0.009,
+            "NDCG@10": 0.0044891870501435295,
+            "users": 2000,
+            "candidate_items": 1538730,
+            "candidate_coverage": 1.0,
+            "filter_seen_items": true,
+            "warm": {
+              "users": 1774,
+              "HR@10": 0.010146561443066516,
+              "NDCG@10": 0.005061090248188872
+            },
+            "cold": {
+              "users": 226,
+              "HR@10": 0.0,
+              "NDCG@10": 0.0
+            }
+          }
+        }
+      ],
+      "validation_ndcg": 0.004434116734295932,
+      "validation_hr": 0.00925
+    }
+  ],
+  "history_sha256": {
+    "/home/jyk/project/baseline_2025/artifacts/day1_3/baseline_seed2026/history.json": "03684a1c22c7fda8161968bbb038b4b845d4c3ca21324254b6a7d8469e211a82",
+    "/home/jyk/project/baseline_2025/artifacts/day1_3/baseline_seed2027/history.json": "8924323467e30145894735ce541aeb086475ea59680ea398ef3b8abbf8424498",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/weighted_bce_seed2026/history.json": "e6a3454ea0190b2f337f95d0ebacf4c30cc870ec288c29ab027b3cbf7aa72130",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/weighted_bce_seed2027/history.json": "30bed3eeac87b0e6ebda6b642120a99ab349600f23dc22e55b5ce615c6036b56",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce_seed2026/history.json": "56566f29a27d80f5a76c2701f5814db282a246f8d7e2b6fcbec75d4d2a8fc9d4",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce_seed2027/history.json": "18e6b04ef3d3fd05faaf3f7b004d6d0ec5299a6213f863f99b755faea0444589",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce64_seed2026/history.json": "03b901a5c283b3db5f27140f9ca755907e63e7fb92cb5df8b660c44ac351fcf9",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_bce64_seed2027/history.json": "6a85e11bd5d6f3219cf5be3199d14f7e450ef355d29463f0e5012a7ab0f7f308",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_seed2026/history.json": "73ba05881641f605591aa09418f6c542c0269899427c47d1089c6a43c642e49c",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_seed2027/history.json": "872228969dc62b8deebb83b26937e80e367217ea7e9554021bedd7443c4c1cd6",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_actions_seed2026/history.json": "6d735f5fc94ad44cac4346cf13c444feca88c5e47fceef55d0322cdb0018ad6d",
+    "/home/jyk/project/baseline_2025/artifacts/day4_7/development/click_infonce64_actions_seed2027/history.json": "a4db4434cb828390c32135ddeb6ae4e3d202f9aacba4aab57d795c2c61d42308"
+  },
+  "scope": "Development uses the old 100k-user cache; confirmation uses 300k sampled users and fresh test users.",
+  "locked_at_utc": "2026-11-02T03:11:09.664825+00:00"
+}

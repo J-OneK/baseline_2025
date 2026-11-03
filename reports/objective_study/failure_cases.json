@@ -1,0 +1,1682 @@
+{
+  "selected_hit_baseline_miss": {
+    "total_users": 213,
+    "examples": [
+      {
+        "user_rid": 13090,
+        "target_oid": 20005606414,
+        "target_training_events": 1452,
+        "target_has_content": true,
+        "history_events": 98,
+        "recent_history": [
+          {
+            "item_oid": 20004255311,
+            "action": 1,
+            "timestamp": 1747634964
+          },
+          {
+            "item_oid": 20002387362,
+            "action": 1,
+            "timestamp": 1747636509
+          },
+          {
+            "item_oid": 20004436507,
+            "action": 1,
+            "timestamp": 1747743756
+          },
+          {
+            "item_oid": 20003262005,
+            "action": 1,
+            "timestamp": 1747747064
+          },
+          {
+            "item_oid": 20005528784,
+            "action": 1,
+            "timestamp": 1747794051
+          },
+          {
+            "item_oid": 20004118195,
+            "action": 1,
+            "timestamp": 1747794501
+          },
+          {
+            "item_oid": 20005072347,
+            "action": 1,
+            "timestamp": 1747990113
+          },
+          {
+            "item_oid": 20002293793,
+            "action": 1,
+            "timestamp": 1748005944
+          },
+          {
+            "item_oid": 20005747313,
+            "action": 1,
+            "timestamp": 1748006864
+          },
+          {
+            "item_oid": 20002315771,
+            "action": 1,
+            "timestamp": 1748008114
+          }
+        ],
+        "baseline_top10_oids": [
+          20001584568,
+          20003782451,
+          20003364909,
+          20004513599,
+          20003643894,
+          20002464685,
+          20004265377,
+          20004510062,
+          20005275895,
+          20003036631
+        ],
+        "selected_top10_oids": [
+          20005606414,
+          20003481071,
+          20002057652,
+          20002877035,
+          20002546669,
+          20003917998,
+          20000183574,
+          20003614240,
+          20004798212,
+          20005294899
+        ]
+      },
+      {
+        "user_rid": 21208,
+        "target_oid": 20000936496,
+        "target_training_events": 8909,
+        "target_has_content": true,
+        "history_events": 72,
+        "recent_history": [
+          {
+            "item_oid": 20005253724,
+            "action": 1,
+            "timestamp": 1746476756
+          },
+          {
+            "item_oid": 20000153356,
+            "action": 1,
+            "timestamp": 1746477250
+          },
+          {
+            "item_oid": 20005047386,
+            "action": 1,
+            "timestamp": 1746626269
+          },
+          {
+            "item_oid": 20002826913,
+            "action": 1,
+            "timestamp": 1746674686
+          },
+          {
+            "item_oid": 20001143772,
+            "action": 1,
+            "timestamp": 1746739844
+          },
+          {
+            "item_oid": 20005626930,
+            "action": 1,
+            "timestamp": 1746767955
+          },
+          {
+            "item_oid": 20001009388,
+            "action": 1,
+            "timestamp": 1746767969
+          },
+          {
+            "item_oid": 20002476880,
+            "action": 1,
+            "timestamp": 1746839610
+          },
+          {
+            "item_oid": 20001959367,
+            "action": 1,
+            "timestamp": 1746847797
+          },
+          {
+            "item_oid": 20002677242,
+            "action": 1,
+            "timestamp": 1746992587
+          }
+        ],
+        "baseline_top10_oids": [
+          20004115351,
+          20005168181,
+          20005750223,
+          20002160160,
+          20003381150,
+          20003705902,
+          20002615356,
+          20001835319,
+          20004631186,
+          20001806790
+        ],
+        "selected_top10_oids": [
+          20002344637,
+          20000936496,
+          20001689543,
+          20003105754,
+          20004610340,
+          20004115351,
+          20001806790,
+          20004182261,
+          20003550275,
+          20000260704
+        ]
+      },
+      {
+        "user_rid": 22379,
+        "target_oid": 20000936496,
+        "target_training_events": 8909,
+        "target_has_content": true,
+        "history_events": 61,
+        "recent_history": [
+          {
+            "item_oid": 20003410663,
+            "action": 1,
+            "timestamp": 1746711903
+          },
+          {
+            "item_oid": 20005331217,
+            "action": 1,
+            "timestamp": 1746794483
+          },
+          {
+            "item_oid": 20000169105,
+            "action": 1,
+            "timestamp": 1746927915
+          },
+          {
+            "item_oid": 20003453610,
+            "action": 1,
+            "timestamp": 1746929086
+          },
+          {
+            "item_oid": 20001158120,
+            "action": 1,
+            "timestamp": 1747048920
+          },
+          {
+            "item_oid": 20001449211,
+            "action": 1,
+            "timestamp": 1747137686
+          },
+          {
+            "item_oid": 20004033637,
+            "action": 3,
+            "timestamp": 1747137797
+          },
+          {
+            "item_oid": 20001367072,
+            "action": 1,
+            "timestamp": 1747140273
+          },
+          {
+            "item_oid": 20001461779,
+            "action": 1,
+            "timestamp": 1747140568
+          },
+          {
+            "item_oid": 20001159513,
+            "action": 1,
+            "timestamp": 1747173660
+          }
+        ],
+        "baseline_top10_oids": [
+          20000924334,
+          20003407526,
+          20000422465,
+          20001465582,
+          20000755180,
+          20000413990,
+          20002947395,
+          20000579089,
+          20003545268,
+          20004426463
+        ],
+        "selected_top10_oids": [
+          20000936496,
+          20004433282,
+          20005636276,
+          20003396556,
+          20002824394,
+          20001036841,
+          20000924334,
+          20000755180,
+          20002340077,
+          20004119561
+        ]
+      },
+      {
+        "user_rid": 28659,
+        "target_oid": 20001368344,
+        "target_training_events": 2347,
+        "target_has_content": true,
+        "history_events": 87,
+        "recent_history": [
+          {
+            "item_oid": 20003356620,
+            "action": 1,
+            "timestamp": 1747738902
+          },
+          {
+            "item_oid": 20004909441,
+            "action": 1,
+            "timestamp": 1747756126
+          },
+          {
+            "item_oid": 20000852002,
+            "action": 1,
+            "timestamp": 1747802303
+          },
+          {
+            "item_oid": 20003646863,
+            "action": 2,
+            "timestamp": 1747804057
+          },
+          {
+            "item_oid": 20004795189,
+            "action": 1,
+            "timestamp": 1747806685
+          },
+          {
+            "item_oid": 20000510613,
+            "action": 1,
+            "timestamp": 1747852260
+          },
+          {
+            "item_oid": 20003789606,
+            "action": 1,
+            "timestamp": 1747852541
+          },
+          {
+            "item_oid": 20004660515,
+            "action": 1,
+            "timestamp": 1747853275
+          },
+          {
+            "item_oid": 20004086109,
+            "action": 1,
+            "timestamp": 1747893475
+          },
+          {
+            "item_oid": 20005610916,
+            "action": 1,
+            "timestamp": 1747894620
+          }
+        ],
+        "baseline_top10_oids": [
+          20003190872,
+          20000075829,
+          20002053671,
+          20004863997,
+          20002034555,
+          20005042484,
+          20000742024,
+          20003162675,
+          20002217669,
+          20002368834
+        ],
+        "selected_top10_oids": [
+          20003190872,
+          20005618845,
+          20001368344,
+          20002053671,
+          20005042484,
+          20002806957,
+          20003254230,
+          20002217669,
+          20003562607,
+          20002439929
+        ]
+      },
+      {
+        "user_rid": 39731,
+        "target_oid": 20001459530,
+        "target_training_events": 482,
+        "target_has_content": true,
+        "history_events": 91,
+        "recent_history": [
+          {
+            "item_oid": 20003176037,
+            "action": 1,
+            "timestamp": 1747913405
+          },
+          {
+            "item_oid": 20005294777,
+            "action": 1,
+            "timestamp": 1747915223
+          },
+          {
+            "item_oid": 20002479795,
+            "action": 1,
+            "timestamp": 1747917475
+          },
+          {
+            "item_oid": 20001257147,
+            "action": 1,
+            "timestamp": 1747917559
+          },
+          {
+            "item_oid": 20005729970,
+            "action": 1,
+            "timestamp": 1747918015
+          },
+          {
+            "item_oid": 20001930997,
+            "action": 1,
+            "timestamp": 1747920005
+          },
+          {
+            "item_oid": 20002043059,
+            "action": 1,
+            "timestamp": 1747920098
+          },
+          {
+            "item_oid": 20002613259,
+            "action": 1,
+            "timestamp": 1747960479
+          },
+          {
+            "item_oid": 20004759978,
+            "action": 1,
+            "timestamp": 1747960785
+          },
+          {
+            "item_oid": 20000472142,
+            "action": 1,
+            "timestamp": 1747962448
+          }
+        ],
+        "baseline_top10_oids": [
+          20000630817,
+          20002674349,
+          20000104840,
+          20001660194,
+          20003847775,
+          20000841126,
+          20004062358,
+          20002700772,
+          20003832337,
+          20002119384
+        ],
+        "selected_top10_oids": [
+          20000104840,
+          20001459530,
+          20004667890,
+          20000949743,
+          20002860484,
+          20000883830,
+          20003725192,
+          20005396974,
+          20005335170,
+          20000630817
+        ]
+      }
+    ]
+  },
+  "baseline_hit_selected_miss": {
+    "total_users": 119,
+    "examples": [
+      {
+        "user_rid": 6884,
+        "target_oid": 20003000520,
+        "target_training_events": 894,
+        "target_has_content": true,
+        "history_events": 69,
+        "recent_history": [
+          {
+            "item_oid": 20005414309,
+            "action": 2,
+            "timestamp": 1747636887
+          },
+          {
+            "item_oid": 20005467935,
+            "action": 1,
+            "timestamp": 1747637032
+          },
+          {
+            "item_oid": 20001228736,
+            "action": 1,
+            "timestamp": 1747637292
+          },
+          {
+            "item_oid": 20004986900,
+            "action": 1,
+            "timestamp": 1747637455
+          },
+          {
+            "item_oid": 20002278357,
+            "action": 1,
+            "timestamp": 1747644509
+          },
+          {
+            "item_oid": 20003734653,
+            "action": 1,
+            "timestamp": 1747716260
+          },
+          {
+            "item_oid": 20003930670,
+            "action": 1,
+            "timestamp": 1747716604
+          },
+          {
+            "item_oid": 20004484595,
+            "action": 1,
+            "timestamp": 1747731322
+          },
+          {
+            "item_oid": 20000087800,
+            "action": 1,
+            "timestamp": 1747731952
+          },
+          {
+            "item_oid": 20001919763,
+            "action": 1,
+            "timestamp": 1747732174
+          }
+        ],
+        "baseline_top10_oids": [
+          20002340679,
+          20005818104,
+          20005381835,
+          20001993096,
+          20005486453,
+          20002368834,
+          20000297413,
+          20002449271,
+          20000953365,
+          20003000520
+        ],
+        "selected_top10_oids": [
+          20005887431,
+          20002368834,
+          20005901104,
+          20001294220,
+          20001993096,
+          20002110228,
+          20000266340,
+          20000697992,
+          20000297413,
+          20002397310
+        ]
+      },
+      {
+        "user_rid": 11840,
+        "target_oid": 20000705545,
+        "target_training_events": 60,
+        "target_has_content": true,
+        "history_events": 60,
+        "recent_history": [
+          {
+            "item_oid": 20003044612,
+            "action": 1,
+            "timestamp": 1746442286
+          },
+          {
+            "item_oid": 20003803139,
+            "action": 1,
+            "timestamp": 1746685240
+          },
+          {
+            "item_oid": 20000993619,
+            "action": 1,
+            "timestamp": 1746692591
+          },
+          {
+            "item_oid": 20003725295,
+            "action": 1,
+            "timestamp": 1746766929
+          },
+          {
+            "item_oid": 20004426463,
+            "action": 1,
+            "timestamp": 1746767785
+          },
+          {
+            "item_oid": 20001822613,
+            "action": 1,
+            "timestamp": 1746768817
+          },
+          {
+            "item_oid": 20005707245,
+            "action": 2,
+            "timestamp": 1746781291
+          },
+          {
+            "item_oid": 20002954443,
+            "action": 1,
+            "timestamp": 1746781410
+          },
+          {
+            "item_oid": 20005495234,
+            "action": 1,
+            "timestamp": 1746782179
+          },
+          {
+            "item_oid": 20001703747,
+            "action": 1,
+            "timestamp": 1746782628
+          }
+        ],
+        "baseline_top10_oids": [
+          20000152682,
+          20005038693,
+          20003883736,
+          20002486734,
+          20003370787,
+          20000705545,
+          20002844611,
+          20000971250,
+          20003352812,
+          20002681822
+        ],
+        "selected_top10_oids": [
+          20002903034,
+          20001153659,
+          20005157307,
+          20005065715,
+          20004980059,
+          20005692758,
+          20002844867,
+          20005765452,
+          20002947395,
+          20005479758
+        ]
+      },
+      {
+        "user_rid": 15116,
+        "target_oid": 20005888818,
+        "target_training_events": 56,
+        "target_has_content": true,
+        "history_events": 70,
+        "recent_history": [
+          {
+            "item_oid": 20004858173,
+            "action": 1,
+            "timestamp": 1747133640
+          },
+          {
+            "item_oid": 20004192029,
+            "action": 1,
+            "timestamp": 1747173351
+          },
+          {
+            "item_oid": 20005661375,
+            "action": 1,
+            "timestamp": 1747198444
+          },
+          {
+            "item_oid": 20005715804,
+            "action": 1,
+            "timestamp": 1747198857
+          },
+          {
+            "item_oid": 20000473002,
+            "action": 1,
+            "timestamp": 1747264966
+          },
+          {
+            "item_oid": 20000283316,
+            "action": 1,
+            "timestamp": 1747279547
+          },
+          {
+            "item_oid": 20003287345,
+            "action": 1,
+            "timestamp": 1747280593
+          },
+          {
+            "item_oid": 20004388609,
+            "action": 1,
+            "timestamp": 1747371556
+          },
+          {
+            "item_oid": 20004508637,
+            "action": 3,
+            "timestamp": 1747451630
+          },
+          {
+            "item_oid": 20004592727,
+            "action": 1,
+            "timestamp": 1747454001
+          }
+        ],
+        "baseline_top10_oids": [
+          20000699320,
+          20005601061,
+          20005888818,
+          20002801812,
+          20001095427,
+          20004761848,
+          20005791140,
+          20001284407,
+          20001258857,
+          20000801025
+        ],
+        "selected_top10_oids": [
+          20000865166,
+          20005018999,
+          20005601061,
+          20004653260,
+          20001312611,
+          20004391956,
+          20005035828,
+          20000130009,
+          20005431680,
+          20001208373
+        ]
+      },
+      {
+        "user_rid": 27714,
+        "target_oid": 20004057698,
+        "target_training_events": 1329,
+        "target_has_content": true,
+        "history_events": 74,
+        "recent_history": [
+          {
+            "item_oid": 20002160508,
+            "action": 1,
+            "timestamp": 1747029299
+          },
+          {
+            "item_oid": 20002734267,
+            "action": 1,
+            "timestamp": 1747054127
+          },
+          {
+            "item_oid": 20005437489,
+            "action": 1,
+            "timestamp": 1747060872
+          },
+          {
+            "item_oid": 20000738544,
+            "action": 2,
+            "timestamp": 1747061355
+          },
+          {
+            "item_oid": 20000576363,
+            "action": 1,
+            "timestamp": 1747124882
+          },
+          {
+            "item_oid": 20004356747,
+            "action": 1,
+            "timestamp": 1747208350
+          },
+          {
+            "item_oid": 20004042375,
+            "action": 1,
+            "timestamp": 1747212756
+          },
+          {
+            "item_oid": 20002077656,
+            "action": 1,
+            "timestamp": 1747225516
+          },
+          {
+            "item_oid": 20003236886,
+            "action": 1,
+            "timestamp": 1747228579
+          },
+          {
+            "item_oid": 20004026755,
+            "action": 1,
+            "timestamp": 1747234625
+          }
+        ],
+        "baseline_top10_oids": [
+          20001103577,
+          20001744109,
+          20000292750,
+          20003296472,
+          20003951675,
+          20003616640,
+          20003801266,
+          20005332364,
+          20004042585,
+          20004057698
+        ],
+        "selected_top10_oids": [
+          20005469879,
+          20000668999,
+          20004033537,
+          20005449145,
+          20004042585,
+          20000292750,
+          20002652491,
+          20001337158,
+          20005841048,
+          20002117390
+        ]
+      },
+      {
+        "user_rid": 32027,
+        "target_oid": 20000942579,
+        "target_training_events": 174,
+        "target_has_content": true,
+        "history_events": 52,
+        "recent_history": [
+          {
+            "item_oid": 20003387031,
+            "action": 1,
+            "timestamp": 1746844805
+          },
+          {
+            "item_oid": 20002130660,
+            "action": 1,
+            "timestamp": 1746847015
+          },
+          {
+            "item_oid": 20003657868,
+            "action": 1,
+            "timestamp": 1746848190
+          },
+          {
+            "item_oid": 20003007522,
+            "action": 1,
+            "timestamp": 1746855571
+          },
+          {
+            "item_oid": 20005633580,
+            "action": 1,
+            "timestamp": 1746867788
+          },
+          {
+            "item_oid": 20000083732,
+            "action": 1,
+            "timestamp": 1746901852
+          },
+          {
+            "item_oid": 20000465506,
+            "action": 1,
+            "timestamp": 1746929673
+          },
+          {
+            "item_oid": 20000181621,
+            "action": 1,
+            "timestamp": 1746929902
+          },
+          {
+            "item_oid": 20005029333,
+            "action": 1,
+            "timestamp": 1746930079
+          },
+          {
+            "item_oid": 20003073672,
+            "action": 1,
+            "timestamp": 1747043582
+          }
+        ],
+        "baseline_top10_oids": [
+          20003592536,
+          20003936791,
+          20000655978,
+          20002644538,
+          20001307379,
+          20000890262,
+          20002361480,
+          20000942579,
+          20001007637,
+          20003457827
+        ],
+        "selected_top10_oids": [
+          20002185399,
+          20004073888,
+          20003936791,
+          20003935652,
+          20002995665,
+          20001887585,
+          20003592536,
+          20003457827,
+          20005728750,
+          20003079889
+        ]
+      }
+    ]
+  },
+  "cold_miss": {
+    "total_users": 785,
+    "examples": [
+      {
+        "user_rid": 751,
+        "target_oid": 20003214457,
+        "target_training_events": 0,
+        "target_has_content": true,
+        "history_events": 77,
+        "recent_history": [
+          {
+            "item_oid": 20005829497,
+            "action": 1,
+            "timestamp": 1747789428
+          },
+          {
+            "item_oid": 20004357988,
+            "action": 1,
+            "timestamp": 1747843316
+          },
+          {
+            "item_oid": 20001835595,
+            "action": 1,
+            "timestamp": 1747868642
+          },
+          {
+            "item_oid": 20002612782,
+            "action": 2,
+            "timestamp": 1747870859
+          },
+          {
+            "item_oid": 20001463820,
+            "action": 1,
+            "timestamp": 1747872301
+          },
+          {
+            "item_oid": 20002034979,
+            "action": 1,
+            "timestamp": 1747873930
+          },
+          {
+            "item_oid": 20003685816,
+            "action": 2,
+            "timestamp": 1747876680
+          },
+          {
+            "item_oid": 20002084940,
+            "action": 1,
+            "timestamp": 1747876697
+          },
+          {
+            "item_oid": 20003510654,
+            "action": 2,
+            "timestamp": 1747883321
+          },
+          {
+            "item_oid": 20004226494,
+            "action": 2,
+            "timestamp": 1747954699
+          }
+        ],
+        "baseline_top10_oids": [
+          20001126462,
+          20005829159,
+          20001769556,
+          20002476142,
+          20000925671,
+          20004824141,
+          20005010597,
+          20004093870,
+          20005590335,
+          20002411792
+        ],
+        "selected_top10_oids": [
+          20001126462,
+          20001842910,
+          20001459530,
+          20005469879,
+          20003720779,
+          20003018233,
+          20001166928,
+          20005829159,
+          20001698479,
+          20005335170
+        ]
+      },
+      {
+        "user_rid": 1071,
+        "target_oid": 20000128563,
+        "target_training_events": 0,
+        "target_has_content": true,
+        "history_events": 26,
+        "recent_history": [
+          {
+            "item_oid": 20000276652,
+            "action": 1,
+            "timestamp": 1739001537
+          },
+          {
+            "item_oid": 20000005401,
+            "action": 1,
+            "timestamp": 1739002201
+          },
+          {
+            "item_oid": 20004808620,
+            "action": 1,
+            "timestamp": 1739084815
+          },
+          {
+            "item_oid": 20002961319,
+            "action": 2,
+            "timestamp": 1739183828
+          },
+          {
+            "item_oid": 20004912082,
+            "action": 1,
+            "timestamp": 1739193624
+          },
+          {
+            "item_oid": 20001808970,
+            "action": 1,
+            "timestamp": 1739352568
+          },
+          {
+            "item_oid": 20003410724,
+            "action": 1,
+            "timestamp": 1739359195
+          },
+          {
+            "item_oid": 20000180636,
+            "action": 1,
+            "timestamp": 1741338281
+          },
+          {
+            "item_oid": 20004284482,
+            "action": 1,
+            "timestamp": 1741447822
+          },
+          {
+            "item_oid": 20003912089,
+            "action": 1,
+            "timestamp": 1742288989
+          }
+        ],
+        "baseline_top10_oids": [
+          20004630308,
+          20000504582,
+          20001210809,
+          20001543376,
+          20002633764,
+          20001518415,
+          20003539227,
+          20004725917,
+          20001934324,
+          20003457845
+        ],
+        "selected_top10_oids": [
+          20004834745,
+          20005420302,
+          20000793077,
+          20000460191,
+          20004020270,
+          20002136910,
+          20005846477,
+          20004364293,
+          20001808333,
+          20002280796
+        ]
+      },
+      {
+        "user_rid": 1201,
+        "target_oid": 20000739180,
+        "target_training_events": 0,
+        "target_has_content": true,
+        "history_events": 74,
+        "recent_history": [
+          {
+            "item_oid": 20000598914,
+            "action": 1,
+            "timestamp": 1747539603
+          },
+          {
+            "item_oid": 20002318449,
+            "action": 1,
+            "timestamp": 1747539693
+          },
+          {
+            "item_oid": 20003019187,
+            "action": 1,
+            "timestamp": 1747621563
+          },
+          {
+            "item_oid": 20003469513,
+            "action": 1,
+            "timestamp": 1747628834
+          },
+          {
+            "item_oid": 20000696355,
+            "action": 1,
+            "timestamp": 1747633222
+          },
+          {
+            "item_oid": 20003897308,
+            "action": 1,
+            "timestamp": 1747647434
+          },
+          {
+            "item_oid": 20004979954,
+            "action": 1,
+            "timestamp": 1747647540
+          },
+          {
+            "item_oid": 20000776272,
+            "action": 1,
+            "timestamp": 1747647955
+          },
+          {
+            "item_oid": 20000980867,
+            "action": 1,
+            "timestamp": 1747693006
+          },
+          {
+            "item_oid": 20002072161,
+            "action": 1,
+            "timestamp": 1747720670
+          }
+        ],
+        "baseline_top10_oids": [
+          20002586707,
+          20005324798,
+          20000123614,
+          20004977382,
+          20001058416,
+          20004674450,
+          20003327800,
+          20003333830,
+          20003289636,
+          20000809373
+        ],
+        "selected_top10_oids": [
+          20005161085,
+          20002145940,
+          20001048122,
+          20000809373,
+          20005324798,
+          20003048913,
+          20001835167,
+          20000773991,
+          20001058416,
+          20004321109
+        ]
+      },
+      {
+        "user_rid": 1919,
+        "target_oid": 20004579154,
+        "target_training_events": 0,
+        "target_has_content": true,
+        "history_events": 73,
+        "recent_history": [
+          {
+            "item_oid": 20000143395,
+            "action": 1,
+            "timestamp": 1747122469
+          },
+          {
+            "item_oid": 20001144244,
+            "action": 1,
+            "timestamp": 1747180360
+          },
+          {
+            "item_oid": 20002999599,
+            "action": 1,
+            "timestamp": 1747182146
+          },
+          {
+            "item_oid": 20000328313,
+            "action": 1,
+            "timestamp": 1747224301
+          },
+          {
+            "item_oid": 20005263768,
+            "action": 2,
+            "timestamp": 1747224391
+          },
+          {
+            "item_oid": 20004904598,
+            "action": 2,
+            "timestamp": 1747389194
+          },
+          {
+            "item_oid": 20001107687,
+            "action": 2,
+            "timestamp": 1747466828
+          },
+          {
+            "item_oid": 20000058871,
+            "action": 2,
+            "timestamp": 1747466874
+          },
+          {
+            "item_oid": 20000852508,
+            "action": 1,
+            "timestamp": 1747605889
+          },
+          {
+            "item_oid": 20002806479,
+            "action": 1,
+            "timestamp": 1747657151
+          }
+        ],
+        "baseline_top10_oids": [
+          20000515472,
+          20001703840,
+          20001039303,
+          20002538861,
+          20002900434,
+          20001159519,
+          20000564851,
+          20005078408,
+          20000619578,
+          20003951675
+        ],
+        "selected_top10_oids": [
+          20005469879,
+          20005078408,
+          20002398057,
+          20001703840,
+          20004599308,
+          20004268286,
+          20001127072,
+          20001459530,
+          20005864564,
+          20000761875
+        ]
+      },
+      {
+        "user_rid": 4732,
+        "target_oid": 20003697572,
+        "target_training_events": 0,
+        "target_has_content": true,
+        "history_events": 90,
+        "recent_history": [
+          {
+            "item_oid": 20001790379,
+            "action": 1,
+            "timestamp": 1747394874
+          },
+          {
+            "item_oid": 20003130822,
+            "action": 1,
+            "timestamp": 1747399624
+          },
+          {
+            "item_oid": 20001265538,
+            "action": 1,
+            "timestamp": 1747519092
+          },
+          {
+            "item_oid": 20005762867,
+            "action": 1,
+            "timestamp": 1747556704
+          },
+          {
+            "item_oid": 20004583514,
+            "action": 1,
+            "timestamp": 1747648709
+          },
+          {
+            "item_oid": 20000105550,
+            "action": 1,
+            "timestamp": 1747648760
+          },
+          {
+            "item_oid": 20000244985,
+            "action": 1,
+            "timestamp": 1747648849
+          },
+          {
+            "item_oid": 20002398057,
+            "action": 1,
+            "timestamp": 1747744008
+          },
+          {
+            "item_oid": 20004667246,
+            "action": 1,
+            "timestamp": 1747825262
+          },
+          {
+            "item_oid": 20004878865,
+            "action": 1,
+            "timestamp": 1747952054
+          }
+        ],
+        "baseline_top10_oids": [
+          20004205958,
+          20005469879,
+          20005031023,
+          20002697017,
+          20005192273,
+          20005464411,
+          20000281459,
+          20000482501,
+          20002843791,
+          20005122166
+        ],
+        "selected_top10_oids": [
+          20005469879,
+          20004205958,
+          20001127370,
+          20002652491,
+          20004059703,
+          20005011392,
+          20004713567,
+          20002088565,
+          20000113543,
+          20001484032
+        ]
+      }
+    ]
+  },
+  "warm_shared_miss": {
+    "total_users": 8812,
+    "examples": [
+      {
+        "user_rid": 12,
+        "target_oid": 20002205421,
+        "target_training_events": 2566,
+        "target_has_content": true,
+        "history_events": 96,
+        "recent_history": [
+          {
+            "item_oid": 20003339705,
+            "action": 1,
+            "timestamp": 1746431779
+          },
+          {
+            "item_oid": 20003713234,
+            "action": 1,
+            "timestamp": 1746882473
+          },
+          {
+            "item_oid": 20001237553,
+            "action": 1,
+            "timestamp": 1747146075
+          },
+          {
+            "item_oid": 20000697888,
+            "action": 1,
+            "timestamp": 1747212902
+          },
+          {
+            "item_oid": 20003500528,
+            "action": 1,
+            "timestamp": 1747212949
+          },
+          {
+            "item_oid": 20000284375,
+            "action": 1,
+            "timestamp": 1747493096
+          },
+          {
+            "item_oid": 20001315527,
+            "action": 2,
+            "timestamp": 1747555539
+          },
+          {
+            "item_oid": 20004056754,
+            "action": 1,
+            "timestamp": 1747555743
+          },
+          {
+            "item_oid": 20002220359,
+            "action": 1,
+            "timestamp": 1747665069
+          },
+          {
+            "item_oid": 20000009236,
+            "action": 3,
+            "timestamp": 1747752258
+          }
+        ],
+        "baseline_top10_oids": [
+          20005770786,
+          20002786337,
+          20000343594,
+          20001662150,
+          20000027639,
+          20001213918,
+          20004826587,
+          20003371754,
+          20004522678,
+          20003782308
+        ],
+        "selected_top10_oids": [
+          20001009388,
+          20000184097,
+          20005469879,
+          20005770786,
+          20005657636,
+          20004289211,
+          20000769622,
+          20004791999,
+          20002959740,
+          20001423155
+        ]
+      },
+      {
+        "user_rid": 44,
+        "target_oid": 20005090675,
+        "target_training_events": 37,
+        "target_has_content": false,
+        "history_events": 92,
+        "recent_history": [
+          {
+            "item_oid": 20001094391,
+            "action": 1,
+            "timestamp": 1747979092
+          },
+          {
+            "item_oid": 20003251153,
+            "action": 1,
+            "timestamp": 1747979694
+          },
+          {
+            "item_oid": 20004576232,
+            "action": 3,
+            "timestamp": 1747984150
+          },
+          {
+            "item_oid": 20005751813,
+            "action": 1,
+            "timestamp": 1747999157
+          },
+          {
+            "item_oid": 20001581010,
+            "action": 1,
+            "timestamp": 1747999243
+          },
+          {
+            "item_oid": 20002152597,
+            "action": 1,
+            "timestamp": 1748005263
+          },
+          {
+            "item_oid": 20005614185,
+            "action": 3,
+            "timestamp": 1748005613
+          },
+          {
+            "item_oid": 20000146109,
+            "action": 1,
+            "timestamp": 1748007444
+          },
+          {
+            "item_oid": 20002836980,
+            "action": 1,
+            "timestamp": 1748008289
+          },
+          {
+            "item_oid": 20002046412,
+            "action": 1,
+            "timestamp": 1748045982
+          }
+        ],
+        "baseline_top10_oids": [
+          20001572081,
+          20004583445,
+          20003892500,
+          20003347063,
+          20001595374,
+          20003582608,
+          20000343480,
+          20002335228,
+          20003050171,
+          20003603418
+        ],
+        "selected_top10_oids": [
+          20005352782,
+          20002779713,
+          20004583445,
+          20005469879,
+          20003347063,
+          20003695919,
+          20005590335,
+          20002888741,
+          20003603418,
+          20005807518
+        ]
+      },
+      {
+        "user_rid": 104,
+        "target_oid": 20000248563,
+        "target_training_events": 832,
+        "target_has_content": false,
+        "history_events": 78,
+        "recent_history": [
+          {
+            "item_oid": 20000639896,
+            "action": 1,
+            "timestamp": 1747035998
+          },
+          {
+            "item_oid": 20002080321,
+            "action": 1,
+            "timestamp": 1747050216
+          },
+          {
+            "item_oid": 20004448059,
+            "action": 1,
+            "timestamp": 1747130228
+          },
+          {
+            "item_oid": 20003540234,
+            "action": 1,
+            "timestamp": 1747399352
+          },
+          {
+            "item_oid": 20002374359,
+            "action": 2,
+            "timestamp": 1747399986
+          },
+          {
+            "item_oid": 20002381090,
+            "action": 2,
+            "timestamp": 1747426637
+          },
+          {
+            "item_oid": 20001077862,
+            "action": 1,
+            "timestamp": 1747426679
+          },
+          {
+            "item_oid": 20005344150,
+            "action": 1,
+            "timestamp": 1747454180
+          },
+          {
+            "item_oid": 20003024259,
+            "action": 1,
+            "timestamp": 1747455083
+          },
+          {
+            "item_oid": 20002304488,
+            "action": 1,
+            "timestamp": 1747482667
+          }
+        ],
+        "baseline_top10_oids": [
+          20001402917,
+          20004642920,
+          20001422219,
+          20005479412,
+          20000384970,
+          20004648464,
+          20002222943,
+          20003082965,
+          20003744214,
+          20001698744
+        ],
+        "selected_top10_oids": [
+          20005504339,
+          20005657636,
+          20002236888,
+          20003018233,
+          20005506580,
+          20002875046,
+          20002299482,
+          20004642920,
+          20002254285,
+          20005457236
+        ]
+      },
+      {
+        "user_rid": 134,
+        "target_oid": 20005492340,
+        "target_training_events": 10,
+        "target_has_content": true,
+        "history_events": 95,
+        "recent_history": [
+          {
+            "item_oid": 20002066953,
+            "action": 1,
+            "timestamp": 1747448659
+          },
+          {
+            "item_oid": 20003741792,
+            "action": 1,
+            "timestamp": 1747449925
+          },
+          {
+            "item_oid": 20003481071,
+            "action": 1,
+            "timestamp": 1747494805
+          },
+          {
+            "item_oid": 20000508468,
+            "action": 1,
+            "timestamp": 1747534406
+          },
+          {
+            "item_oid": 20005218839,
+            "action": 1,
+            "timestamp": 1747747513
+          },
+          {
+            "item_oid": 20000445826,
+            "action": 1,
+            "timestamp": 1747754093
+          },
+          {
+            "item_oid": 20002473865,
+            "action": 1,
+            "timestamp": 1747755929
+          },
+          {
+            "item_oid": 20005668884,
+            "action": 2,
+            "timestamp": 1747839138
+          },
+          {
+            "item_oid": 20002447626,
+            "action": 1,
+            "timestamp": 1747840654
+          },
+          {
+            "item_oid": 20005806147,
+            "action": 1,
+            "timestamp": 1747882485
+          }
+        ],
+        "baseline_top10_oids": [
+          20001176176,
+          20002226340,
+          20000093350,
+          20002440831,
+          20002588904,
+          20000014745,
+          20004457251,
+          20005296082,
+          20001289440,
+          20002801812
+        ],
+        "selected_top10_oids": [
+          20002905102,
+          20002704734,
+          20001818584,
+          20005506580,
+          20001289440,
+          20001176176,
+          20004922034,
+          20005304937,
+          20000908282,
+          20002226340
+        ]
+      },
+      {
+        "user_rid": 282,
+        "target_oid": 20001251391,
+        "target_training_events": 5,
+        "target_has_content": true,
+        "history_events": 69,
+        "recent_history": [
+          {
+            "item_oid": 20002159246,
+            "action": 1,
+            "timestamp": 1747865491
+          },
+          {
+            "item_oid": 20000680859,
+            "action": 1,
+            "timestamp": 1747902509
+          },
+          {
+            "item_oid": 20001464298,
+            "action": 1,
+            "timestamp": 1747905803
+          },
+          {
+            "item_oid": 20000381029,
+            "action": 1,
+            "timestamp": 1747955349
+          },
+          {
+            "item_oid": 20003633032,
+            "action": 1,
+            "timestamp": 1747994283
+          },
+          {
+            "item_oid": 20000272347,
+            "action": 1,
+            "timestamp": 1747994958
+          },
+          {
+            "item_oid": 20003477576,
+            "action": 1,
+            "timestamp": 1748041940
+          },
+          {
+            "item_oid": 20003139394,
+            "action": 1,
+            "timestamp": 1748047430
+          },
+          {
+            "item_oid": 20005422234,
+            "action": 1,
+            "timestamp": 1748063765
+          },
+          {
+            "item_oid": 20003105724,
+            "action": 2,
+            "timestamp": 1748073376
+          }
+        ],
+        "baseline_top10_oids": [
+          20000585509,
+          20003897184,
+          20005307186,
+          20004811500,
+          20005435583,
+          20005832567,
+          20005506580,
+          20001238404,
+          20001372490,
+          20003102168
+        ],
+        "selected_top10_oids": [
+          20005469879,
+          20005590335,
+          20003695919,
+          20001372490,
+          20002220939,
+          20002089359,
+          20003297380,
+          20002652491,
+          20003325045,
+          20000334424
+        ]
+      }
+    ]
+  }
+}

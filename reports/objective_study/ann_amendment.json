@@ -1,0 +1,24 @@
+{
+  "registered_at_utc": "2026-11-02T03:33:29.106492+00:00",
+  "model_selection_unchanged": true,
+  "threshold_unchanged": 0.98,
+  "test_ann_queries_unopened": true,
+  "reason": "Raw-IP graph recall plateaus at ~87% even at efSearch=16384 on a validation-only diagnostic. Validation score ties do not explain it. Try an exact-ranking-preserving one-dimensional lift before graph construction.",
+  "candidate_geometry": "mips_l2",
+  "original_failed_results": "ann_initial_failure.json",
+  "new_config": "configs/day6_ann_metric.json",
+  "model_config": "configs/day4_7.json",
+  "beam_extension": {
+    "registered_at_utc": "2026-11-02T03:38:59.056825+00:00",
+    "validation_only_reason": "Lifting raises validation recall to 97.09% at ef=1024; extend the same graph to 2048 and 4096 without lowering the 98% target.",
+    "efSearch": [
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096
+    ],
+    "test_ann_queries_unopened": true
+  }
+}

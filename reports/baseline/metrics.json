@@ -1,0 +1,355 @@
+{
+  "seeds": [
+    2026,
+    2027
+  ],
+  "comparison": "corrected array-backed SASRec baseline vs + observed-history action embedding",
+  "evaluation_users": 2000,
+  "candidate_items": 1538730,
+  "training_users": 93586,
+  "epochs": 5,
+  "matched_initialization_and_budget": true,
+  "test_used_for_checkpoint_selection": false,
+  "aggregates": {
+    "baseline": {
+      "HR@10": {
+        "mean": 0.01675,
+        "sample_std": 0.0003535533905932741,
+        "per_seed": [
+          0.017,
+          0.0165
+        ]
+      },
+      "NDCG@10": {
+        "mean": 0.008417578728862646,
+        "sample_std": 0.0008037211165780524,
+        "per_seed": [
+          0.008985895380577811,
+          0.007849262077147482
+        ]
+      }
+    },
+    "actions": {
+      "HR@10": {
+        "mean": 0.01675,
+        "sample_std": 0.004596194077712559,
+        "per_seed": [
+          0.0135,
+          0.02
+        ]
+      },
+      "NDCG@10": {
+        "mean": 0.009427577183952544,
+        "sample_std": 0.0017487100823214813,
+        "per_seed": [
+          0.008191052426413738,
+          0.010664101941491349
+        ]
+      }
+    }
+  },
+  "deltas": {
+    "HR@10": {
+      "absolute": 0.0,
+      "relative": 0.0,
+      "paired_user_bootstrap_95pct": [
+        -0.00425,
+        0.004
+      ]
+    },
+    "NDCG@10": {
+      "absolute": 0.0010099984550898972,
+      "relative": 0.11998681421615462,
+      "paired_user_bootstrap_95pct": [
+        -0.0015337705221059707,
+        0.0035454643223087425
+      ]
+    }
+  },
+  "runs": {
+    "baseline": [
+      {
+        "variant": "baseline",
+        "seed": 2026,
+        "best_epoch": 4,
+        "validation": {
+          "HR@10": 0.0175,
+          "NDCG@10": 0.008317307551719387,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1774,
+            "HR@10": 0.019729425028184894,
+            "NDCG@10": 0.00937689690160021
+          },
+          "cold": {
+            "users": 226,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.017,
+          "NDCG@10": 0.008985895380577811,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.01992966002344666,
+            "NDCG@10": 0.01053446117301033
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "popularity_test": {
+          "HR@10": 0.0125,
+          "NDCG@10": 0.007116272617632265,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.014654161781946073,
+            "NDCG@10": 0.008342640817857285
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "global_steps": 3660,
+        "training_users": 93586,
+        "candidates": 1538730,
+        "shared_initialization_sha256": "ca0efb194de66e2b5947f4d015a199da5fb7cedc3b2b46c2f7e41faa737cd40d",
+        "elapsed_seconds": 236.88601939205546,
+        "peak_gpu_memory_mb": 2277.20068359375
+      },
+      {
+        "variant": "baseline",
+        "seed": 2027,
+        "best_epoch": 3,
+        "validation": {
+          "HR@10": 0.016,
+          "NDCG@10": 0.00851346480426079,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1774,
+            "HR@10": 0.018038331454340473,
+            "NDCG@10": 0.009598043747757374
+          },
+          "cold": {
+            "users": 226,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.0165,
+          "NDCG@10": 0.007849262077147482,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.019343493552168817,
+            "NDCG@10": 0.009201948507793063
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "popularity_test": {
+          "HR@10": 0.0125,
+          "NDCG@10": 0.007116272617632265,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.014654161781946073,
+            "NDCG@10": 0.008342640817857285
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "global_steps": 3660,
+        "training_users": 93586,
+        "candidates": 1538730,
+        "shared_initialization_sha256": "5ca5fa49cf774cd5ebf28e0b17951edf1be637a047febe14df41e4e98aca869e",
+        "elapsed_seconds": 240.62010266899597,
+        "peak_gpu_memory_mb": 2277.20068359375
+      }
+    ],
+    "actions": [
+      {
+        "variant": "actions",
+        "seed": 2026,
+        "best_epoch": 4,
+        "validation": {
+          "HR@10": 0.0185,
+          "NDCG@10": 0.008566602415758212,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1774,
+            "HR@10": 0.020856820744081173,
+            "NDCG@10": 0.009657950863312528
+          },
+          "cold": {
+            "users": 226,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.0135,
+          "NDCG@10": 0.008191052426413738,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.015826494724501757,
+            "NDCG@10": 0.00960264059368551
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "popularity_test": {
+          "HR@10": 0.0125,
+          "NDCG@10": 0.007116272617632265,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.014654161781946073,
+            "NDCG@10": 0.008342640817857285
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "global_steps": 3660,
+        "training_users": 93586,
+        "candidates": 1538730,
+        "shared_initialization_sha256": "ca0efb194de66e2b5947f4d015a199da5fb7cedc3b2b46c2f7e41faa737cd40d",
+        "elapsed_seconds": 239.80973617802374,
+        "peak_gpu_memory_mb": 2277.2021484375
+      },
+      {
+        "variant": "actions",
+        "seed": 2027,
+        "best_epoch": 3,
+        "validation": {
+          "HR@10": 0.017,
+          "NDCG@10": 0.008562852061625595,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1774,
+            "HR@10": 0.019165727170236752,
+            "NDCG@10": 0.00965372273013032
+          },
+          "cold": {
+            "users": 226,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.02,
+          "NDCG@10": 0.010664101941491349,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.023446658851113716,
+            "NDCG@10": 0.012501878008782356
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "popularity_test": {
+          "HR@10": 0.0125,
+          "NDCG@10": 0.007116272617632265,
+          "users": 2000,
+          "candidate_items": 1538730,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 1706,
+            "HR@10": 0.014654161781946073,
+            "NDCG@10": 0.008342640817857285
+          },
+          "cold": {
+            "users": 294,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "global_steps": 3660,
+        "training_users": 93586,
+        "candidates": 1538730,
+        "shared_initialization_sha256": "5ca5fa49cf774cd5ebf28e0b17951edf1be637a047febe14df41e4e98aca869e",
+        "elapsed_seconds": 238.06765214109328,
+        "peak_gpu_memory_mb": 2277.2021484375
+      }
+    ]
+  },
+  "popularity": {
+    "HR@10": 0.0125,
+    "NDCG@10": 0.007116272617632265,
+    "users": 2000,
+    "candidate_items": 1538730,
+    "candidate_coverage": 1.0,
+    "filter_seen_items": true,
+    "warm": {
+      "users": 1706,
+      "HR@10": 0.014654161781946073,
+      "NDCG@10": 0.008342640817857285
+    },
+    "cold": {
+      "users": 294,
+      "HR@10": 0.0,
+      "NDCG@10": 0.0
+    }
+  },
+  "uncertainty_note": "Bootstrap resamples paired users after averaging these training seeds; it is conditional on these trained models, not a population interval over all training seeds.",
+  "scope": "Local first-appearance-click holdout on a sampled-user cohort; not an official leaderboard score."
+}

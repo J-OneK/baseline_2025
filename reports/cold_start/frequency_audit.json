@@ -1,0 +1,141 @@
+{
+  "configuration": {
+    "cache": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data",
+    "cohort": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+    "item_vectors": "/home/jyk/project/baseline_2025/artifacts/objective_study/export/item_vectors.npy",
+    "click_counts_output": "/home/jyk/project/baseline_2025/artifacts/cold_start/diagnostics/train_click_counts.npy",
+    "split": "val"
+  },
+  "cache_signature": {
+    "max_users": 300000,
+    "seed": 2026,
+    "max_history": 100,
+    "min_history": 5,
+    "eval_users": 10000,
+    "protocol_version": 2,
+    "source_signature": "f55e89b7ce83c4b69d94e67c82159bdf358783a0c37c4cf5d5f7a35e73f92efd"
+  },
+  "cache_metadata_sha256": "786d2c2dbd9baabf2df028ef83a33bc3998f00c0c505bc21f0c3d266fc9dc6d6",
+  "code_sha256": "b87661edfcb740ef004445c01c1c7f5effd70d6d0fe9ef270fd9a5938711657a",
+  "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72",
+  "num_users": 280985,
+  "candidate_items": 2708122,
+  "validation_users": 10000,
+  "training_events": 19361659,
+  "click_positive_training_positions": 2050483,
+  "exposure_or_unknown_training_events": 17311176,
+  "frequency_definition": "all events in all user training prefixes, including exposure/click/unknown",
+  "positive_frequency_definition": "action code 2 in each user training prefix; matches click InfoNCE supervised positions",
+  "catalog_groups": {
+    "cold_0": {
+      "items": 322236,
+      "zero_training_click_fraction": 1.0,
+      "text_present_fraction": 0.967424496331881,
+      "usable_text_fraction": 0.967424496331881,
+      "field121_zero_or_oov_fraction": 0.41197755682170834,
+      "mean_exported_vector_norm": 1.6481447219848633,
+      "exported_vector_norm_quantiles": {
+        "p10": 1.3759950399398804,
+        "p50": 1.6361385583877563,
+        "p90": 1.939441740512848
+      }
+    },
+    "tail_1_5": {
+      "items": 1931099,
+      "zero_training_click_fraction": 0.8200449588550354,
+      "text_present_fraction": 0.9533488443627178,
+      "usable_text_fraction": 0.9533488443627178,
+      "field121_zero_or_oov_fraction": 0.0,
+      "mean_exported_vector_norm": 1.7211174964904785,
+      "exported_vector_norm_quantiles": {
+        "p10": 1.421627926826477,
+        "p50": 1.7140045166015625,
+        "p90": 2.0280455112457276
+      }
+    },
+    "mid_6_50": {
+      "items": 394930,
+      "zero_training_click_fraction": 0.31661813485934215,
+      "text_present_fraction": 0.9351834502316866,
+      "usable_text_fraction": 0.9351834502316866,
+      "field121_zero_or_oov_fraction": 0.0,
+      "mean_exported_vector_norm": 1.718133568763733,
+      "exported_vector_norm_quantiles": {
+        "p10": 1.3714275717735291,
+        "p50": 1.7104382514953613,
+        "p90": 2.0722869634628296
+      }
+    },
+    "head_gt50": {
+      "items": 59857,
+      "zero_training_click_fraction": 0.007000016706483786,
+      "text_present_fraction": 0.9358471022603873,
+      "usable_text_fraction": 0.9358471022603873,
+      "field121_zero_or_oov_fraction": 0.0,
+      "mean_exported_vector_norm": 1.873916506767273,
+      "exported_vector_norm_quantiles": {
+        "p10": 1.4860716342926026,
+        "p50": 1.8708255290985107,
+        "p90": 2.2678163051605225
+      }
+    }
+  },
+  "validation_target_groups": {
+    "cold_0": {
+      "users": 659,
+      "zero_training_click_fraction": 1.0,
+      "text_missing_fraction": 0.03338391502276176,
+      "usable_text_fraction": 0.9666160849772383,
+      "field121_zero_or_oov_fraction": 0.3596358118361153,
+      "median_training_click_count": 0.0
+    },
+    "tail_1_5": {
+      "users": 1326,
+      "zero_training_click_fraction": 0.72473604826546,
+      "text_missing_fraction": 0.0444947209653092,
+      "usable_text_fraction": 0.9555052790346908,
+      "field121_zero_or_oov_fraction": 0.0,
+      "median_training_click_count": 0.0
+    },
+    "mid_6_50": {
+      "users": 2966,
+      "zero_training_click_fraction": 0.17936614969656103,
+      "text_missing_fraction": 0.05529332434254889,
+      "usable_text_fraction": 0.9447066756574511,
+      "field121_zero_or_oov_fraction": 0.0,
+      "median_training_click_count": 2.0
+    },
+    "head_gt50": {
+      "users": 5049,
+      "zero_training_click_fraction": 0.0013864131511190335,
+      "text_missing_fraction": 0.061794414735591205,
+      "usable_text_fraction": 0.9382055852644088,
+      "field121_zero_or_oov_fraction": 0.0,
+      "median_training_click_count": 30.0
+    }
+  },
+  "field121": {
+    "train_visible_items": 2385886,
+    "distinct_train_categories": 1237081,
+    "distinct_nonzero_train_categories": 1237081,
+    "fraction_of_items_with_singleton_category": 0.33909080316494583,
+    "category_size_quantiles_per_item": {
+      "p10": 1.0,
+      "p50": 2.0,
+      "p90": 11.0,
+      "p99": 41.0
+    },
+    "semantics": "anonymous high-cardinality field; business meaning is not inferred",
+    "vocabulary_policy": "fit item ID and attribute vocabularies on training-visible items; OOV=0"
+  },
+  "exported_norm_scope": "one saved seed2026 learned raw-IP candidate export; norms alone do not establish ranking causality",
+  "click_counts_sha256": "f12dde169d009ca7fb84be94f79681ff31c0493b73690e02555612c8bbe01609",
+  "checks": {
+    "train_counts_recomputed_exactly": true,
+    "clicks_subset_of_all_events": true,
+    "validation_groups_partition_cohort": true,
+    "validation_target_absent_from_history": true,
+    "cache_modified": false,
+    "test_positions_or_targets_opened": false
+  }
+}

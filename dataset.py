@@ -11,6 +11,7 @@ import time
 
 
 import pyarrow.dataset as ds  # type: ignore
+import pyarrow.compute as pc
 
 
 
@@ -114,6 +115,7 @@ class MyDataset(torch.utils.data.Dataset):
         self.keep_raw_user_id = False
         self.full_events, self.user_indices = load_seq_as_list(self.data_dir / "seq")
         self.seq_usernum = len(self.user_indices)
+        self.user_ids = sorted(self.user_indices)
         self.maxlen = args.maxlen
         self.mm_emb_ids = args.mm_emb_id
 
@@ -275,7 +277,7 @@ class MyDataset(torch.utils.data.Dataset):
             pos_feat: 正样本特征，每个元素为字典，key为特征ID，value为特征值
             neg_feat: 负样本特征，每个元素为字典，key为特征ID，value为特征值
         """
-        uid += 1
+        uid = self.user_ids[uid]
         user_sequence = self.new_load_user_data(uid)  # 动态加载用户数据
 
 
@@ -311,8 +313,8 @@ class MyDataset(torch.utils.data.Dataset):
         for record_tuple in reversed(ext_user_sequence[:-1]):
             i, feat, type_, act_type = record_tuple
             next_i, next_feat, next_type, next_act_type = nxt
-            feat = self.fill_missing_feat(feat, i)
-            next_feat = self.fill_missing_feat(next_feat, next_i)
+            feat = self.fill_missing_feat(feat, i, is_item=(type_ == 1))
+            next_feat = self.fill_missing_feat(next_feat, next_i, is_item=(next_type == 1))
             seq[idx] = i
             token_type[idx] = type_
             next_token_type[idx] = next_type
@@ -402,7 +404,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         return feat_default_value, feat_types, feat_statistics
 
-    def fill_missing_feat(self, feat, item_id):
+    def fill_missing_feat(self, feat, item_id, is_item=True):
         """
         对于原始数据中缺失的特征进行填充缺省值
 
@@ -426,9 +428,12 @@ class MyDataset(torch.utils.data.Dataset):
         for feat_id in missing_fields:
             filled_feat[feat_id] = self.feature_default_value[feat_id]
         for feat_id in self.feature_types['item_emb']:
-            if item_id != 0 and self.indexer_i_rev[item_id] in self.mm_emb_dict[feat_id]:
-                if type(self.mm_emb_dict[feat_id][self.indexer_i_rev[item_id]]) == np.ndarray:
-                    filled_feat[feat_id] = self.mm_emb_dict[feat_id][self.indexer_i_rev[item_id]]
+            # Content keys are strings, while indexer OIDs can be integers.
+            # A user RID must never be interpreted as an unrelated item RID.
+            oid = self.indexer_i_rev.get(item_id) if is_item and item_id != 0 else None
+            vector = self.mm_emb_dict[feat_id].get(str(oid)) if oid is not None else None
+            if isinstance(vector, np.ndarray):
+                filled_feat[feat_id] = vector
 
         return filled_feat
 
@@ -505,7 +510,7 @@ class MyTestDataset(MyDataset):
         """
         # start_time = time.time()
         # user_sequence = self._load_user_data(uid) 
-        uid += 1 # 会是从0开始的，但是数据从1开始
+        uid = self.user_ids[uid]
         #  # 动态加载用户数据
         user_sequence = self.new_load_user_data(uid) 
 
@@ -544,9 +549,9 @@ class MyTestDataset(MyDataset):
             if record_tuple[2] == 1 and record_tuple[0]:
                 ts.add(record_tuple[0])
 
-        for record_tuple in reversed(ext_user_sequence[:-1]):
+        for record_tuple in reversed(ext_user_sequence):
             i, feat, type_ = record_tuple
-            feat = self.fill_missing_feat(feat, i)
+            feat = self.fill_missing_feat(feat, i, is_item=(type_ == 1))
             seq[idx] = i
             token_type[idx] = type_
             seq_feat[idx] = feat
@@ -710,18 +715,20 @@ def load_seq_as_list(seq_dir, batch_size=100000):
             # user_ids = batch.column("user_id")
             seqs = batch.column("seq")
 
-            flat_structs = seqs.values
+            offsets = seqs.offsets.to_numpy()
+            first_offset = int(offsets[0])
+            flat_structs = seqs.values.slice(first_offset, int(offsets[-1]) - first_offset)
+            offsets = offsets - first_offset
 
             batch_events = np.empty(len(flat_structs), dtype=event_type)
             
-            batch_events['item_id'] = flat_structs.field('item_id').to_numpy()
-            batch_events['action_type'] = flat_structs.field('action_type').to_numpy()
-            batch_events['timestamp'] = flat_structs.field('timestamp').to_numpy()
+            batch_events['item_id'] = pc.fill_null(flat_structs.field('item_id'), 0).to_numpy()
+            batch_events['action_type'] = pc.fill_null(flat_structs.field('action_type'), -1).to_numpy()
+            batch_events['timestamp'] = pc.fill_null(flat_structs.field('timestamp'), 0).to_numpy()
 
             all_events_list.append(batch_events)
 
             # 每个用户的序列偏移量
-            offsets = seqs.offsets.to_numpy()
             lengths = np.diff(offsets)
 
             for i in range(len(uids)):

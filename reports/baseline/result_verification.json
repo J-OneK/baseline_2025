@@ -1,0 +1,50 @@
+{
+  "unit_tests_passed": 15,
+  "runs": [
+    {
+      "run": "baseline_seed2026",
+      "five_complete_epochs": true,
+      "test_metrics_recomputed": true,
+      "validation_only_selection": true,
+      "no_seen_items_or_duplicates": true
+    },
+    {
+      "run": "baseline_seed2027",
+      "five_complete_epochs": true,
+      "test_metrics_recomputed": true,
+      "validation_only_selection": true,
+      "no_seen_items_or_duplicates": true
+    },
+    {
+      "run": "actions_seed2026",
+      "five_complete_epochs": true,
+      "test_metrics_recomputed": true,
+      "validation_only_selection": true,
+      "no_seen_items_or_duplicates": true
+    },
+    {
+      "run": "actions_seed2027",
+      "five_complete_epochs": true,
+      "test_metrics_recomputed": true,
+      "validation_only_selection": true,
+      "no_seen_items_or_duplicates": true
+    }
+  ],
+  "full_cache_checks_passed": 35,
+  "end_to_end_reproduction_runner_passed": true,
+  "single_user_checkpoint_inference_passed": true,
+  "feature_learning_checks": [
+    {
+      "seed": 2026,
+      "content_projection_weight_change_l2": 1.9780304431915283,
+      "history_action_weight_change_l2": 3.0879523754119873,
+      "unused_baseline_action_embedding_unchanged": true
+    },
+    {
+      "seed": 2027,
+      "content_projection_weight_change_l2": 1.67682945728302,
+      "history_action_weight_change_l2": 2.6782400608062744,
+      "unused_baseline_action_embedding_unchanged": true
+    }
+  ]
+}

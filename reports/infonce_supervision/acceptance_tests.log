@@ -1,0 +1,50 @@
+test_filter_reports_too_few_candidates (test_ann.ANNLogicTests) ... ok
+test_recall_and_selection_do_not_use_recommendation_labels (test_ann.ANNLogicTests) ... ok
+test_zero_based_index_ids_are_not_padding_or_double_mapped (test_ann.ANNLogicTests) ... ok
+test_asymmetric_lift_preserves_ip_scores_and_order (test_ann.FaissIntegrationTests) ... ok
+test_benchmark_exports_selection_and_verified_test_scores (test_ann.FaissIntegrationTests) ... 2026-11-02 09:24:25 Building flat over 500 vectors
+2026-11-02 09:24:25 Building hnsw over 500 vectors
+2026-11-02 09:24:25 HNSW build: 500/500 items
+2026-11-02 09:24:25 Measuring warm FlatIP single-query latency
+2026-11-02 09:24:25 {"efSearch": 64, "single_query_p50_ms": 0.063256, "single_query_p95_ms": 0.07072625, "single_query_mean_ms": 0.06493362500000001, "measured_single_queries": 8, "single_query_threads": 1, "batch_qps_8_threads": 49588.701264045245, "batch_queries": 8, "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network", "ANNRecall@10": 0.9875, "validation_recommendation": {"HR@10": 0.0, "NDCG@10": 0.0}}
+2026-11-02 09:24:25 {"efSearch": 128, "single_query_p50_ms": 0.076482, "single_query_p95_ms": 0.0819804, "single_query_mean_ms": 0.07761075, "measured_single_queries": 8, "single_query_threads": 1, "batch_qps_8_threads": 47340.37432798477, "batch_queries": 8, "latency_scope": "CPU index search plus Python history filtering; warm cache; excludes encoder/network", "ANNRecall@10": 1.0, "validation_recommendation": {"HR@10": 0.0, "NDCG@10": 0.0}}
+2026-11-02 09:24:25 Benchmark complete: /tmp/tmp4e36u3oc/index/benchmark.json
+ok
+test_hnsw_persistence_filtering_and_exact_reference (test_ann.FaissIntegrationTests) ... ok
+test_inner_product_is_not_silently_normalized (test_ann.FaissIntegrationTests) ... ok
+test_exposures_clicks_unknowns_are_distinct (test_objectives.ObjectiveTests) ... ok
+test_frozen_cohort_excludes_previously_tested_users (test_objectives.ObjectiveTests) ... ok
+test_info_nce_has_correct_uniform_value_and_gradient_directions (test_objectives.ObjectiveTests) ... ok
+test_info_nce_supervision_scope_controls_exposure_gradients (test_objectives.ObjectiveTests) ... ok
+test_invalid_temperature_or_unsupervised_batch_is_rejected (test_objectives.ObjectiveTests) ... ok
+test_negative_count_does_not_rescale_bce (test_objectives.ObjectiveTests) ... ok
+test_unlabelled_positions_have_zero_gradient (test_objectives.ObjectiveTests) ... ok
+test_causal_mask_and_padding_have_finite_gradients (test_retrieval.RetrievalTests) ... ok
+test_chronological_holdout_has_no_target_or_future_history (test_retrieval.RetrievalTests) ... ok
+test_chunked_search_matches_exhaustive_inner_product (test_retrieval.RetrievalTests) ... ok
+test_content_oid_join_and_user_token_separation (test_retrieval.RetrievalTests) ... ok
+test_downloaded_candidate_schema_and_cold_start (test_retrieval.RetrievalTests) ... ok
+test_eval_keeps_last_observed_event (test_retrieval.RetrievalTests) ... ok
+test_legacy_arrow_batch_offsets_and_null_actions (test_retrieval.RetrievalTests) ... all the rows: 2
+Loading Seqs:   0%|          | 0/2 [00:00<?, ? rows/s]Loading Seqs: 100%|██████████| 2/2 [00:00<00:00, 1668.05 rows/s]
+ok
+test_legacy_test_input_keeps_final_event_for_noncontiguous_user_id (test_retrieval.RetrievalTests) ... ok
+test_metric_known_ranks (test_retrieval.RetrievalTests) ... ok
+test_negative_pool_exhaustion_is_reported (test_retrieval.RetrievalTests) ... ok
+test_negative_sampling_excludes_training_history (test_retrieval.RetrievalTests) ... ok
+test_only_action_variant_responds_to_action_changes (test_retrieval.RetrievalTests) ... ok
+test_previously_exposed_ad_is_not_a_holdout_target (test_retrieval.RetrievalTests) ... ok
+test_timestamp_ties_are_excluded_and_unknown_actions_are_preserved (test_retrieval.RetrievalTests) ... ok
+test_training_samples_use_only_prefix (test_retrieval.RetrievalTests) ... ok
+test_seed_uncertainty_is_not_hidden_by_user_bootstrap (test_study.StudyTests) ... ok
+test_selection_uses_validation_and_cannot_be_silently_changed (test_study.StudyTests) ... Memory Usage: 0.00 MB (Events Only)
+Total users: 2
+Locked using validation only: click_infonce64; confirmation comparison: click_infonce64
+ok
+test_difference_direction_is_all_minus_click (test_supervision_report.SupervisionReportTests) ... ok
+test_saved_scores_and_user_identity_are_checked (test_supervision_report.SupervisionReportTests) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 1.082s
+
+OK
