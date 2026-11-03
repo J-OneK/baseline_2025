@@ -21,10 +21,12 @@ class ObjectiveTests(unittest.TestCase):
         torch.testing.assert_close(supervision_weights(actions, 'weighted_bce'), torch.tensor([0., .1, 1., 0.]))
         torch.testing.assert_close(supervision_weights(actions, 'click_bce'), torch.tensor([0., 0., 1., 0.]))
         torch.testing.assert_close(supervision_weights(actions, 'click_infonce'), torch.tensor([0., 0., 1., 0.]))
+        torch.testing.assert_close(supervision_weights(actions, 'all_infonce'), torch.tensor([0., 1., 1., 0.]))
 
     def test_info_nce_supervision_scope_controls_exposure_gradients(self):
         actions = torch.tensor([0, 1, 2, 3])
-        for objective, expected in [('click_infonce', [False, False, True, False])]:
+        for objective, expected in [('click_infonce', [False, False, True, False]),
+                                    ('all_infonce', [False, True, True, False])]:
             with self.subTest(objective=objective):
                 positive = torch.zeros(4, requires_grad=True)
                 negative = torch.zeros(4, 64, requires_grad=True)

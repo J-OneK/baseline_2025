@@ -98,7 +98,7 @@ def train(args):
                 count = int(mask.sum())
                 if count == 0:
                     continue
-                if args.num_negatives == 1 and args.objective != 'click_infonce':
+                if args.num_negatives == 1 and args.objective not in ['click_infonce', 'all_infonce']:
                     # Keep the original one-negative BCE computation and sampling intact.
                     negative = sample_negatives(negative_pool, batch['seen'], batch['positive'].shape,
                                                 negative_generator)
@@ -119,7 +119,7 @@ def train(args):
                     positive_logits = (states * model.encode_items(positive)).sum(-1)
                     negative_logits = torch.einsum('md,mkd->mk', states, model.encode_items(negative))
                     loss = (sampled_info_nce(positive_logits, negative_logits, args.temperature)
-                            if args.objective == 'click_infonce' else
+                            if args.objective in ['click_infonce', 'all_infonce'] else
                             weighted_bce(positive_logits, negative_logits, weights[mask]))
                 if not torch.isfinite(loss):
                     raise FloatingPointError(f'Non-finite loss at epoch={epoch}, step={step}')
@@ -191,7 +191,7 @@ def parser():
     result.add_argument('--dropout', type=float, default=0.2)
     result.add_argument('--lr', type=float, default=0.001)
     result.add_argument('--max-steps', type=int, default=0, help='Smoke runs only; 0 trains complete epochs.')
-    result.add_argument('--objective', choices=['all_bce', 'weighted_bce', 'click_bce', 'click_infonce'], default='click_infonce')
+    result.add_argument('--objective', choices=['all_bce', 'weighted_bce', 'click_bce', 'click_infonce', 'all_infonce'], default='click_infonce')
     result.add_argument('--num-negatives', type=int, default=64)
     result.add_argument('--exposure-weight', type=float, default=0.1)
     result.add_argument('--temperature', type=float, default=1.0)

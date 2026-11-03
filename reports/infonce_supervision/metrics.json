@@ -1,0 +1,1442 @@
+{
+  "protocol": {
+    "reference_root": "artifacts/day4_7",
+    "seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "control_objective": "click_infonce",
+    "experimental_objective": "all_infonce",
+    "num_negatives": 64,
+    "temperature": 1.0,
+    "epochs": 5,
+    "primary_comparison": "paired mean best-validation NDCG@10; HR@10 secondary",
+    "checkpoint_selection": "validation NDCG@10, then HR@10; earliest epoch on ties",
+    "supervision": {
+      "click_infonce": "click next-events only; observed exposures remain in history",
+      "all_infonce": "exposure and click next-events with equal per-position weight"
+    },
+    "unknown_and_padding": "excluded from supervised positions in both arms",
+    "budget": "same model, data, initial shared weights, batch size, epochs and optimizer; not equal supervised positions or FLOPs",
+    "negative_sampling": "same uniform train-visible pool and own-prefix rejection policy, 64 draws per position; actual draws differ when the position mask changes",
+    "test_policy": "supplementary post-hoc ablation on a previously inspected cohort, not a new independent confirmation; do not change the original model/index selection"
+  },
+  "training_settings": {
+    "cache": "/home/jyk/project/baseline_2025/artifacts/day4_7/scale_data",
+    "variant": "baseline",
+    "seed": 2026,
+    "epochs": 5,
+    "batch_size": 128,
+    "eval_batch_size": 256,
+    "candidate_chunk": 32768,
+    "workers": 2,
+    "hidden": 32,
+    "blocks": 1,
+    "heads": 1,
+    "dropout": 0.2,
+    "lr": 0.001,
+    "max_steps": 0,
+    "num_negatives": 64,
+    "exposure_weight": 0.1,
+    "temperature": 1.0,
+    "skip_test": true,
+    "eval_indices": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirm_eval_indices.npy",
+    "objective": "all_infonce"
+  },
+  "training_users": 280985,
+  "candidate_items": 2708122,
+  "evaluation_users": 10000,
+  "runs": {
+    "click_infonce": [
+      {
+        "seed": 2026,
+        "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2026",
+        "best_epoch": 4,
+        "validation": {
+          "HR@10": 0.0304,
+          "NDCG@10": 0.01567152720299275,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.032437640509581415,
+            "NDCG@10": 0.016746194968805226
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0015174506828528073,
+            "NDCG@10": 0.0004386416180848071
+          }
+        },
+        "test": {
+          "HR@10": 0.0284,
+          "NDCG@10": 0.01466465569024796,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.030819316332067283,
+            "NDCG@10": 0.015913896571077543
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.0295,
+          "NDCG@10": 0.01475801583068653,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.031581201156193124,
+            "NDCG@10": 0.015799181919159116
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0213,
+              "NDCG@10": 0.01102956320036953,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.022802697783963172,
+                "NDCG@10": 0.011807689969349673
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 1.672288362451607
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0273,
+              "NDCG@10": 0.014291064957638525,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.029011883096028264,
+                "NDCG@10": 0.015227382240926185
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0030349013657056147,
+                "NDCG@10": 0.0010192292320087269
+              }
+            },
+            "train_loss": 1.0501544228840434
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.0282,
+              "NDCG@10": 0.015493025844639578,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.03008243228776362,
+                "NDCG@10": 0.0165503613224561
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0005058168942842691
+              }
+            },
+            "train_loss": 0.7981703008232279
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.0304,
+              "NDCG@10": 0.01567152720299275,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.032437640509581415,
+                "NDCG@10": 0.016746194968805226
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0004386416180848071
+              }
+            },
+            "train_loss": 0.6283018622613615
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.0295,
+              "NDCG@10": 0.01475801583068653,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.031581201156193124,
+                "NDCG@10": 0.015799181919159116
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.5153318986311268
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          2050483,
+          2050483,
+          2050483,
+          2050483,
+          2050483
+        ],
+        "training_seconds": 774.0615653640125,
+        "elapsed_seconds": 794.290262942086,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 3470.10498046875,
+        "checkpoint_sha256": "88d5513f03c3cfdfb6bc460c0d73304a16c3e2bf0c7a60c3bfa64137a35e6a05",
+        "shared_initialization_sha256": "40c0d949fff5ee37d20d3efb5ff82e4bfcb7d86758d511d654cf909b80e7a407",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      },
+      {
+        "seed": 2027,
+        "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2027",
+        "best_epoch": 5,
+        "validation": {
+          "HR@10": 0.0305,
+          "NDCG@10": 0.01630583757475639,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.032651750347928485,
+            "NDCG@10": 0.01745620123622352
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.0298,
+          "NDCG@10": 0.014907689989938239,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.032338578404774825,
+            "NDCG@10": 0.016177634280996462
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.0305,
+          "NDCG@10": 0.01630583757475639,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.032651750347928485,
+            "NDCG@10": 0.01745620123622352
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0236,
+              "NDCG@10": 0.0123240937713588,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.025157906005780967,
+                "NDCG@10": 0.013162602814181577
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0004386416180848071
+              }
+            },
+            "train_loss": 1.6719534022556144
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0293,
+              "NDCG@10": 0.01529170527346067,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.03126003639867252,
+                "NDCG@10": 0.016338295978904047
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0004567981724794859
+              }
+            },
+            "train_loss": 1.043678213183861
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.027,
+              "NDCG@10": 0.01381354272365146,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.028904828176854726,
+                "NDCG@10": 0.014788076997806937
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.7881920350660196
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.0271,
+              "NDCG@10": 0.013992061460296938,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.028904828176854726,
+                "NDCG@10": 0.014946963345177753
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0004567981724794859
+              }
+            },
+            "train_loss": 0.6270694139657671
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.0305,
+              "NDCG@10": 0.01630583757475639,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.032651750347928485,
+                "NDCG@10": 0.01745620123622352
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.5211963370456467
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          2050483,
+          2050483,
+          2050483,
+          2050483,
+          2050483
+        ],
+        "training_seconds": 774.3636705311947,
+        "elapsed_seconds": 793.4927051209379,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 3469.4609375,
+        "checkpoint_sha256": "445ea1f51fd65fc6af1df301f4856512e7d5ed1d0f0de0050fb86005a259b532",
+        "shared_initialization_sha256": "6b1c8ddf933960ea8c8ad61e76cd4c9ae4def728b96d7c37fe2e8a0cf75341f8",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      },
+      {
+        "seed": 2028,
+        "output": "/home/jyk/project/baseline_2025/artifacts/day4_7/confirmation/selected_seed2028",
+        "best_epoch": 4,
+        "validation": {
+          "HR@10": 0.0283,
+          "NDCG@10": 0.015347569945086454,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.03018948720693716,
+            "NDCG@10": 0.016394643626756362
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0015174506828528073,
+            "NDCG@10": 0.0005058168942842691
+          }
+        },
+        "test": {
+          "HR@10": 0.031,
+          "NDCG@10": 0.016602095545378052,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.033532284319045036,
+            "NDCG@10": 0.017947913803603804
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0012738853503184713,
+            "NDCG@10": 0.0008037321701547229
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.0284,
+          "NDCG@10": 0.014669403770940701,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.030403597045284232,
+            "NDCG@10": 0.015704318350220212
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0227,
+              "NDCG@10": 0.011924166774146793,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.02430146665239268,
+                "NDCG@10": 0.012765407102180486
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 1.6716194051279176
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0259,
+              "NDCG@10": 0.013718741779519997,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.02772722406594583,
+                "NDCG@10": 0.014686587923691253
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 1.0331696125236036
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.0267,
+              "NDCG@10": 0.01461605575860937,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.028476608500160584,
+                "NDCG@10": 0.015613434611851834
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0004787023926945808
+              }
+            },
+            "train_loss": 0.7831027203166439
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.0283,
+              "NDCG@10": 0.015347569945086454,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.03018948720693716,
+                "NDCG@10": 0.016394643626756362
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0005058168942842691
+              }
+            },
+            "train_loss": 0.620998099762701
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.0284,
+              "NDCG@10": 0.014669403770940701,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.030403597045284232,
+                "NDCG@10": 0.015704318350220212
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.512972687388197
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          2050483,
+          2050483,
+          2050483,
+          2050483,
+          2050483
+        ],
+        "training_seconds": 768.6098908409476,
+        "elapsed_seconds": 788.6839490389684,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 3470.1552734375,
+        "checkpoint_sha256": "c4e93dcd43026ddeefc905d01d208ec68f5286b9c1a2f5782842d67c34f65e3b",
+        "shared_initialization_sha256": "1b6a0c00f6119a3f27ef78e345f4a2db9b7b01b745465d4ba91f3e433ab24c71",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      }
+    ],
+    "all_infonce": [
+      {
+        "seed": 2026,
+        "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2026",
+        "best_epoch": 2,
+        "validation": {
+          "HR@10": 0.0302,
+          "NDCG@10": 0.01593233710847517,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.03233058559040788,
+            "NDCG@10": 0.01705635061393338
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.0293,
+          "NDCG@10": 0.016274033887713688,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.031795984807379274,
+            "NDCG@10": 0.01766037318254334
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.0222,
+          "NDCG@10": 0.01268114554232983,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.023230917460657318,
+            "NDCG@10": 0.013327749849692604
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.007587253414264037,
+            "NDCG@10": 0.003515848372260487
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0277,
+              "NDCG@10": 0.014456167576110854,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.029547157691895944,
+                "NDCG@10": 0.015408494380423623
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0015174506828528073,
+                "NDCG@10": 0.0009574047853891616
+              }
+            },
+            "train_loss": 1.3182649468121932
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0302,
+              "NDCG@10": 0.01593233710847517,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.03233058559040788,
+                "NDCG@10": 0.01705635061393338
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.8688028348797036
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.0299,
+              "NDCG@10": 0.015843191342072755,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.03200942083288727,
+                "NDCG@10": 0.016960915685764646
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 0.7487454990512562
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.0263,
+              "NDCG@10": 0.01501538220199289,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.02772722406594583,
+                "NDCG@10": 0.015918590605020117
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.006069802731411229,
+                "NDCG@10": 0.002212848525699521
+              }
+            },
+            "train_loss": 0.6842132709709458
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.0222,
+              "NDCG@10": 0.01268114554232983,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.023230917460657318,
+                "NDCG@10": 0.013327749849692604
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.007587253414264037,
+                "NDCG@10": 0.003515848372260487
+              }
+            },
+            "train_loss": 0.6415820323620819
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          19199815,
+          19199815,
+          19199815,
+          19199815,
+          19199815
+        ],
+        "training_seconds": 1161.843531610095,
+        "elapsed_seconds": 1180.0227024169872,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 4653.45068359375,
+        "checkpoint_sha256": "9bf6731def99c2b8ccc3c942b4ed895ebeefc02c65d0d6a9c2a69ed4450f0533",
+        "shared_initialization_sha256": "40c0d949fff5ee37d20d3efb5ff82e4bfcb7d86758d511d654cf909b80e7a407",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      },
+      {
+        "seed": 2027,
+        "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2027",
+        "best_epoch": 1,
+        "validation": {
+          "HR@10": 0.0257,
+          "NDCG@10": 0.0129822221285717,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.027513114227598758,
+            "NDCG@10": 0.013898107406671346
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.0,
+            "NDCG@10": 0.0
+          }
+        },
+        "test": {
+          "HR@10": 0.0283,
+          "NDCG@10": 0.013960432493436203,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.030602278893109063,
+            "NDCG@10": 0.015095423215883022
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0012738853503184713,
+            "NDCG@10": 0.0006369426751592356
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.0184,
+          "NDCG@10": 0.009980214034671985,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.019269885451236483,
+            "NDCG@10": 0.010445394903434584
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.006069802731411229,
+            "NDCG@10": 0.0033865046338958636
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0257,
+              "NDCG@10": 0.0129822221285717,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.027513114227598758,
+                "NDCG@10": 0.013898107406671346
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 1.3180497239804232
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0231,
+              "NDCG@10": 0.01290672389787523,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.024515576490739748,
+                "NDCG@10": 0.013676455850761864
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0030349013657056147,
+                "NDCG@10": 0.0019961530755473883
+              }
+            },
+            "train_loss": 0.8532201490616433
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.0222,
+              "NDCG@10": 0.011523261229842388,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.023337972379830853,
+                "NDCG@10": 0.012177375122858998
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.006069802731411229,
+                "NDCG@10": 0.0022515193866434104
+              }
+            },
+            "train_loss": 0.7390000343708107
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.019,
+              "NDCG@10": 0.009839402720979397,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.019805160047104163,
+                "NDCG@10": 0.010348018569266957
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.007587253414264037,
+                "NDCG@10": 0.0026300239063297517
+              }
+            },
+            "train_loss": 0.6780863966276417
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.0184,
+              "NDCG@10": 0.009980214034671985,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.019269885451236483,
+                "NDCG@10": 0.010445394903434584
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.006069802731411229,
+                "NDCG@10": 0.0033865046338958636
+              }
+            },
+            "train_loss": 0.6384449597695872
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          19199815,
+          19199815,
+          19199815,
+          19199815,
+          19199815
+        ],
+        "training_seconds": 1164.3510220950702,
+        "elapsed_seconds": 1181.2952743900241,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 4650.63720703125,
+        "checkpoint_sha256": "bc0c2c8cf24f51dfca292597363c696ae56babfec6141628abad5bf90acbf379",
+        "shared_initialization_sha256": "6b1c8ddf933960ea8c8ad61e76cd4c9ae4def728b96d7c37fe2e8a0cf75341f8",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      },
+      {
+        "seed": 2028,
+        "output": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/training/all_infonce_seed2028",
+        "best_epoch": 3,
+        "validation": {
+          "HR@10": 0.0318,
+          "NDCG@10": 0.016485147294588953,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.033508189701316776,
+            "NDCG@10": 0.017366148754162706
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.007587253414264037,
+            "NDCG@10": 0.003997386089917616
+          }
+        },
+        "test": {
+          "HR@10": 0.0317,
+          "NDCG@10": 0.01687513173640298,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9215,
+            "HR@10": 0.03429191535539881,
+            "NDCG@10": 0.01828000948110318
+          },
+          "cold": {
+            "users": 785,
+            "HR@10": 0.0012738853503184713,
+            "NDCG@10": 0.0003834777014827786
+          }
+        },
+        "epoch5_validation": {
+          "HR@10": 0.026,
+          "NDCG@10": 0.013717367545247652,
+          "users": 10000,
+          "candidate_items": 2708122,
+          "candidate_coverage": 1.0,
+          "filter_seen_items": true,
+          "warm": {
+            "users": 9341,
+            "HR@10": 0.02719194947007815,
+            "NDCG@10": 0.014344253396978958
+          },
+          "cold": {
+            "users": 659,
+            "HR@10": 0.009104704097116844,
+            "NDCG@10": 0.0048315697591746155
+          }
+        },
+        "validation_history": [
+          {
+            "epoch": 1,
+            "metrics": {
+              "HR@10": 0.0257,
+              "NDCG@10": 0.013658181046538322,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.027513114227598758,
+                "NDCG@10": 0.014621754679946818
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0,
+                "NDCG@10": 0.0
+              }
+            },
+            "train_loss": 1.3121899838482138
+          },
+          {
+            "epoch": 2,
+            "metrics": {
+              "HR@10": 0.0305,
+              "NDCG@10": 0.01613652450807482,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.032437640509581415,
+                "NDCG@10": 0.017210489785828096
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.0030349013657056147,
+                "NDCG@10": 0.0009135963449589718
+              }
+            },
+            "train_loss": 0.8510690841816192
+          },
+          {
+            "epoch": 3,
+            "metrics": {
+              "HR@10": 0.0318,
+              "NDCG@10": 0.016485147294588953,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.033508189701316776,
+                "NDCG@10": 0.017366148754162706
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.007587253414264037,
+                "NDCG@10": 0.003997386089917616
+              }
+            },
+            "train_loss": 0.7279155618112407
+          },
+          {
+            "epoch": 4,
+            "metrics": {
+              "HR@10": 0.0273,
+              "NDCG@10": 0.014883752706123124,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.028690718338507653,
+                "NDCG@10": 0.015749177701557867
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.007587253414264037,
+                "NDCG@10": 0.0026167801987544517
+              }
+            },
+            "train_loss": 0.6619440594687752
+          },
+          {
+            "epoch": 5,
+            "metrics": {
+              "HR@10": 0.026,
+              "NDCG@10": 0.013717367545247652,
+              "users": 10000,
+              "candidate_items": 2708122,
+              "candidate_coverage": 1.0,
+              "filter_seen_items": true,
+              "warm": {
+                "users": 9341,
+                "HR@10": 0.02719194947007815,
+                "NDCG@10": 0.014344253396978958
+              },
+              "cold": {
+                "users": 659,
+                "HR@10": 0.009104704097116844,
+                "NDCG@10": 0.0048315697591746155
+              }
+            },
+            "train_loss": 0.6206891397754036
+          }
+        ],
+        "supervised_positions_per_epoch": [
+          19199815,
+          19199815,
+          19199815,
+          19199815,
+          19199815
+        ],
+        "training_seconds": 1165.1269983830862,
+        "elapsed_seconds": 1183.9336125460686,
+        "global_steps": 10980,
+        "peak_gpu_memory_mb": 4634.68115234375,
+        "checkpoint_sha256": "c1024bb22455bb7c598f34eead298f61c97f123c54eeb90b3076ca8a99570c83",
+        "shared_initialization_sha256": "1b6a0c00f6119a3f27ef78e345f4a2db9b7b01b745465d4ba91f3e433ab24c71",
+        "evaluation_cohort_sha256": "2ed6d2f2502a9ee5787cbf1a90e0e2625b375eff90e248ac1f57e64ce4b92d72"
+      }
+    ]
+  },
+  "comparison": {
+    "validation": {
+      "aggregates": {
+        "click_infonce": {
+          "HR@10": {
+            "mean": 0.029733333333333334,
+            "sample_std": 0.0012423096769056154,
+            "values": [
+              0.0304,
+              0.0305,
+              0.0283
+            ]
+          },
+          "NDCG@10": {
+            "mean": 0.015774978240945196,
+            "sample_std": 0.00048743799652713573,
+            "values": [
+              0.01567152720299275,
+              0.01630583757475639,
+              0.015347569945086454
+            ]
+          }
+        },
+        "all_infonce": {
+          "HR@10": {
+            "mean": 0.029233333333333333,
+            "sample_std": 0.00316280466253187,
+            "values": [
+              0.0302,
+              0.0257,
+              0.0318
+            ]
+          },
+          "NDCG@10": {
+            "mean": 0.015133235510545275,
+            "sample_std": 0.0018832269386719793,
+            "values": [
+              0.01593233710847517,
+              0.0129822221285717,
+              0.016485147294588953
+            ]
+          }
+        }
+      },
+      "differences": {
+        "HR@10": {
+          "direction": "all minus click",
+          "absolute": -0.0005,
+          "relative_to_click": -0.01681614349775784,
+          "per_seed": [
+            -0.0002,
+            -0.0048,
+            0.0035
+          ],
+          "paired_user_95pct": [
+            -0.0028666666666666667,
+            0.0019008333333333288
+          ],
+          "paired_seed_and_user_95pct": [
+            -0.0051,
+            0.0043
+          ],
+          "note": "Only three training seeds: resampling them does not establish broad seed-population generalization."
+        },
+        "NDCG@10": {
+          "direction": "all minus click",
+          "absolute": -0.0006417427303999222,
+          "relative_to_click": -0.040681053285653856,
+          "per_seed": [
+            0.0002608099054824218,
+            -0.0033236154461846867,
+            0.001137577349502498
+          ],
+          "paired_user_95pct": [
+            -0.00193401242549557,
+            0.0006903339937587239
+          ],
+          "paired_seed_and_user_95pct": [
+            -0.0033042315635947337,
+            0.0019337707761215165
+          ],
+          "note": "Only three training seeds: resampling them does not establish broad seed-population generalization."
+        }
+      }
+    },
+    "test": {
+      "aggregates": {
+        "click_infonce": {
+          "HR@10": {
+            "mean": 0.029733333333333334,
+            "sample_std": 0.0013012814197295413,
+            "values": [
+              0.0284,
+              0.0298,
+              0.031
+            ]
+          },
+          "NDCG@10": {
+            "mean": 0.015391480408521417,
+            "sample_std": 0.00105544217032308,
+            "values": [
+              0.01466465569024796,
+              0.014907689989938239,
+              0.016602095545378052
+            ]
+          }
+        },
+        "all_infonce": {
+          "HR@10": {
+            "mean": 0.029766666666666663,
+            "sample_std": 0.001747378989610821,
+            "values": [
+              0.0293,
+              0.0283,
+              0.0317
+            ]
+          },
+          "NDCG@10": {
+            "mean": 0.015703199372517625,
+            "sample_std": 0.00153891421204761,
+            "values": [
+              0.016274033887713688,
+              0.013960432493436203,
+              0.01687513173640298
+            ]
+          }
+        }
+      },
+      "differences": {
+        "HR@10": {
+          "direction": "all minus click",
+          "absolute": 3.3333333333333335e-05,
+          "relative_to_click": 0.0011210762331836932,
+          "per_seed": [
+            0.0009,
+            -0.0015,
+            0.0007
+          ],
+          "paired_user_95pct": [
+            -0.0023333333333333327,
+            0.002466666666666666
+          ],
+          "paired_seed_and_user_95pct": [
+            -0.0031666666666666666,
+            0.003234166666666662
+          ],
+          "note": "Only three training seeds: resampling them does not establish broad seed-population generalization."
+        },
+        "NDCG@10": {
+          "direction": "all minus click",
+          "absolute": 0.00031171896399620654,
+          "relative_to_click": 0.020252695369291862,
+          "per_seed": [
+            0.0016093781974657268,
+            -0.0009472574965020353,
+            0.00027303619102492813
+          ],
+          "paired_user_95pct": [
+            -0.0009955438545595748,
+            0.001746076535414189
+          ],
+          "paired_seed_and_user_95pct": [
+            -0.0017817385578805175,
+            0.002384493294960788
+          ],
+          "note": "Only three training seeds: resampling them does not establish broad seed-population generalization."
+        }
+      }
+    }
+  },
+  "test_groups": {
+    "cold_0": {
+      "users": 785,
+      "click_infonce": {
+        "HR@10": 0.0004246284501061571,
+        "NDCG@10": 0.00026791072338490764
+      },
+      "all_infonce": {
+        "HR@10": 0.0008492569002123143,
+        "NDCG@10": 0.0003401401255473381
+      }
+    },
+    "tail_1_5": {
+      "users": 1413,
+      "click_infonce": {
+        "HR@10": 0.0,
+        "NDCG@10": 0.0
+      },
+      "all_infonce": {
+        "HR@10": 0.0,
+        "NDCG@10": 0.0
+      }
+    },
+    "mid_6_50": {
+      "users": 2984,
+      "click_infonce": {
+        "HR@10": 0.0017873100983020554,
+        "NDCG@10": 0.0008647935045185363
+      },
+      "all_infonce": {
+        "HR@10": 0.0010053619302949062,
+        "NDCG@10": 0.0003877125023163407
+      }
+    },
+    "head_gt50": {
+      "users": 4818,
+      "click_infonce": {
+        "HR@10": 0.06053687560536876,
+        "NDCG@10": 0.031366531828533356
+      },
+      "all_infonce": {
+        "HR@10": 0.06102117061021171,
+        "NDCG@10": 0.03229722906179112
+      }
+    },
+    "content_present": {
+      "users": 9528,
+      "click_infonce": {
+        "HR@10": 0.029422054296109713,
+        "NDCG@10": 0.015246285451131724
+      },
+      "all_infonce": {
+        "HR@10": 0.02984186957738595,
+        "NDCG@10": 0.01564398013658049
+      }
+    },
+    "content_missing": {
+      "users": 472,
+      "click_infonce": {
+        "HR@10": 0.036016949152542374,
+        "NDCG@10": 0.018322449802608325
+      },
+      "all_infonce": {
+        "HR@10": 0.02824858757062147,
+        "NDCG@10": 0.016898624965757107
+      }
+    }
+  },
+  "reference_artifacts_reused": true,
+  "original_selection_changed": false,
+  "fixed_epoch5_validation": {
+    "click_infonce": {
+      "HR@10": [
+        0.0295,
+        0.0305,
+        0.0284
+      ],
+      "NDCG@10": [
+        0.01475801583068653,
+        0.01630583757475639,
+        0.014669403770940701
+      ]
+    },
+    "all_infonce": {
+      "HR@10": [
+        0.0222,
+        0.0184,
+        0.026
+      ],
+      "NDCG@10": [
+        0.01268114554232983,
+        0.009980214034671985,
+        0.013717367545247652
+      ]
+    }
+  },
+  "supervision_budget": {
+    "click_infonce": {
+      "known_positions_per_epoch": 2050483,
+      "negative_draws_per_epoch": 131230912
+    },
+    "all_infonce": {
+      "known_positions_per_epoch": 19199815,
+      "negative_draws_per_epoch": 1228788160
+    }
+  }
+}

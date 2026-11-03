@@ -1,0 +1,19 @@
+{
+  "completed_new_training_runs": 3,
+  "reused_click_training_runs": 3,
+  "same_shared_initialization": true,
+  "same_training_configuration_except_objective": true,
+  "same_cohort_and_target_ids": true,
+  "full_five_epochs": true,
+  "validation_only_checkpoint_selection": true,
+  "scores_recomputed_from_predictions": true,
+  "reference_checksums_verified": true,
+  "post_hoc_test_caveat_disclosed": true,
+  "report_source_sha256": "6ca74d3794a6a93e9e5403caaf0da3720e3ac108e1a46e5ad11de44e258c1b81",
+  "unit_tests": 33,
+  "unit_tests_passed": true,
+  "documentation_links_checked": true,
+  "source_snippets_match_current_code": true,
+  "training_source_hashes_verified": 9,
+  "tiny_end_to_end_training_and_report_passed": true
+}

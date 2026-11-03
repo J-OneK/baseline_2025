@@ -5,12 +5,12 @@ import torch.nn.functional as F
 
 
 def supervision_weights(actions, objective, exposure_weight=0.1):
-    if objective not in ['all_bce', 'weighted_bce', 'click_bce', 'click_infonce']:
+    if objective not in ['all_bce', 'weighted_bce', 'click_bce', 'click_infonce', 'all_infonce']:
         raise ValueError(objective)
     if exposure_weight < 0:
         raise ValueError('Exposure weight must be nonnegative.')
     weights = (actions == 2).float()
-    if objective == 'all_bce':
+    if objective in ['all_bce', 'all_infonce']:
         weights = weights + (actions == 1).float()
     elif objective == 'weighted_bce':
         weights = weights + (actions == 1).float() * exposure_weight
