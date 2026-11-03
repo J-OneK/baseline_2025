@@ -1,0 +1,33 @@
+{
+  "reference_root": "artifacts/objective_study",
+  "cache": "artifacts/objective_study/scale_data",
+  "evaluation_indices": "artifacts/objective_study/confirm_eval_indices.npy",
+  "seeds": [2026, 2027, 2028],
+  "item_id_dropout_probabilities": [0.3, 0.7],
+  "epochs": 5,
+  "objective": "click_infonce",
+  "num_negatives": 64,
+  "temperature": 1.0,
+  "retrieval_budgets": [10, 100, 500],
+  "mask_policy": "one independent Bernoulli keep decision per train-visible item per optimizer batch; shared by history/positive/negative; only ID lookup changes; no inverted scaling; eval disables masking",
+  "mask_randomness": "dedicated Torch generator seeded training_seed + 31; ordinary dropout, shuffle and negative random streams remain separate",
+  "checkpoint_selection": "unchanged: overall validation NDCG@10, then HR@10; earliest epoch on ties",
+  "variant_selection": {
+    "primary": "highest three-seed mean of cold Recall@500 and tail Recall@500, weighted equally",
+    "minimum_overall_ndcg_retention": 0.95,
+    "require_cold_and_tail_each_not_worse": true,
+    "tie_break": "smaller ID masking probability; retain the zero-mask control if no eligible improvement"
+  },
+  "content_channel": "fixed mean of available observed-click raw81 vectors, exposure fallback; normalized query and item81 cosine; no new training",
+  "fusion": {
+    "candidate_budget": 500,
+    "extra_channel_quotas": [0, 50, 100, 250],
+    "minimum_overall_recall500_retention": 0.95,
+    "require_cold_and_tail_each_not_worse": true,
+    "preserve_baseline_top10": true,
+    "selection": "largest cold/tail macro Recall@500, then smaller extra-channel quota; validation only",
+    "union_diagnostic": "learned Top500 union content Top500 has at most 1000 candidates and must not be called Recall@500"
+  },
+  "evaluation_policy": "validation-only development study on a previously reused validation cohort; never open new test labels, do not change the persisted original model/index",
+  "budget_caveat": "same batch, epochs, train targets and 64 negatives per target across masking arms; ID mask adds augmentation work; machine timings are descriptive"
+}

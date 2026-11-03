@@ -22,7 +22,8 @@ def load_model(checkpoint_path, cache, device):
         data.set_eval_indices(checkpoint['evaluation_indices'].numpy())
     config = checkpoint['config']
     model = SequenceRetriever(data, config['hidden'], config['blocks'], config['heads'], config['dropout'],
-                              use_actions=config['variant'] == 'actions')
+                              use_actions=config['variant'] == 'actions',
+                              item_id_dropout=config.get('item_id_dropout', 0.0))
     model.load_state_dict(checkpoint['model'])
     return model.to(device).eval(), data, checkpoint
 

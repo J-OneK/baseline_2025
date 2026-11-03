@@ -1,0 +1,75 @@
+{
+  "selected_arm": "click",
+  "selected_probability": 0.0,
+  "baseline_retained": true,
+  "rows": [
+    {
+      "name": "click",
+      "probability": 0.0,
+      "overall_ndcg10": 0.015774978240945196,
+      "cold_recall500": 0.08396560445118867,
+      "tail_recall500": 0.007290095525389644,
+      "cold_tail_macro_recall500": 0.04562784998828916,
+      "rejection_reasons": [],
+      "eligible": true,
+      "strictly_improves_control": false
+    },
+    {
+      "name": "id_mask_30",
+      "probability": 0.3,
+      "overall_ndcg10": 0.015616039346934313,
+      "cold_recall500": 0.05867475973697522,
+      "tail_recall500": 0.006033182503770739,
+      "cold_tail_macro_recall500": 0.03235397112037298,
+      "rejection_reasons": [
+        "cold_recall500_decreased",
+        "tail_recall500_decreased"
+      ],
+      "eligible": false,
+      "strictly_improves_control": false
+    },
+    {
+      "name": "id_mask_70",
+      "probability": 0.7,
+      "overall_ndcg10": 0.015772352355391234,
+      "cold_recall500": 0.05918057663125948,
+      "tail_recall500": 0.012317747611865259,
+      "cold_tail_macro_recall500": 0.03574916212156237,
+      "rejection_reasons": [
+        "cold_recall500_decreased"
+      ],
+      "eligible": false,
+      "strictly_improves_control": false
+    }
+  ],
+  "selection_split": "val",
+  "test_targets_read": false,
+  "deployed": false,
+  "criteria": {
+    "primary": "highest three-seed mean of cold Recall@500 and tail Recall@500, weighted equally",
+    "minimum_overall_ndcg_retention": 0.95,
+    "require_cold_and_tail_each_not_worse": true,
+    "tie_break": "smaller ID masking probability; retain the zero-mask control if no eligible improvement"
+  },
+  "baseline_macro_recall500": 0.04562784998828916,
+  "selected_macro_recall500": 0.04562784998828916,
+  "reason": "no eligible strict cold/tail macro improvement; retain control",
+  "repeated_validation_development": true,
+  "input_checkpoint_sha256": {
+    "click": [
+      "88d5513f03c3cfdfb6bc460c0d73304a16c3e2bf0c7a60c3bfa64137a35e6a05",
+      "445ea1f51fd65fc6af1df301f4856512e7d5ed1d0f0de0050fb86005a259b532",
+      "c4e93dcd43026ddeefc905d01d208ec68f5286b9c1a2f5782842d67c34f65e3b"
+    ],
+    "id_mask_30": [
+      "5f3d4a6c9cae269491a4286a6e6efb7fda01174c8904d62b3888c09965272d05",
+      "26cc860ecc88e41db9fe58ca7ea272aad25ec5aaf0d0ca2acc877a4192cb8071",
+      "64e7c3ac5832ffa7119e078e768f7e37122634c9a9533e13dcb21207d085bae2"
+    ],
+    "id_mask_70": [
+      "1bec9093a5cbed5cb33291775a5a7127af5aa6130968dffcfaabb75f4400e618",
+      "cd1809154639ba4f184fdb6dab875b8b2f02d6d5c04a20815d2f7eb0f4761f6e",
+      "4d30437245b12ab80c75058c9e6885fb704930a612c0c360ff151e138b7fa2d7"
+    ]
+  }
+}

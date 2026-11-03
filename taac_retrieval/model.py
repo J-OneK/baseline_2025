@@ -16,8 +16,13 @@ from .data import load_array
 
 
 class SequenceRetriever(nn.Module):
-    def __init__(self, data, hidden=32, blocks=1, heads=1, dropout=0.2, use_actions=False):
+    def __init__(self, data, hidden=32, blocks=1, heads=1, dropout=0.2, use_actions=False,
+                 item_id_dropout=0.0):
         super().__init__()
+        if not 0 <= item_id_dropout <= 1:
+            raise ValueError('Item ID dropout must be between zero and one.')
+        self.item_id_dropout = float(item_id_dropout)
+        self._item_id_keep = None
         self.use_actions = use_actions
         self.hidden = hidden
         meta = data.metadata
@@ -56,8 +61,25 @@ class SequenceRetriever(nn.Module):
             if isinstance(module, nn.Linear) and module.bias is not None:
                 nn.init.zeros_(module.bias)
 
+    def refresh_item_id_mask(self, generator=None):
+        """One decision per train-visible item, shared across an optimizer batch.
+
+        Use a dedicated generator so augmentation does not change shuffle,
+        negative sampling, or ordinary Transformer dropout random streams.
+        This transient mask is not checkpoint state and is ignored in eval.
+        """
+        self._item_id_keep = None
+        if self.training and self.item_id_dropout > 0:
+            self._item_id_keep = torch.rand(self.item_emb.num_embeddings,
+                                           device=self.item_id_lookup.device,
+                                           generator=generator) >= self.item_id_dropout
+
     def encode_items(self, ids):
         lookup = self.item_id_lookup[ids]
+        if self.training and self.item_id_dropout > 0:
+            if self._item_id_keep is None:
+                raise RuntimeError('Refresh the item ID mask once before each training batch.')
+            lookup = lookup * self._item_id_keep[lookup]
         parts = [self.item_emb(lookup)]
         sparse = self.item_sparse[ids]
         parts.extend(self.sparse_emb[field](sparse[..., j]) for j, field in enumerate(self.item_fields))

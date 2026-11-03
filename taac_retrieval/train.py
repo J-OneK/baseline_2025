@@ -63,7 +63,8 @@ def train(args):
                             exposure_weight=args.exposure_weight, temperature=args.temperature,
                             sampling='uniform train-visible items, excluding the user training prefix'))
     model = SequenceRetriever(data, args.hidden, args.blocks, args.heads, args.dropout,
-                              use_actions=args.variant == 'actions')
+                              use_actions=args.variant == 'actions',
+                              item_id_dropout=args.item_id_dropout)
     config['shared_initialization_sha256'] = initialization_hash(model)
     config['parameters'] = sum(p.numel() for p in model.parameters())
     (output / 'config.json').write_text(json.dumps(config, indent=2) + '\n')
@@ -71,6 +72,7 @@ def train(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.98))
     generator = torch.Generator().manual_seed(args.seed)
     negative_generator = torch.Generator(device=args.device).manual_seed(args.seed + 17)
+    augmentation_generator = torch.Generator(device=args.device).manual_seed(args.seed + 31)
     loader = DataLoader(SequenceDataset(data), batch_size=args.batch_size, shuffle=True,
                         num_workers=args.workers, pin_memory=args.device.startswith('cuda'), generator=generator)
     negative_pool = torch.tensor(np.flatnonzero(data.train_counts), dtype=torch.long, device=args.device)
@@ -93,6 +95,7 @@ def train(args):
             for step, cpu_batch in enumerate(loader):
                 batch = to_device(cpu_batch, args.device)
                 optimizer.zero_grad(set_to_none=True)
+                model.refresh_item_id_mask(augmentation_generator)
                 weights = supervision_weights(batch['target_actions'], args.objective, args.exposure_weight)
                 mask = (batch['positive'] != 0) & (weights > 0)
                 count = int(mask.sum())
@@ -197,6 +200,8 @@ def parser():
     result.add_argument('--temperature', type=float, default=1.0)
     result.add_argument('--skip-test', action='store_true', help='Development runs must only read validation targets.')
     result.add_argument('--eval-indices', default=None, help='Frozen cohort .npy file; does not change training data.')
+    result.add_argument('--item-id-dropout', type=float, default=0.0,
+                        help='Per-item ID masking during training only; shared across each batch.')
     return result
 
 

@@ -1,0 +1,20 @@
+{
+  "registered_at_utc": "2026-11-03T03:25:07.750210+00:00",
+  "split": "val",
+  "test_targets_read": false,
+  "trigger": "ID mask70 retained overall NDCG but increased tail Recall500 and reduced cold Recall500; reject it as a standalone replacement.",
+  "hypothesis": "Keep all original rare candidates and Top10; use the complementary mask70 channel only for new rare candidates.",
+  "extra_arm": "id_mask_70",
+  "quotas": [
+    0,
+    10,
+    25,
+    50
+  ],
+  "candidate_budget": 500,
+  "protected_training_frequency_max": 5,
+  "rule": "Reuse protected_merge: protect base Top10 and all freq<=5; new extra rare IDs absent from entirebase500; remove bottom nonrare only; preserve remaining base order.",
+  "selection": "Same >=95% overall Recall500 retention and cold/tail each not worse; maximum equal cold-tail macro Recall500; ties smaller quota.",
+  "inference": "Validation-driven exploratory follow-up after observing masking outcomes. Not independently confirmed and no final Top10 improvement claim.",
+  "original_artifacts_unchanged": true
+}
