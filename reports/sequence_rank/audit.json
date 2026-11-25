@@ -1,0 +1,208 @@
+{
+  "cohorts": {
+    "config": {
+      "ranking_config": "configs/ranking_study.json",
+      "group_config": "configs/group_recall.json",
+      "output": "artifacts/sequence_rank_v1",
+      "fit_users": 24000,
+      "confirmation_users": 10000,
+      "cohort_seed": 46291,
+      "seeds": [
+        2026,
+        2027
+      ],
+      "epochs": 5,
+      "batch_size": 128,
+      "lr": 0.001,
+      "width": 32,
+      "cross_rank": 8,
+      "rare_weight": 2,
+      "l2_residual": 0.01,
+      "residual_scales": [
+        0.25,
+        0.5,
+        1
+      ],
+      "protocol": "Ranker learns a one-click candidate-list objective on distinct user held-out clicks outside prior evaluation cohorts. Frozen InfoNCE/CTR scores, fixed protected Top500 augmented with history proposals. Identical data across basic MLP, channel MLP and low-rank DCN-V2. Choose via paired development results. Fresh6k is reserved until lock."
+    },
+    "parent_cohorts": {
+      "fit": "5d8214d209f71d3733c2f77d349bb2fe9d84623d55ddc518789a3288da83d1e7",
+      "dev": "81be39b86ff797d7514f828574fdb44c454960273d394fcb67503a567286fc99",
+      "fresh": "1d28e66045a9cc598692961f8d0f58acb3017081a11d15487f4736bc04a28ebb"
+    },
+    "prior_manifest_sha256": "bf65286f7157faf23b3195dd930bebd10506f3bb05f3c72f01309219424a2777",
+    "available_outside_known_cohorts": 38630,
+    "test_evaluated": false,
+    "cohorts": {
+      "fresh": {
+        "users": 10000,
+        "rows_sha256": "7b4d3d1c79f759be63290e025aa1083d2c71eaa888e2d22e05b6163574f385b9"
+      }
+    }
+  },
+  "fixed_500_history_filtered": true,
+  "exact_sample_replay": true,
+  "clicks_last40_quantiles": [
+    0.0,
+    2.0,
+    3.0,
+    6.0,
+    10.0
+  ],
+  "by_history_clicks": {
+    "users": {
+      "click_0": 801,
+      "click_1_4": 5523,
+      "click_5_plus": 3676
+    },
+    "ranks": {
+      "2026": {
+        "click_0": {
+          "dcn_v2": {
+            "hits": 28,
+            "hr10": 0.03495630461922597
+          },
+          "history_attention": {
+            "hits": 27,
+            "hr10": 0.033707865168539325
+          },
+          "joint_transformer": {
+            "hits": 29,
+            "hr10": 0.03620474406991261
+          }
+        },
+        "click_1_4": {
+          "dcn_v2": {
+            "hits": 125,
+            "hr10": 0.022632627195364838
+          },
+          "history_attention": {
+            "hits": 133,
+            "hr10": 0.024081115335868188
+          },
+          "joint_transformer": {
+            "hits": 134,
+            "hr10": 0.024262176353431107
+          }
+        },
+        "click_5_plus": {
+          "dcn_v2": {
+            "hits": 82,
+            "hr10": 0.022306855277475515
+          },
+          "history_attention": {
+            "hits": 85,
+            "hr10": 0.023122959738846573
+          },
+          "joint_transformer": {
+            "hits": 95,
+            "hr10": 0.025843307943416757
+          }
+        }
+      },
+      "2027": {
+        "click_0": {
+          "dcn_v2": {
+            "hits": 32,
+            "hr10": 0.039950062421972535
+          },
+          "history_attention": {
+            "hits": 31,
+            "hr10": 0.03870162297128589
+          },
+          "joint_transformer": {
+            "hits": 33,
+            "hr10": 0.04119850187265917
+          }
+        },
+        "click_1_4": {
+          "dcn_v2": {
+            "hits": 159,
+            "hr10": 0.028788701792504073
+          },
+          "history_attention": {
+            "hits": 158,
+            "hr10": 0.028607640774941157
+          },
+          "joint_transformer": {
+            "hits": 164,
+            "hr10": 0.029694006880318667
+          }
+        },
+        "click_5_plus": {
+          "dcn_v2": {
+            "hits": 106,
+            "hr10": 0.02883569096844396
+          },
+          "history_attention": {
+            "hits": 111,
+            "hr10": 0.030195865070729053
+          },
+          "joint_transformer": {
+            "hits": 110,
+            "hr10": 0.029923830250272034
+          }
+        }
+      }
+    }
+  },
+  "auxiliary_top10_hits": {
+    "2026": {
+      "dcn_v2": 4,
+      "history_attention": 6,
+      "joint_transformer": 5
+    },
+    "2027": {
+      "dcn_v2": 1,
+      "history_attention": 0,
+      "joint_transformer": 1
+    }
+  },
+  "cold_tail_promotions": [
+    {
+      "seed": 2026,
+      "user_rid": 311428,
+      "oid": 20004114747,
+      "train_events": 0,
+      "from_auxiliary": true,
+      "dcn_v2_rank": 11,
+      "joint_rank": 8
+    },
+    {
+      "seed": 2026,
+      "user_rid": 328815,
+      "oid": 20001710319,
+      "train_events": 0,
+      "from_auxiliary": false,
+      "dcn_v2_rank": 11,
+      "joint_rank": 10
+    },
+    {
+      "seed": 2026,
+      "user_rid": 596005,
+      "oid": 20005892327,
+      "train_events": 2,
+      "from_auxiliary": false,
+      "dcn_v2_rank": 22,
+      "joint_rank": 10
+    },
+    {
+      "seed": 2026,
+      "user_rid": 677772,
+      "oid": 20004915570,
+      "train_events": 0,
+      "from_auxiliary": false,
+      "dcn_v2_rank": 29,
+      "joint_rank": 10
+    },
+    {
+      "seed": 2026,
+      "user_rid": 880788,
+      "oid": 20004350457,
+      "train_events": 0,
+      "from_auxiliary": false,
+      "dcn_v2_rank": 23,
+      "joint_rank": 7
+    }
+  ]
+}

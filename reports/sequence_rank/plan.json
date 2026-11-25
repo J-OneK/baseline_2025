@@ -1,0 +1,33 @@
+{
+  "config": {
+    "base_config": "configs/channel_rank.json",
+    "output": "artifacts/sequence_rank_v1",
+    "confirmation_users": 10000,
+    "cohort_seed": 46291,
+    "seeds": [
+      2026,
+      2027
+    ],
+    "history_length": 40,
+    "width": 24,
+    "heads": 3,
+    "epochs": 5,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "rare_weight": 2.0,
+    "residual_penalty": 0.01,
+    "residual_scales": [
+      0.25,
+      0.5,
+      1.0
+    ]
+  },
+  "selection_rule": "Same two seeds, parent fit/dev lists, frozen DCN anchor, same candidate data, list loss and epochs. Per arm lock epoch and residual scale using development mean NDCG@10, then HR@10, then earlier epoch and lower scale. Prefer configurations preserving dev HR@10 and cold+tail hit count. Recommend a challenger only if it also improves dev NDCG. Confirm both locked arms once on 10000 users outside parent fit/dev/fresh and known older evaluation cohorts.",
+  "parent_selection_sha256": "dd504f4dbe5bfd40f6d5af6fb28b049a46f3fbb8784533ab6137a059a5624166",
+  "sources": {
+    "scripts/run_sequence_rank.py": "3f119cda40be51e69b6671cf85d014ff7f2ecc75715c4f4458e8fe91188df2c7",
+    "taac_retrieval/sequence_ranker.py": "822e60fcff2d4c8abbf62e8dc52ffa798bd4ecdcdb7c8f347ede2bc8b8cc1b97",
+    "scripts/build_channel_features.py": "4f17208df1906457c02559c031d6fa67307ca437b25494f8cba9dc7557ebc80f",
+    "scripts/prepare_channel_rank.py": "ea606d0625c73a31c21a12c38dfedcbc404b0adad35ef8ff820d933b73efe28d"
+  }
+}

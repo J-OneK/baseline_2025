@@ -6,6 +6,7 @@
 |---|---|---|
 | `main` | 一层点击 InfoNCE-64、精确评估、MIPS→L2 Faiss，以及历史查组、DCN V2 列表排序与单用户演示 | 三种子召回测试和两种子排序确认各自记录 |
 | `research/channel-aware-ranking` | 列表排序的原始冻结实验与完整研究历史 | 6,000 人确认，使用验证点击 |
+| `research/onetrans-ranking` | 固定 Top-500 上比较历史注意力与 OneTrans 风格排序 | 10,000 人确认，报告 [收益与耗时](../reports/sequence_rank/README.md) |
 | `research/tail-recall` | 零点击长尾 ID 置零通道 | 另一种历史候选补充方法 |
 | `research/generative-group-recall`、`research/generative-retrieval` | 属性路径生成与语义 ID 探索 | 见[生成式探索](generative_retrieval.md) |
 | `research/supervision` | 全部有效事件 InfoNCE-64 对比仅点击 InfoNCE-64 | 后续补充研究；不能倒推为原始方案选择依据 |

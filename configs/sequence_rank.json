@@ -1,0 +1,16 @@
+{
+  "base_config": "configs/channel_rank.json",
+  "output": "artifacts/sequence_rank_v1",
+  "confirmation_users": 10000,
+  "cohort_seed": 46291,
+  "seeds": [2026, 2027],
+  "history_length": 40,
+  "width": 24,
+  "heads": 3,
+  "epochs": 5,
+  "batch_size": 32,
+  "learning_rate": 0.001,
+  "rare_weight": 2.0,
+  "residual_penalty": 0.01,
+  "residual_scales": [0.25, 0.5, 1.0]
+}
