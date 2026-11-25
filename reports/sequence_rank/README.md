@@ -67,11 +67,19 @@
 
 这是新实验的模型打分计时。之前的 Faiss 搜索、历史过滤和运行入口另有测量口径。完整候选提取、特征构建到出结果的计时需要单独测量。
 
-当前数据支持保留联合模型作排序拓展。它在同一批候选上改善了 NDCG，HR 的增量和冷尾收益的区间仍有较大不确定性，打分成本更高。现有主排序的性价比与证据范围见[主排序报告](../channel_rank/README.md)。
+联合模型已作为主分支完整推荐的最终打分阶段。它在同一批候选上改善了 NDCG，HR 的增量和冷尾收益仍有较大不确定性。主分支同时提供轻量配置，并分别保存打分计时。 [主分支入口](../../docs/ranking_extension.md) · [数据链路](../../docs/data_flow.md)
 
 ## 本机复现
 
-在 `baseline_2025_onetrans` 根目录运行，使用现有 Python 环境和原主项目的 `artifacts/baseline`、`artifacts/channel_rank_v1`、`artifacts/ranking_v1`、`artifacts/ranking_content_v1`、`artifacts/group_recall_v1`、`artifacts/ranking_confirmation_v1` 链接。登记使用已核对的历史排除队列。现有完整实验产物位于 `artifacts/sequence_rank_v1`。重跑时复制配置到新文件，并给 `output` 指定新目录。
+已有权重和目录时可重算单用户链路：
+
+```bash
+python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace
+```
+
+[生成的真实 trace](demo_rid311428.json) 与[逐阶段解释](../../docs/data_flow.md)记录了该条广告从补入候选到第 8 名的过程。
+
+从仓库根目录运行，使用项目 Python 环境和已有的 `artifacts/baseline`、`artifacts/channel_rank_v1`、`artifacts/ranking_v1`、`artifacts/ranking_content_v1`、`artifacts/group_recall_v1`、`artifacts/ranking_confirmation_v1` 本地资产。登记使用已核对的历史排除队列。现有完整实验产物位于 `artifacts/sequence_rank_v1`。重跑时复制配置到新文件，并给 `output` 指定新目录。
 
 ```bash
 PY=/home/jyk/project/baseline_2025/.project_venv/bin/python

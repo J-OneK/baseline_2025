@@ -54,7 +54,7 @@ cd /home/jyk/project/baseline_2025_generative
 
 ## 生成两级属性组的辅助通道对照
 
-`research/generative-group-recall` 曾用冻结用户查询预测 118→102 的广告属性组，再从组内选冷尾候选。在固定 5,000 人复核队列与 Top-500 预算下，生成查组的冷启动 Recall@500 为 8.22%，历史查组为 8.73%，两者 HR@10 均为 1.84%。主分支采用[历史查组与列表排序](ranking_extension.md)。
+`research/generative-group-recall` 曾用冻结用户查询预测 118→102 的广告属性组，再从组内选冷尾候选。在固定 5,000 人复核队列与 Top-500 预算下，生成查组的冷启动 Recall@500 为 8.22%，历史查组为 8.73%，两者 HR@10 均为 1.84%。主分支采用[历史查组与候选感知联合排序](ranking_extension.md)。
 
 生成路径有时能匹配近期历史没有出现过的组。组内只补到很少的真实点击，补入后又停在榜尾。实验在本机可用 `git show research/generative-group-recall:reports/generated_group/README.md` 查看。
 

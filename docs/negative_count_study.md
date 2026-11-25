@@ -77,4 +77,4 @@ git show research/negative-count:reports/negative_count_study/verification.json
 已核验9个主比较模型的45轮验证指标、6份新增全目录候选、队列与目标、候选唯一性和历史过滤。K64重跑的全部最佳模型参数与历史一致。原权重、主配置和Faiss索引没有替换。
 
 
-当前主召回仍采用 K=64。后续 [通道感知排序](ranking_extension.md) 使用固定主召回的实际候选列表训练。排序指标与本篇负例数消融使用不同队列。
+当前主召回仍采用 K=64。后续[通道感知排序与联合 Transformer](ranking_extension.md) 使用固定主召回的实际候选列表训练。排序指标与本篇负例数消融使用不同队列。

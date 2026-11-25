@@ -1,5 +1,5 @@
 <section class="chapter" id="channel-ranking">
-  <div class="chapter-kicker">08B · 当前完整推荐</div>
+  <div class="chapter-kicker">08B · 双通道的基础排序</div>
   <h2>候选已经找到了，如何把真正想点的排到前十？</h2>
   <p class="lead">主召回仍使用因果序列的内积分数取 500 条。另一条通道从最近 40 次已知点击或曝光中找 102 或 122 同组的广告，借助 81 号向量余弦相似度分别补最多 5 条冷启动和 5 条长尾广告。</p>
   <pre>主召回 Top-500 + 历史同组提议 → 合并后固定 500 条
@@ -35,5 +35,5 @@
   <h3>怎么判断是哪个模块起了作用？</h3>
   <p>固定排序器时只改变候选，能观察辅助通道的覆盖变化。固定同一批合并候选时只更换排序器，可以判断重新打分带来的变化。6,000 人确认集两个种子均值，原融合 HR@10 为 2.233%，加历史查组候选后仍为 2.233%，采用新排序为 2.917%。NDCG@10 由 0.01225 提至 0.01602。确认集复核锁定的整套排序方案，交叉支路与 MLP 的比较来自开发集。冷启动的主要收益在 Top-500 覆盖，最终 HR 的增量主要来自头部。</p>
   <pre>python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target</pre>
-  <p><a href="ranking_extension.md">完整推荐入口</a> · <a href="../reports/channel_rank/README.md">确认集结果与复现协议</a> · <a href="../reports/channel_rank/README.md#遇到的问题与选择依据">方案取舍与失败复盘</a></p>
+  <p><a href="#sequence-ranking">继续看主分支的联合排序</a> · <a href="ranking_extension.md">完整推荐入口</a> · <a href="../reports/channel_rank/README.md">确认集结果与复现协议</a> · <a href="../reports/channel_rank/README.md#遇到的问题与选择依据">方案取舍与失败复盘</a></p>
 </section>

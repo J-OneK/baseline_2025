@@ -1,47 +1,48 @@
-# 主分支排序链路
+# 主分支完整推荐与联合排序
 
 ```text
-同一可见历史 → InfoNCE 内积 Top-500
-             → 102/122 同组近邻＋81 号向量补冷启动与长尾
-             → 合并为 500 条
-             → 0.9 z(内积)＋0.1 z(内容 MLP logit)＋DCN V2 残差 → Top-10
+可见历史 → InfoNCE 内积 Top-500
+        → 102/122 同组近邻 + 81 号向量补冷启动、长尾
+        → 去重和等量替换，固定 500 条
+        → 原融合分 + DCN V2 残差
+        → 逐条历史和候选特征联合注意力，加入第二个残差
+        → Top-10 OID
 ```
 
-每组最多补 5 条。合并时保护原融合 Top-100 和已有的冷启动、长尾广告。最终排序可以重排全部 500 条。DCN V2 用 15 个数值特征，包括候选来源、与历史点击及曝光的相似度、时间差和匹配组大小。训练时每个样本是一份已召回目标的真实候选列表，留出的点击在列表内做交叉熵监督。
+每桶最多补 5 条。合并保留原融合 Top-100 的成员和已有冷尾广告。DCN V2 在 15 项汇总特征上重新打分，联合 Transformer 用 40 条已知行为的内容、动作、位置和时间提供第二次调整。验证点击仅用于指标，`--show-target` 在打分后打印目标名次。 [真实用户数据链路](data_flow.md)
 
-| 6,000 人确认集，两种子均值 | HR@10 | NDCG@10 |
+## 为什么采用联合排序
+
+原来的高余弦硬提位会对近乎所有用户触发，HR@10 下滑，促使我们让新增候选按分数同主候选竞争。第一轮先在真实列表上训练 15 特征的 DCN V2。第二轮让排序模型逐条读取点击、曝光历史，保留同一个候选池和基础分。联合模型为每个广告构造两个特征 token，与用户历史交互，适合检验持续兴趣是否比单次最大相似更有用。 [提位失败与 DCN V2 选型](../reports/channel_rank/README.md#遇到的问题与选择依据) · [联合实验设计](../reports/sequence_rank/README.md)
+
+| 两种子平均，10,000 人留出确认 | HR@10 | NDCG@10 |
 |---|---:|---:|
-| 召回＋冻结内容 MLP | 2.233% | 0.01225 |
-| 加历史查组候选，沿用原排序分 | 2.233% | 0.01225 |
-| 加历史查组与 DCN V2 | **2.917%** | **0.01602** |
+| DCN V2 | 2.660% | 0.013950 |
+| 加候选历史注意力 | 2.725% | 0.014211 |
+| 加联合 Transformer | **2.825%** | **0.014800** |
 
-HR@10 绝对提升 0.683 个百分点，95% 配对区间为 +0.383～+0.992 个百分点。两位用户的长尾目标由辅助通道补进候选后进入前十。冷启动收益主要在候选覆盖；固定预算下整体 Recall@500 从 16.975% 到 16.867%。整体排名提升主要来自头部样本。[完整消融、分桶与复现协议](../reports/channel_rank/README.md)
-
-## 为什么最后选了这个方案
-
-1. **先查目标去了哪里。** 初次诊断里，两个种子合计，长尾目标在 Top-500 命中 17 次、在 MLP Top-100 命中 4 次、在前十命中 1 次。因此分别解决候选覆盖和候选内排序。用同组近邻补候选后，上一轮确认新增命中全在第 491～500 名。
-2. **先试便宜的修正。** 只用高余弦做第 10 位提位几乎对所有人触发，开发集 HR@10 从 2.40% 降到 2.20%。下一版让候选和原榜竞争，区分匹配的是点击还是曝光，同时加入匹配组大小、时间差和候选来源。日志 CTR 分作为原融合的一部分保留。
-3. **先让训练任务对齐，再比较模型。** 以真实 500 条作为一个训练列表，开发集旧融合 HR@10 为 1.840%，基础列表 MLP 为 2.370%，通道特征 MLP 为 2.430%。在同样的 15 个输入上加 DCN V2 交叉分支，得到 2.610%。想检验的交互包括“辅助通道来源 × 同组点击相似度”。架构优劣来自开发集消融，6,000 人确认集复核的是锁定的整体方案。
-
-生成式重排受 Top-100 入口限制。生成属性组有时能发现新组，组内选对单条广告仍很难。原日志任务中 DIN 风格的注意力也曾使 AUC 略升，但最终 HR@10 低于均值 MLP。三类失败分别指向候选入口、组内筛选和指标目标。 [完整决策过程与对照](../reports/channel_rank/README.md#遇到的问题与选择依据)
+NDCG@10 相对提高约 6.1%，差值的 95% 配对区间为 +0.000069～+0.001694。HR@10 的差值区间为 −0.020～+0.360 个百分点。共享 RTX 2080 Ti 上，已准备的 500 条候选的**模型打分** p95 从约 2.42 ms 到约 5.18 ms。更早的 DCN V2 相对原融合 HR@10 为 2.233% → 2.917%，来自另一批 6,000 人。 [对照与计时口径](../reports/sequence_rank/README.md#10000-人确认集) · [两轮评估边界](release.md)
 
 ## 本机演示
 
-从仓库根目录执行。使用已经准备的排序缓存、冻结召回和排序权重，现场重算候选与排序：
+从仓库根目录，在安装项目依赖的 Python 环境中执行：
 
 ```bash
-python scripts/recommend_channel_rank.py --device cpu --seed 2026 --rid 134009 --show-target
+python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace
 ```
 
-这名用户的目标 OID 为 20004004871。原召回漏掉它，补入后冻结融合分排名第 492，DCN V2 排名第 6。省略 `--show-target` 时只打印推荐列表及辅助来源。省略 `--rid` 时，默认用确认队列第一个用户，也可指定 `--cohort dev --index 0`。运行时使用全目录精确 Top-500。
+这个用户的实际留出目标 OID 是 20004114747。它在原 500 条以外，由辅助通道补入。旧融合分排第 494，DCN V2 排第 11，联合排序排第 8。省略 `--rid` 后，默认选择 10,000 人确认队列的首位用户。指定 `--cohort dev --index 0` 可以选原 5,000 人开发队列。用 `--variant history_attention` 可运行对照模型。常规输出给出 OID、名次与辅助通道标记，`--trace` 另外给出各阶段样式和分数。
 
-| 源码 | 职责 |
+本机环境可以用 `.project_venv/bin/python` 替代 `python`。权重、目录和向量需在本地生成或准备。主要目录是 `artifacts/baseline/data`、`artifacts/ranking_v1`、`artifacts/ranking_content_v1`、`artifacts/channel_rank_v1` 与 `artifacts/sequence_rank_v1`。 [训练与复现步骤](../reports/sequence_rank/README.md#本机复现)
+
+| 入口或源码 | 职责 |
 |---|---|
-| [group_recall.py](../taac_retrieval/group_recall.py) | 历史同组检索、相似度与固定候选预算 |
-| [build_channel_features.py](../scripts/build_channel_features.py) | 冻结分数融合、合并、特征组装 |
-| [channel_features.py](../taac_retrieval/channel_features.py) | 点击与曝光匹配、时间差等特征 |
-| [channel_ranker.py](../taac_retrieval/channel_ranker.py) | 低秩交叉层与列表损失 |
-| [run_channel_rank.py](../scripts/run_channel_rank.py) | 训练、开发集锁定、独立确认 |
-| [recommend_channel_rank.py](../scripts/recommend_channel_rank.py) | 重新跑单用户完整推荐并展示目标路径 |
+| [recommend_sequence_rank.py](../scripts/recommend_sequence_rank.py) | 双路召回、联合排序和真实 trace 的主入口 |
+| [recommend_channel_rank.py](../scripts/recommend_channel_rank.py) | 共享数据准备、打分与 trace，也可单独复查 DCN V2 |
+| [group_recall.py](../taac_retrieval/group_recall.py) | 同组查询、内容相似度、固定候选预算 |
+| [build_channel_features.py](../scripts/build_channel_features.py) | 冻结内容融合分、候选合并、15 项特征 |
+| [channel_ranker.py](../taac_retrieval/channel_ranker.py) | DCN V2 交叉层、旧排序基础分与列表损失 |
+| [sequence_ranker.py](../taac_retrieval/sequence_ranker.py) | 历史 token、候选 token、联合注意力与残差 |
+| [run_sequence_rank.py](../scripts/run_sequence_rank.py) | 训练、锁定开发配置与 10,000 人确认 |
 
-从 Git 获取的是源码、配置与可审读的结果。数据、权重和中间数组需按[复现步骤](../reports/channel_rank/README.md#本机复现)准备。`run_main.py` 是原始召回与 Faiss 的独立入口，其历史测试与延迟采用[另一套评估口径](release.md)。
+`run_main.py` 提供原召回和 Faiss 的独立复现。两种入口的计时范围见[版本说明](release.md)。

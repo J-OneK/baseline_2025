@@ -1,31 +1,34 @@
 # 腾讯广告序列召回与列表排序
 
-[English](README.md) · [完整代码导读](docs/code_walkthrough.md) · [版本与指标口径](docs/release.md)
+[English](README.md) · [数据链路实录](docs/data_flow.md) · [完整代码导读](docs/code_walkthrough.md) · [版本与指标口径](docs/release.md)
 
-基于 TAAC 2025 提供的 SASRec 风格基线和公开 TencentGR-1M 数据，完成“Parquet 数据处理 → 序列模型训练 → 全候选精确评估 → 向量导出 → Faiss 持久化索引 → 推荐演示”的完整召回项目。
+基于 TAAC 2025 提供的 SASRec 风格基线和公开 TencentGR-1M 数据，实现从原始行为处理、序列召回，到固定候选的联合排序与本地演示。召回留有单独的全目录评估和 Faiss 索引复现。
 
-主召回使用 **1 层因果 Transformer、32 维表示、仅点击监督、InfoNCE-64**。完整推荐方案加入 **同组内容辅助召回和 DCN V2 列表排序**。在固定 500 条候选内学习下一次点击的相对顺序。
+主召回使用 **1 层因果 Transformer、32 维表示、仅点击监督、InfoNCE-64**。完整推荐在同组辅助召回和 DCN V2 基础分上叠加 **OneTrans 风格联合 Transformer 残差**，让每条候选直接读取逐条历史。
 
 ```text
 公开 Parquet → 清洗与逐用户时间留出 → 数组缓存
+  ├─ 点击 InfoNCE-64 → 查询向量 → 主召回 Top-500
+  └─ 102/122 同组历史 + 81 内容向量 → 冷尾提议
                          ↓
-广告 ID + 属性 + 81 号向量 → 广告表示
-用户 token + 因果历史序列 → 用户表示
+合并为 500 条 → 15 项候选特征 → DCN V2 基础分
                          ↓
-       点击 InfoNCE-64 / 全候选精确 Top-10 评估
+40 条历史 + 每个候选的两个 token → 联合 Transformer 残差
                          ↓
-向量导出 → MIPS→L2 HNSW → 历史广告过滤 → Top-10 广告原始 ID
+总分排序 → Top-10 广告 OID
 ```
 
 ## 完整推荐结果
 
-在两种子、6,000 名独立确认用户上，固定合并候选，比较内容 MLP 原融合分和通道感知 DCN V2。**HR@10 从 2.233% 到 2.917%，NDCG@10 从 0.01225 到 0.01602**。HR 差值的 95% 配对区间为 +0.383～+0.992 个百分点。两位用户的长尾目标经辅助召回与排序进入前十。[排序链路与结果](docs/ranking_extension.md)
+同一份 Top-500 候选、10,000 人留出确认集、两个种子平均。DCN V2 加入联合排序后，**NDCG@10 由 0.013950 到 0.014800，相对提升约 6.1%**，差值的 95% 配对区间为 +0.000069～+0.001694。HR@10 从 **2.660% 到 2.825%**，HR 差值区间跨零。独立的 6,000 人确认集用于比较更早的内容融合与 DCN V2。 [排序对照与计时](reports/sequence_rank/README.md) · [版本与队列](docs/release.md)
 
-已有排序产物时，可现场重算一个实际用户的候选和推荐：
+本地已有冻结权重和向量时，运行完整推荐并查看中间数据：
 
 ```bash
-python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target
+python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace
 ```
+
+该用户的冷启动点击由辅助通道补回，DCN V2 排第 11，联合排序排第 8。原始 Parquet、候选和特征的形状及分数见[数据链路实录](docs/data_flow.md)。
 
 ## 主召回与索引的历史实验
 
@@ -41,7 +44,7 @@ python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target
 
 索引展示使用单独固定的 **seed=2026** 模型。HNSW 经 MIPS→L2 变换后，与精确 Top-10 的 ID 重合率为 98.81%。512 个测试查询上的单线程预热 CPU **索引检索与历史过滤 p95** 从 40.20 ms 降到 4.14 ms，约快 9.70 倍。该数字不含编码器、网络、进程启动及加载，不能写成端到端推荐接口延迟。
 
-## 安装与运行
+## 安装与召回索引复现
 
 在仓库根目录运行。项目依赖文件固定已记录环境的版本；如本机 CUDA/CPU 不兼容，请相应选用合适的 PyTorch 构建。
 

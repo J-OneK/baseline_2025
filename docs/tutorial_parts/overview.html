@@ -17,10 +17,10 @@
     <a href="#tail-recall"><span class="step-no">08A / AUXILIARY</span><strong>新增长尾辅助通道</strong><small>同一查询、另一候选视图、固定预算融合</small></a>
     <a href="#demo"><span class="step-no">09 / TRACE</span><strong>对照实际执行结果</strong><small>12个合成用户完整跑过当前Python代码</small></a>
   </div>
-  <p>查看当前完整推荐与实际长尾案例。<a href="#channel-ranking">08B · 双通道与 DCN V2</a></p>
+  <p>从基础排序读到实际数据。<a href="#channel-ranking">08B · 双通道与 DCN V2</a> · <a href="#sequence-ranking">08C · 联合排序和数据链路</a></p>
   <h3>训练与推荐的共同核心</h3>
   <div class="formula" role="math"><p>广告向量：v<sub>i</sub> = ItemEncoder(广告ID, 匿名属性, 81号内容向量)</p><p>用户查询：q<sub>u,t</sub> = SequenceEncoder(用户属性, 截至 t 可见的广告历史)</p><p>打分：s(u,t,i) = q<sub>u,t</sub><sup>T</sup>v<sub>i</sub></p></div>
-  <p>训练让真实点击目标在采样候选中的分数相对提高。验证时检查同一打分函数在完整目录里是否找得到目标。推荐时用已经训练好的参数编码当前历史，再通过持久化索引查找广告。召回演示直接按内积分输出。完整推荐采用两通道合并的 500 条候选，再用 DCN V2 重新打分。</p>
+  <p>训练让真实点击目标在采样候选中的分数相对提高。验证时检查同一打分函数在完整目录里是否找得到目标。推荐时用已经训练好的参数编码当前历史，再通过持久化索引查找广告。召回演示直接按内积分输出。完整推荐采用两通道合并的 500 条候选，再叠加 DCN V2 与联合 Transformer 的分数。</p>
   <h3>三个层次的例子，各自回答不同问题</h3>
   <div class="table-wrap"><table><thead><tr><th>例子</th><th>本教程如何使用</th><th>可以得出什么</th></tr></thead><tbody>
     <tr><td>原始数据真实记录</td><td>解释Parquet列、整数/列表/空值、OID/RID</td><td>数据实际长什么样</td></tr>

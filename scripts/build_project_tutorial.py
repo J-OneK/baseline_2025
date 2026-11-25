@@ -32,6 +32,8 @@ SOURCE_FILES = [
     'scripts/run_tutorial_demo.py', 'scripts/build_project_tutorial.py',
     'scripts/recommend_channel_rank.py', 'taac_retrieval/channel_ranker.py',
     'taac_retrieval/channel_features.py', 'taac_retrieval/group_recall.py',
+    'scripts/recommend_sequence_rank.py', 'taac_retrieval/sequence_ranker.py',
+    'scripts/build_channel_features.py', 'scripts/run_sequence_rank.py', 'configs/sequence_rank.json',
 ]
 NAV = [
     ('00', 'overview', '整体架构与学习地图'),
@@ -46,6 +48,7 @@ NAV = [
     ('08', 'experiments', '实验结果与证据范围'),
     ('08A', 'tail-recall', '新增：零点击长尾辅助召回'),
     ('08B', 'channel-ranking', '双通道召回与 DCN V2 排序'),
+    ('08C', 'sequence-ranking', '联合排序与逐阶段数据'),
     ('09', 'demo', '真实执行：12用户完整轨迹'),
     ('10', 'debugging', '排查问题与理解验收'),
     ('11', 'glossary', '符号与术语速查'),
@@ -269,7 +272,7 @@ def source_chapter(builder):
     files = ''.join(builder.code(path, 1, '*', full=True) for path in builder.sources)
     return ('<section class="chapter" id="sources"><div class="chapter-kicker">12 · 可以离线核对的来源</div>'
             '<h2>核心源码、真实实验文件与构建说明</h2>'
-            f'<p>Git基准提交：<code>{builder.commit}</code>。正文片段从构建时本地文件自动截取，行号不是手工抄写；下面嵌入完整相关文件。新增的教程构建器和合成演示脚本尚不属于该旧提交，分别使用本页记录的文件摘要标识。</p>'
+            f'<p>Git 构建基准 <code>{builder.commit}</code>。正文片段从构建时的文件自动截取。每份嵌入源码以本页的文件摘要为准。</p>'
             f'<p>新增08A章单独使用<code>{esc(builder.research["branch"])}</code>的固定提交<code>{builder.research["commit"]}</code>。带<code>research/tail-recall/</code>前缀的文件来自本教程保存的研究快照，构建时核对每个文件SHA256；它们没有替换主分支实现，不能把研究指标与主模型历史成绩混为同一次实验。</p>'
             '<p>要定位正文某段代码，可点击“完整源码”；它会自动展开对应文件并跳到该行。真正运行代码仍需Python环境和相应的数据/产物，本页面本身可完全离线阅读。</p>'
             + manifest + '<details><summary>展开完整来源摘要</summary>' + pre(builder.hashes) + '</details>'
@@ -311,9 +314,12 @@ def main():
         tail_chapter = tail_chapter.replace('{{' + key + '}}', value)
     tail_chapter = tail_chapter.replace('{{tail_lab}}', (PARTS / 'tail_lab.html').read_text())
     body += tail_chapter + (PARTS / 'channel_ranking.html').read_text()
+    rank_trace = json.loads((REPO / 'reports/sequence_rank/demo_rid311428.json').read_text())
+    sequence_chapter = (PARTS / 'sequence_ranking.html').read_text()
+    body += sequence_chapter.replace('{{sequence_trace}}', pre(rank_trace))
     body += demo_chapter(demo) + (PARTS / 'appendix.html').read_text()
     body = builder.replace_code(body)
-    if '{{code:' in body or '{{flowdiagram}}' in body or '{{tail_' in body:
+    if '{{code:' in body or '{{flowdiagram}}' in body or '{{tail_' in body or '{{sequence_trace}}' in body:
         raise ValueError('Unresolved template placeholder')
     body += source_chapter(builder)
     for _, chapter_id, _ in NAV:
@@ -343,7 +349,7 @@ def main():
 <div class="tool-row"><button class="small-btn" id="source-toggle">折叠源码</button><button class="small-btn" id="theme-toggle">明 / 暗</button><button class="small-btn" id="print">打印 / PDF</button></div><p>单文件 · 无外部依赖<br>源码基准 {builder.commit[:7]}<br>本地保存阅读进度</p></div></aside>
 <div class="mobile-bar"><button id="menu" aria-label="打开学习目录" aria-expanded="false">☰ 目录</button><span>TAAC2025 · 代码与公式</span><a href="#overview">首页 ↑</a></div>
 <main class="main" id="main-content"><div class="article"><div class="topline"><span>RECOMMENDATION ENGINEERING / LEARNING EDITION</span><span class="version">{builder.commit[:7]} · OFFLINE HTML</span></div>
-<header class="hero"><div class="eyebrow">从数据到模型，再到可验证的推荐结果</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">一份把 TAAC2025 主项目讲透的代码讲义：沿同一个用户追踪完整流程，把每个数组、每条公式和每项实验结论对应起来。08B 章讲解历史查组与 DCN V2 如何共同将长尾广告从候选榜尾送进前十。</p>
+<header class="hero"><div class="eyebrow">从数据到模型，再到可验证的推荐结果</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">一份把 TAAC2025 主项目讲透的代码讲义：沿同一个用户追踪完整流程，把每个数组、每条公式和每项实验结论对应起来。08C 章用真实用户展示 Parquet、候选、特征、两个残差和最终名次。</p>
 <div class="hero-tags"><span class="pill">实际源码与行号</span><span class="pill">6组互动实验</span><span class="pill">双通道召回与列表排序</span><span class="pill">12用户真实CPU执行轨迹</span><span class="pill">离线可读 · 可打印</span></div>
 <div class="hero-stats"><div><strong>32维</strong><small>广告与用户共享检索空间</small></div><div><strong>1层 / 1头</strong><small>当前固定主模型</small></div><div><strong>64负例</strong><small>每个有效点击监督位置</small></div><div><strong>270万+</strong><small>历史主实验的完整候选广告</small></div></div></header>
 <noscript><div class="callout">浏览器关闭了JavaScript。正文、源码、公式、手算例子和实际运行结果仍可阅读；互动滑块与本地进度需要启用脚本。</div></noscript>
