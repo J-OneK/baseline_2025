@@ -1,0 +1,44 @@
+{
+  "status": "completed_confirmation",
+  "frozen_source_files": 13,
+  "source_manifest_matches": true,
+  "original_checkpoint_files_verified": 3,
+  "original_parameter_hashes_verified": true,
+  "original_models_retrained": false,
+  "original_main_replaced": false,
+  "eligible_zero_click_tail_pool": 1583588,
+  "excluded_previous_user_rids": 31574,
+  "development_users": 10000,
+  "confirmation_users": 10000,
+  "development_matches_old_cohort": true,
+  "development_confirmation_overlap": 0,
+  "confirmation_previous_evaluation_overlap": 0,
+  "phase_worker_arrays_verified": {
+    "development": 3,
+    "confirmation": 3
+  },
+  "saved_query_rows_verified": 60000,
+  "fused_arrays_independently_reconstructed": 15,
+  "fixed_500_unique_candidates": true,
+  "main_top10_and_per_user_hr_ndcg10_unchanged": true,
+  "original_cold_tail_candidates_preserved": true,
+  "zero_click_tail_only_new_candidates": true,
+  "novel_proposals_exclude_all_main500_and_visible_history": true,
+  "all_per_model_groups_gainloss_and_aggregates_recomputed": true,
+  "score_and_quota_selected_on_development_only": true,
+  "confirmation_locked_before_saved_arrays": true,
+  "confirmation_targets_evaluated": true,
+  "paired_seed_user_bootstrap_independently_recomputed": true,
+  "zero_click_tail_confirmation_interval": {
+    "mean": 0.0018832391713747645,
+    "ci95": [
+      0.0,
+      0.005649717514124294
+    ],
+    "users": 885,
+    "unique_users_with_gain": 3
+  },
+  "cpu_tests_passed": 56,
+  "gpu_16_user_preflight_passed": true,
+  "verifier_source_sha256": "809dcc64904507ada289c66bef5f8573f06630b733c843d67c5cbc5ca1127b52"
+}

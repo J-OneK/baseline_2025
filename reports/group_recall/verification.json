@@ -1,0 +1,389 @@
+{
+  "scope": "Independent verification of saved development and confirmation candidate pools",
+  "stages": {
+    "develop": {
+      "2026": {
+        "frozen_recall_sha256": "4e37fb0ad3cd1ccd981e019d6d0bee7a56a176b9dcaa6113b019583dca23d2ee",
+        "frozen_ranking_sha256": "c442f9b71e0ca341360a0d570c2af69e285e1f3a6517b71bfc60581716641312",
+        "baseline": {
+          "new_targets": []
+        },
+        "mean": {
+          "new_targets": [
+            {
+              "user_rid": 503906,
+              "rank": 495,
+              "target_oid": 20004012947,
+              "history_oid": 20000593354,
+              "training_frequency": 0,
+              "similarity": 0.9991599321365356
+            },
+            {
+              "user_rid": 622389,
+              "rank": 496,
+              "target_oid": 20003251098,
+              "history_oid": 20003943461,
+              "training_frequency": 0,
+              "similarity": 0.9954988360404968
+            },
+            {
+              "user_rid": 695601,
+              "rank": 495,
+              "target_oid": 20003206106,
+              "history_oid": 20001362497,
+              "training_frequency": 0,
+              "similarity": 0.9978091716766357
+            },
+            {
+              "user_rid": 909984,
+              "rank": 497,
+              "target_oid": 20001703158,
+              "history_oid": 20001904722,
+              "training_frequency": 0,
+              "similarity": 0.9987674951553345
+            }
+          ]
+        },
+        "match": {
+          "new_targets": [
+            {
+              "user_rid": 36407,
+              "rank": 491,
+              "target_oid": 20001112262,
+              "history_oid": 20000128129,
+              "training_frequency": 0,
+              "similarity": 0.9996687173843384
+            },
+            {
+              "user_rid": 238673,
+              "rank": 495,
+              "target_oid": 20004202210,
+              "history_oid": 20005601765,
+              "training_frequency": 0,
+              "similarity": 0.9987541437149048
+            },
+            {
+              "user_rid": 307292,
+              "rank": 494,
+              "target_oid": 20005576775,
+              "history_oid": 20005558383,
+              "training_frequency": 0,
+              "similarity": 0.9948269128799438
+            },
+            {
+              "user_rid": 359292,
+              "rank": 497,
+              "target_oid": 20002336693,
+              "history_oid": 20001747999,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 554626,
+              "rank": 500,
+              "target_oid": 20002311930,
+              "history_oid": 20003097614,
+              "training_frequency": 1,
+              "similarity": 0.9987227320671082
+            },
+            {
+              "user_rid": 649828,
+              "rank": 495,
+              "target_oid": 20004375868,
+              "history_oid": 20002417281,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 853714,
+              "rank": 470,
+              "target_oid": 20005828202,
+              "history_oid": 20000629347,
+              "training_frequency": 0,
+              "similarity": 1.0
+            }
+          ]
+        }
+      },
+      "2027": {
+        "frozen_recall_sha256": "ceadbadfd8fce3cb7519263e6e4c62d2b4f3ed73ee027ca04705ee74ffd98483",
+        "frozen_ranking_sha256": "e9c0fa66897d54deac9b3a8a613b927c057870274645c81e3d5361bfeb812f3b",
+        "baseline": {
+          "new_targets": []
+        },
+        "mean": {
+          "new_targets": [
+            {
+              "user_rid": 622389,
+              "rank": 494,
+              "target_oid": 20003251098,
+              "history_oid": 20003943461,
+              "training_frequency": 0,
+              "similarity": 0.9954988360404968
+            },
+            {
+              "user_rid": 830552,
+              "rank": 491,
+              "target_oid": 20004335443,
+              "history_oid": 20000909622,
+              "training_frequency": 0,
+              "similarity": 0.9982039928436279
+            }
+          ]
+        },
+        "match": {
+          "new_targets": [
+            {
+              "user_rid": 36407,
+              "rank": 492,
+              "target_oid": 20001112262,
+              "history_oid": 20000128129,
+              "training_frequency": 0,
+              "similarity": 0.9996687173843384
+            },
+            {
+              "user_rid": 238673,
+              "rank": 493,
+              "target_oid": 20004202210,
+              "history_oid": 20005601765,
+              "training_frequency": 0,
+              "similarity": 0.9987541437149048
+            },
+            {
+              "user_rid": 307292,
+              "rank": 491,
+              "target_oid": 20005576775,
+              "history_oid": 20005558383,
+              "training_frequency": 0,
+              "similarity": 0.9948269128799438
+            },
+            {
+              "user_rid": 359292,
+              "rank": 500,
+              "target_oid": 20002336693,
+              "history_oid": 20001747999,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 467858,
+              "rank": 494,
+              "target_oid": 20005487996,
+              "history_oid": 20005040892,
+              "training_frequency": 0,
+              "similarity": 0.9998660683631897
+            },
+            {
+              "user_rid": 554626,
+              "rank": 500,
+              "target_oid": 20002311930,
+              "history_oid": 20003097614,
+              "training_frequency": 1,
+              "similarity": 0.9987227320671082
+            },
+            {
+              "user_rid": 649828,
+              "rank": 500,
+              "target_oid": 20004375868,
+              "history_oid": 20002417281,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 866329,
+              "rank": 494,
+              "target_oid": 20001664534,
+              "history_oid": 20002142029,
+              "training_frequency": 0,
+              "similarity": 1.0000001192092896
+            }
+          ]
+        }
+      }
+    },
+    "confirm": {
+      "2026": {
+        "frozen_recall_sha256": "4e37fb0ad3cd1ccd981e019d6d0bee7a56a176b9dcaa6113b019583dca23d2ee",
+        "frozen_ranking_sha256": "c442f9b71e0ca341360a0d570c2af69e285e1f3a6517b71bfc60581716641312",
+        "baseline": {
+          "new_targets": []
+        },
+        "match": {
+          "new_targets": [
+            {
+              "user_rid": 138652,
+              "rank": 496,
+              "target_oid": 20003735086,
+              "history_oid": 20003170310,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 272049,
+              "rank": 492,
+              "target_oid": 20000972155,
+              "history_oid": 20005727886,
+              "training_frequency": 1,
+              "similarity": 0.9971480369567871
+            },
+            {
+              "user_rid": 612580,
+              "rank": 493,
+              "target_oid": 20003833687,
+              "history_oid": 20004452174,
+              "training_frequency": 0,
+              "similarity": 0.9991346001625061
+            },
+            {
+              "user_rid": 715095,
+              "rank": 491,
+              "target_oid": 20005227596,
+              "history_oid": 20003537981,
+              "training_frequency": 0,
+              "similarity": 0.9953949451446533
+            },
+            {
+              "user_rid": 732661,
+              "rank": 496,
+              "target_oid": 20005431265,
+              "history_oid": 20005636341,
+              "training_frequency": 3,
+              "similarity": 0.9973601698875427
+            },
+            {
+              "user_rid": 745137,
+              "rank": 496,
+              "target_oid": 20004530145,
+              "history_oid": 20000852177,
+              "training_frequency": 1,
+              "similarity": 1.0000001192092896
+            },
+            {
+              "user_rid": 772742,
+              "rank": 491,
+              "target_oid": 20005417163,
+              "history_oid": 20004921880,
+              "training_frequency": 0,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 881195,
+              "rank": 491,
+              "target_oid": 20005555566,
+              "history_oid": 20004510409,
+              "training_frequency": 0,
+              "similarity": 0.99994295835495
+            },
+            {
+              "user_rid": 954951,
+              "rank": 491,
+              "target_oid": 20005331963,
+              "history_oid": 20000821860,
+              "training_frequency": 0,
+              "similarity": 1.0
+            }
+          ]
+        }
+      },
+      "2027": {
+        "frozen_recall_sha256": "ceadbadfd8fce3cb7519263e6e4c62d2b4f3ed73ee027ca04705ee74ffd98483",
+        "frozen_ranking_sha256": "e9c0fa66897d54deac9b3a8a613b927c057870274645c81e3d5361bfeb812f3b",
+        "baseline": {
+          "new_targets": []
+        },
+        "match": {
+          "new_targets": [
+            {
+              "user_rid": 138652,
+              "rank": 500,
+              "target_oid": 20003735086,
+              "history_oid": 20003170310,
+              "training_frequency": 1,
+              "similarity": 1.0
+            },
+            {
+              "user_rid": 272049,
+              "rank": 494,
+              "target_oid": 20000972155,
+              "history_oid": 20005727886,
+              "training_frequency": 1,
+              "similarity": 0.9971480369567871
+            },
+            {
+              "user_rid": 340985,
+              "rank": 495,
+              "target_oid": 20003833687,
+              "history_oid": 20004452174,
+              "training_frequency": 0,
+              "similarity": 0.9991346001625061
+            },
+            {
+              "user_rid": 418285,
+              "rank": 492,
+              "target_oid": 20004419059,
+              "history_oid": 20001578873,
+              "training_frequency": 0,
+              "similarity": 0.998246431350708
+            },
+            {
+              "user_rid": 612580,
+              "rank": 492,
+              "target_oid": 20003833687,
+              "history_oid": 20004452174,
+              "training_frequency": 0,
+              "similarity": 0.9991346001625061
+            },
+            {
+              "user_rid": 663234,
+              "rank": 492,
+              "target_oid": 20003818566,
+              "history_oid": 20004103192,
+              "training_frequency": 0,
+              "similarity": 0.9983525276184082
+            },
+            {
+              "user_rid": 715095,
+              "rank": 492,
+              "target_oid": 20005227596,
+              "history_oid": 20003537981,
+              "training_frequency": 0,
+              "similarity": 0.9953949451446533
+            },
+            {
+              "user_rid": 732661,
+              "rank": 497,
+              "target_oid": 20005431265,
+              "history_oid": 20005636341,
+              "training_frequency": 3,
+              "similarity": 0.9973601698875427
+            },
+            {
+              "user_rid": 745137,
+              "rank": 498,
+              "target_oid": 20004530145,
+              "history_oid": 20000852177,
+              "training_frequency": 1,
+              "similarity": 1.0000001192092896
+            },
+            {
+              "user_rid": 846613,
+              "rank": 494,
+              "target_oid": 20003296675,
+              "history_oid": 20004704420,
+              "training_frequency": 0,
+              "similarity": 0.9990532994270325
+            },
+            {
+              "user_rid": 954951,
+              "rank": 493,
+              "target_oid": 20005331963,
+              "history_oid": 20000821860,
+              "training_frequency": 0,
+              "similarity": 1.0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

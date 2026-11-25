@@ -1,0 +1,76 @@
+{
+  "scope": "Descriptive examples from locked confirmation outputs; target labels used only after retrieval",
+  "seed_user_examples": [
+    {
+      "seed": 2026,
+      "cohort_position": 9069,
+      "user_row": 253247,
+      "user_rid": 902230,
+      "target_local_id": 1326725,
+      "target_rid": 2343178,
+      "training_events": 1,
+      "training_clicks": 0,
+      "main_rank": "outside Top500",
+      "auxiliary_novel_rank": 2,
+      "fused_rank": 497,
+      "top10_unchanged": true
+    },
+    {
+      "seed": 2027,
+      "cohort_position": 1303,
+      "user_row": 35449,
+      "user_rid": 126163,
+      "target_local_id": 736261,
+      "target_rid": 1300557,
+      "training_events": 4,
+      "training_clicks": 0,
+      "main_rank": "outside Top500",
+      "auxiliary_novel_rank": 3,
+      "fused_rank": 498,
+      "top10_unchanged": true
+    },
+    {
+      "seed": 2027,
+      "cohort_position": 7570,
+      "user_row": 211084,
+      "user_rid": 751596,
+      "target_local_id": 652694,
+      "target_rid": 1152598,
+      "training_events": 3,
+      "training_clicks": 0,
+      "main_rank": "outside Top500",
+      "auxiliary_novel_rank": 4,
+      "fused_rank": 499,
+      "top10_unchanged": true
+    },
+    {
+      "seed": 2027,
+      "cohort_position": 9069,
+      "user_row": 253247,
+      "user_rid": 902230,
+      "target_local_id": 1326725,
+      "target_rid": 2343178,
+      "training_events": 1,
+      "training_clicks": 0,
+      "main_rank": "outside Top500",
+      "auxiliary_novel_rank": 2,
+      "fused_rank": 497,
+      "top10_unchanged": true
+    },
+    {
+      "seed": 2028,
+      "cohort_position": 9069,
+      "user_row": 253247,
+      "user_rid": 902230,
+      "target_local_id": 1326725,
+      "target_rid": 2343178,
+      "training_events": 1,
+      "training_clicks": 0,
+      "main_rank": "outside Top500",
+      "auxiliary_novel_rank": 1,
+      "fused_rank": 496,
+      "top10_unchanged": true
+    }
+  ],
+  "unique_gained_user_rows": 3
+}

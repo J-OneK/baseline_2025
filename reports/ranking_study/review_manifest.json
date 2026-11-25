@@ -1,0 +1,29 @@
+{
+  "base_commit": "398a3fb",
+  "branch": "research/ranking",
+  "sources": {
+    "configs/ranking_content_study.json": "c863c7c0052d40a33c2da1e0731470f15fa59e98cdaf7d2ce19e0fbaf60403fc",
+    "configs/ranking_study.json": "527290825da470017e06026085ecd2eb65f600f7917a25168f3d3a3209d0f498",
+    "scripts/audit_ranking_inputs.py": "5e8742d4902ac2046af6f310af8014c7b1cedc49743ba9f6ab06e795a1e9de4a",
+    "scripts/confirm_ranking_cohort.py": "770456e8dafd108ee674d6c4a9896c4ababbddcb921dbc74a6ac8d90ce0282ac",
+    "scripts/finish_ranking_study.py": "c16c14d1716edd4ba06b6d913b931d53b8be90f43825e97149289520699c4eb8",
+    "scripts/run_content_ranking_study.py": "9861453242f572c614b3043e732e026cc072635142d62f225948f6d4ef966a19",
+    "scripts/run_ranking_study.py": "dddb0694c17c51819fa2e5158d9f74c95534570b01076705410f62b563729074",
+    "taac_retrieval/content_ranker.py": "4e7ce84317840674680cd9e8a4f6f069d2c4957abb0fdf849d780cefdf9f41d9",
+    "taac_retrieval/content_ranker_train.py": "e400f60a304c05099883119ce96c6efc2f3ff2f0b2f525191516d76dd1008984",
+    "taac_retrieval/rank_recommend.py": "d17a9c1518c65769a14095197ac1dcbf058b197e7b2f34d7efeb05157feb70d8",
+    "taac_retrieval/ranking_data.py": "2dd9db9f5620d9f3023add1be33a9ef7d9fa8a3790c3656368d444852340762c",
+    "taac_retrieval/ranking_metrics.py": "9f4483d48a0471a6cd6b753a5c296abd24fa79aa5f12f9c208713f3bbfd987e8",
+    "taac_retrieval/ranking_model.py": "2f2fe6a29845fa093d6e136d2f43d083969f07d3ffbd220b785a8c7975574393",
+    "taac_retrieval/ranking_train.py": "18620c3cc08daa9ad6e400664c7d418a4a0ce557d3f28b7cc53704fec6091d34",
+    "tests/test_content_ranker.py": "9713afe027b60e77c1e7bdb269bf6dec1cc0078036d16ca6b93d9a8ce4e44f78",
+    "tests/test_ranking.py": "d915948814950294ab235c2f55d067903c48b576b1442c24d1354c1d3e9ec032"
+  },
+  "tests_passed": 49,
+  "input_events_audited": 1124360,
+  "development_users": 2000,
+  "confirmation_users": 5000,
+  "main_model_replaced": false,
+  "source_test_targets_evaluated": false,
+  "confirmation_conclusion": "Positive point estimates; both95percent paired intervals include zero; no post-confirmation tuning"
+}

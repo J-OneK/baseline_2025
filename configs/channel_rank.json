@@ -1,0 +1,25 @@
+{
+  "ranking_config": "configs/ranking_study.json",
+  "group_config": "configs/group_recall.json",
+  "output": "artifacts/channel_rank_v1",
+  "fit_users": 24000,
+  "confirmation_users": 6000,
+  "cohort_seed": 29729,
+  "seeds": [
+    2026,
+    2027
+  ],
+  "epochs": 5,
+  "batch_size": 128,
+  "lr": 0.001,
+  "width": 32,
+  "cross_rank": 8,
+  "rare_weight": 2,
+  "l2_residual": 0.01,
+  "residual_scales": [
+    0.25,
+    0.5,
+    1
+  ],
+  "protocol": "Ranker learns a one-click candidate-list objective on distinct user held-out clicks outside prior evaluation cohorts. Frozen InfoNCE/CTR scores, fixed protected Top500 augmented with history proposals. Identical data across basic MLP, channel MLP and low-rank DCN-V2. Choose via paired development results. Fresh6k is reserved until lock."
+}

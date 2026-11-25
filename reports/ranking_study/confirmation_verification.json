@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "users": 5000,
+  "seeds": 2,
+  "cohort_disjoint_from_identified_old_evaluation_users": true,
+  "all_candidate_sets_unchanged": true,
+  "targets_not_in_history": true,
+  "HR_and_NDCG_independently_recomputed": true,
+  "no_retraining_after_confirmation": true,
+  "source_manifest_unchanged": true,
+  "test_target_evaluated": false,
+  "execution_retry": {
+    "reason": "Shared GPUs5/6 occupied by unrelated jobs; OOM occurred during model loading, before any target scoring.",
+    "original_logs": [
+      "seed2026.log",
+      "seed2027.log"
+    ],
+    "retry_devices": {
+      "2026": "cuda:0",
+      "2027": "cuda:2"
+    },
+    "architecture_and_checkpoints_and_alpha_unchanged": true,
+    "cohort_unchanged": true
+  }
+}

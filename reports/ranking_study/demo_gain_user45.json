@@ -1,0 +1,113 @@
+{
+  "split": "val",
+  "evaluation_index": 45,
+  "user_row": 2670,
+  "user_rid": 29520,
+  "retrieval_execution": "Fresh causal query and exactTop500 over frozen item vectors",
+  "seed": 2026,
+  "variant": "mean_mlp",
+  "checkpoint_epoch": 1,
+  "retrieved_candidates": 500,
+  "blend_alpha": 0.1,
+  "score_scope": "CTR score is for the selected logged-event cohort; blended score is a ranking score, not CTR.",
+  "history_aggregation": "Masked mean; listed weights are uniform",
+  "recommendations": [
+    {
+      "rank": 1,
+      "local_id": 115128,
+      "oid": 20005469879,
+      "recall_rank": 1,
+      "blended_score": 5.782428741455078,
+      "observed_event_click_score": 0.29980331659317017,
+      "history_attention": []
+    },
+    {
+      "rank": 2,
+      "local_id": 970519,
+      "oid": 20001036841,
+      "recall_rank": 2,
+      "blended_score": 4.8735504150390625,
+      "observed_event_click_score": 0.14102496206760406,
+      "history_attention": []
+    },
+    {
+      "rank": 3,
+      "local_id": 969223,
+      "oid": 20001009388,
+      "recall_rank": 3,
+      "blended_score": 3.5231270790100098,
+      "observed_event_click_score": 0.05479033291339874,
+      "history_attention": []
+    },
+    {
+      "rank": 4,
+      "local_id": 478006,
+      "oid": 20005793189,
+      "recall_rank": 4,
+      "blended_score": 3.2408697605133057,
+      "observed_event_click_score": 0.05581948161125183,
+      "history_attention": []
+    },
+    {
+      "rank": 5,
+      "local_id": 402587,
+      "oid": 20000936496,
+      "recall_rank": 7,
+      "blended_score": 2.9639790058135986,
+      "observed_event_click_score": 0.09264691919088364,
+      "history_attention": []
+    },
+    {
+      "rank": 6,
+      "local_id": 25219,
+      "oid": 20000037927,
+      "recall_rank": 12,
+      "blended_score": 2.917663812637329,
+      "observed_event_click_score": 0.2535957098007202,
+      "history_attention": []
+    },
+    {
+      "rank": 7,
+      "local_id": 419870,
+      "oid": 20005796023,
+      "recall_rank": 5,
+      "blended_score": 2.8115174770355225,
+      "observed_event_click_score": 0.029212674126029015,
+      "history_attention": []
+    },
+    {
+      "rank": 8,
+      "local_id": 589150,
+      "oid": 20005516241,
+      "recall_rank": 8,
+      "blended_score": 2.7518012523651123,
+      "observed_event_click_score": 0.045593682676553726,
+      "history_attention": []
+    },
+    {
+      "rank": 9,
+      "local_id": 1127003,
+      "oid": 20000395159,
+      "recall_rank": 6,
+      "blended_score": 2.7279200553894043,
+      "observed_event_click_score": 0.03034829907119274,
+      "history_attention": []
+    },
+    {
+      "rank": 10,
+      "local_id": 287351,
+      "oid": 20003824087,
+      "recall_rank": 10,
+      "blended_score": 2.5309717655181885,
+      "observed_event_click_score": 0.04397287219762802,
+      "history_attention": []
+    }
+  ],
+  "post_ranking_audit": {
+    "target_local_id": 25219,
+    "target_oid": 20000037927,
+    "recall_rank": 12,
+    "reranked_rank": 6,
+    "note": "Target identity is used for display only after scoring; never injected into candidates."
+  }
+}

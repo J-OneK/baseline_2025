@@ -1,0 +1,16 @@
+{
+  "branch": "research/tail-recall",
+  "commit": "d0b73744a46a3558673d70abf1e036508d731e93",
+  "namespace": "research/tail-recall/",
+  "files": {
+    "taac_retrieval/tail_channel.py": "091f32f51849ed4e83b1561123b24581e272827d2c923ff547061e295c2bfc74",
+    "scripts/run_supplemental_tail.py": "7df18784d942614d40bad00e20e73bb9bef20cce557633dda45b3752c59a45fa",
+    "scripts/verify_supplemental_tail.py": "809dcc64904507ada289c66bef5f8573f06630b733c843d67c5cbc5ca1127b52",
+    "configs/supplemental_tail.json": "e3374ca649eaae1095657fc54e22ad2345fbdb1209ca091713a797731718b10f",
+    "reports/supplemental_tail_study/metrics.json": "f71a4c5b1b1320e44767ff82319891afe08af5ae007e42ca96509d835291cca0",
+    "reports/supplemental_tail_study/examples.json": "3da405fda0d00c210f9c7f0dd0a1b56e7ce8a72b7f46c72771a52bb085c48bcf",
+    "reports/supplemental_tail_study/verification.json": "4388689a33414f4eb352d6fbf967c7e8fe6cbde3766194a9dd45ad380d379c45",
+    "reports/click_support/README.md": "b8872889ab446544e613758bb2859068fac4b7768e845dabb563f3d78f01c81d",
+    "reports/candidate_regularization/README.md": "d407be4b3d03d590a924724c39d405c24267b3a4217061ab7f33bdd0f0296847"
+  }
+}

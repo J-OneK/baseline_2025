@@ -1,0 +1,9 @@
+{
+  "scope": "Development selection only; no independent confirmation",
+  "selected_variant": "mean_mlp",
+  "primary_seed": 2026,
+  "alpha": 0.1,
+  "selection_rule": "Mean selected-checkpoint NDCG10 across two seeds, thenHR10, thenmean_mlp",
+  "main_model_replaced": false,
+  "checkpoint": "/home/jyk/project/baseline_2025_ranking/artifacts/ranking_content_v1/training/mean_mlp_seed2026/best.pt"
+}

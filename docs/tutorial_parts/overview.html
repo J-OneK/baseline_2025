@@ -1,0 +1,83 @@
+<section class="chapter" id="overview">
+  <div class="chapter-kicker">00 · 先建立整个系统的地图</div>
+  <h2>从一条用户行为，到十条广告推荐</h2>
+  <p class="lead">这个项目解决一个明确的问题：给定用户属性和已经发生的广告行为，生成用户向量，在固定广告目录中取内积分数最高的候选，过滤历史广告，返回十条广告。训练、评估和推荐共享同一套广告编码器与序列编码器。</p>
+  <p class="callout">新增内容可直接跳到 <a href="#tail-recall">08A · 零点击长尾辅助召回</a>：主模型保持原样，研究分支专门补候选，包含实际源码、8候选交互练习和新留出行为确认。它改善的是部分长尾候选覆盖，Top-10按规则保持。</p>
+  <div class="checkpoint"><strong>本教程的学习目标：</strong>你能亲手构造一个样本、对上每个张量的形状、推导一次损失和一次指标、说明向量索引如何保持原始打分含义，并用已有对照实验解释主方案的取舍。</div>
+  {{flowdiagram}}
+  <div class="pipeline">
+    <a href="#data"><span class="step-no">01 / DATA</span><strong>看清输入</strong><small>行为、属性、81向量和四种广告编号</small></a>
+    <a href="#prepare"><span class="step-no">02 / PREPARE</span><strong>确定可见历史</strong><small>首次出现点击、严格时间截断、缓存</small></a>
+    <a href="#dataset"><span class="step-no">03 / SAMPLE</span><strong>构造一批样本</strong><small>U token、移位目标、动作监督位置</small></a>
+    <a href="#model"><span class="step-no">04 / ENCODE</span><strong>学习32维表示</strong><small>广告/用户编码、因果自注意力</small></a>
+    <a href="#training"><span class="step-no">05 / OPTIMIZE</span><strong>区分正负例</strong><small>点击掩码、64负例、InfoNCE、Adam</small></a>
+    <a href="#evaluation"><span class="step-no">06 / EVALUATE</span><strong>回到完整候选库</strong><small>精确Top-K、HR、NDCG和冷尾分桶</small></a>
+    <a href="#retrieval"><span class="step-no">07 / RETRIEVE</span><strong>导出并加速检索</strong><small>Faiss、MIPS→L2、历史过滤和OID</small></a>
+    <a href="#experiments"><span class="step-no">08 / EVIDENCE</span><strong>解释已有实验</strong><small>控制变量、三种子、局限与后续探索</small></a>
+    <a href="#tail-recall"><span class="step-no">08A / AUXILIARY</span><strong>新增长尾辅助通道</strong><small>同一查询、另一候选视图、固定预算融合</small></a>
+    <a href="#demo"><span class="step-no">09 / TRACE</span><strong>对照实际执行结果</strong><small>12个合成用户完整跑过当前Python代码</small></a>
+  </div>
+  <p>查看当前完整推荐与实际长尾案例。<a href="#channel-ranking">08B · 双通道与 DCN V2</a></p>
+  <h3>训练与推荐的共同核心</h3>
+  <div class="formula" role="math"><p>广告向量：v<sub>i</sub> = ItemEncoder(广告ID, 匿名属性, 81号内容向量)</p><p>用户查询：q<sub>u,t</sub> = SequenceEncoder(用户属性, 截至 t 可见的广告历史)</p><p>打分：s(u,t,i) = q<sub>u,t</sub><sup>T</sup>v<sub>i</sub></p></div>
+  <p>训练让真实点击目标在采样候选中的分数相对提高。验证时检查同一打分函数在完整目录里是否找得到目标。推荐时用已经训练好的参数编码当前历史，再通过持久化索引查找广告。召回演示直接按内积分输出。完整推荐采用两通道合并的 500 条候选，再用 DCN V2 重新打分。</p>
+  <h3>三个层次的例子，各自回答不同问题</h3>
+  <div class="table-wrap"><table><thead><tr><th>例子</th><th>本教程如何使用</th><th>可以得出什么</th></tr></thead><tbody>
+    <tr><td>原始数据真实记录</td><td>解释Parquet列、整数/列表/空值、OID/RID</td><td>数据实际长什么样</td></tr>
+    <tr><td>手算的合成序列与二维向量</td><td>贯穿切片、移位、掩码、损失与指标推导</td><td>数学与代码逻辑如何对应；不是实际模型效果</td></tr>
+    <tr><td>实际执行的12用户CPU演示</td><td>调用当前真实模块，保存张量、训练轨迹、索引与推荐</td><td>代码链路能运行、真实中间数值可以复核；不是大数据效果实验</td></tr>
+    <tr><td>原主项目历史确认实验</td><td>读取已保存的三种子报告和Faiss测量</td><td>指定公开数据协议与机器条件下的实测结果</td></tr>
+  </tbody></table></div>
+  <p>主流程以生成时的主分支快照为准；新增08A章单独标明研究分支提交d0b7374。附录保存两类源码及SHA256。浏览器里的滑块用JavaScript重算相同的小公式，真正的Python源码、CPU演示和研究确认结果分别保留，便于你对照。</p>
+  <h3>怎么使用这份教程</h3>
+  <ol><li>第一遍沿目录读完每章的目标、例子与代码解释，先连上整条数据流。</li><li>第二遍展开对应源码，逐个变量对照形状；在互动区域改变条件，先预测再观察结果。</li><li>第三遍独立完成每章自测，用自己的话解释为什么这样实现，再对照折叠答案。</li></ol>
+  <p>章节末尾可以标记“已理解”，进度保存在当前浏览器本地。源码可统一折叠，支持复制、关键词查找和打印。CSS、脚本、公式、示例数据与核心源码均嵌入本文件，离线阅读不依赖CDN。</p>
+</section>
+
+<section class="chapter" id="workflow">
+  <div class="chapter-kicker">入口 · 你正在IDE里打开的文件</div>
+  <h2>run_main.py：六个阶段怎样接起来</h2>
+  <p class="lead"><code>scripts/run_main.py</code> 是流程编排器：决定每个阶段调用哪个Python模块、传入什么参数、输出放哪里，并检查已有产物是否属于同一配置。真正的模型和算法位于 <code>taac_retrieval/</code>。</p>
+  <h3>先把配置读成一份实验约定</h3>
+  {{code:configs/main.json:1:*}}
+  <div class="table-wrap"><table><thead><tr><th>配置</th><th>实际含义</th></tr></thead><tbody>
+    <tr><td><code>preparation.max_users=300000</code></td><td>均匀抽样上限；经过合法点击和历史筛选后，历史主数据保留280,985用户</td></tr>
+    <tr><td><code>max_history=100 / min_history=5</code></td><td>最多保留100事件；目标前至少5个严格更早的有效事件</td></tr>
+    <tr><td><code>blocks=1 / heads=1 / hidden=32</code></td><td>主模型一层单头，向量维数32；含用户token的输入长度101</td></tr>
+    <tr><td><code>objective=click_infonce / num_negatives=64</code></td><td>只监督点击目标，每个有效监督位置采64个训练可见广告</td></tr>
+    <tr><td><code>seed=2026 / epochs=5</code></td><td>展示流程训练一个固定种子、五完整轮；不是三种子平均</td></tr>
+    <tr><td><code>hnsw_geometry=mips_l2 / efSearch=[2048]</code></td><td>使用已选定的索引几何与搜索预算，仍检查98%验证ANN重合率门槛</td></tr>
+  </tbody></table></div>
+  <p>主配置保留一些供原目标对照使用的通用参数。例如 <code>exposure_weight=0.1</code> 在主click InfoNCE里不会给曝光目标增加权重；具体要看 <code>supervision_weights()</code> 的分支。</p>
+  {{code:scripts/run_main.py:38:53}}
+  <p><code>validate_config()</code> 把展示入口固定在选定方案上。要研究新的层数或监督范围，应该使用研究入口或对应分支，而不是悄悄改变这个默认展示流程后继续引用原结果。</p>
+  <h3>路径从哪里来，产物写到哪里</h3>
+  {{code:scripts/run_main.py:56:96}}
+  <div class="table-wrap"><table><thead><tr><th>阶段</th><th>调用模块</th><th>默认主要产物</th></tr></thead><tbody>
+    <tr><td>prepare</td><td>prepare / cohorts / audit</td><td><code>artifacts/showcase/reference_data/</code>、<code>data/</code>、<code>cohort.npy</code>、<code>reports/data_audit.json</code></td></tr>
+    <tr><td>train</td><td>train</td><td><code>model/config.json</code>、<code>history.json</code>、<code>best.pt</code></td></tr>
+    <tr><td>evaluate</td><td>evaluate_checkpoint</td><td><code>reports/evaluation.json</code> 和逐用户NPZ</td></tr>
+    <tr><td>export</td><td>export</td><td><code>export/item_vectors.npy</code>、验证/测试查询NPZ、<code>metadata.json</code></td></tr>
+    <tr><td>index</td><td>benchmark_ann</td><td><code>ann/flat.faiss</code>、<code>hnsw.faiss</code>、选择记录和测量报告</td></tr>
+    <tr><td>recommend</td><td>recommend</td><td><code>reports/recommend_example.json</code> 中十个OID、原始分数和计时</td></tr>
+  </tbody></table></div>
+  <p>表中除第一行外都省略了共同前缀 <code>artifacts/showcase/</code>。相对路径按仓库根目录解析，换机器时不依赖原开发者的绝对路径。<code>--root</code> 指定另一个目录时，各阶段应使用同一个root。</p>
+  <h3>真正的阶段调用</h3>
+  {{code:scripts/run_main.py:134:207}}
+  <p>注意训练命令中固定传入 <code>skip_test=True</code>；每轮训练只用验证指标选epoch。显式的evaluate阶段再加载固定checkpoint评估测试。索引也先在验证查询上检查门槛并锁定参数，随后才做测试对比。</p>
+  {{code:scripts/run_main.py:234:*}}
+  <p><code>--stage all</code> 按固定顺序串行调用六个阶段。训练/索引是离线工作，不会在每一次推荐请求里重复执行。</p>
+  <h3>现在就能核对的命令</h3>
+  <pre><code>cd /home/jyk/project/baseline_2025
+.project_venv/bin/python scripts/run_main.py --stage all --device cpu --dry-run
+
+# 已有历史主模型：直接演示，不需要先生成showcase新目录
+.project_venv/bin/python -m taac_retrieval.recommend \
+  --checkpoint artifacts/objective_study/confirmation/selected_seed2026/best.pt \
+  --cache artifacts/objective_study/scale_data \
+  --export-dir artifacts/objective_study/export \
+  --index-dir artifacts/objective_study/ann \
+  --device cpu --split val --index 0</code></pre>
+  <p><code>dry-run</code> 只打印实际命令。第二条需要本地已有大产物；它使用历史目录，与新展示入口的 <code>artifacts/showcase/</code> 布局分开。首次安装可以创建环境后使用 <code>python -m pip install -r requirements-project.txt</code>；PyTorch构建应适配你的硬件。</p>
+  <details><summary>自测：为什么推荐时必须加载同一份checkpoint与广告索引？</summary><p>索引中的广告向量由某一份模型参数生成。换了序列模型或广告编码器参数后，新的用户向量和旧广告向量可能不在相同的打分空间中。当前代码用checkpoint摘要等元信息检查对应关系；重新训练得到新权重时，应重新导出向量并建立相应索引。</p></details>
+</section>

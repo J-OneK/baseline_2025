@@ -1,0 +1,1059 @@
+{
+  "selection_rule": "Compare mean development NDCG@10, then HR@10, then earlier epoch, then lower residual scale, then listed architecture order. Eligible arms strictly improve NDCG@10 and preserve or improve HR@10 and combined rare Top10 hits relative to the fixed augmented baseline. If none qualify, confirm the highest NDCG arm as a diagnostic without claiming development eligibility.",
+  "selected": {
+    "variant": "channel_dcn_v2",
+    "epoch": 5,
+    "scale": 1,
+    "hr10": 0.026099999999999998,
+    "ndcg10": 0.013311330269127758,
+    "rare_top10_hits": 5,
+    "recall500": 0.1647,
+    "eligible": true,
+    "new_channel_top10": 4,
+    "checkpoints": {
+      "2026": {
+        "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch5.pt",
+        "sha256": "aef7f1bae89c8f586cfb93cc6db684dbdb0af4d0a4a957a25b388e387599edbe"
+      },
+      "2027": {
+        "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch5.pt",
+        "sha256": "84eb373f4864dc8b2cf8a7e7a4e8bdb47949d8aac9890ecef7bb3e6a22e71f55"
+      }
+    }
+  },
+  "best_by_variant": {
+    "basic_mlp": {
+      "variant": "basic_mlp",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.0237,
+      "ndcg10": 0.01240694107881696,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch5.pt",
+          "sha256": "51f95e21dad5e79d908b29445f8f3896b5043df3d92c7299e9990533718d1d05"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch5.pt",
+          "sha256": "81f3bc5eefbc7a001023e9842add4218ee9019cc66adb9bfccb831212f11ce25"
+        }
+      }
+    },
+    "channel_mlp": {
+      "variant": "channel_mlp",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.0243,
+      "ndcg10": 0.01243278282156161,
+      "rare_top10_hits": 2,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 1,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch5.pt",
+          "sha256": "fc15bb5887e1f84e0816a7a8129ca0535b0a7b555dca649acaec7a351b667394"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch5.pt",
+          "sha256": "b7ae5bdcc611a95b1ada04a9b1e1e681eb48df308f0567ca2428055c8cddf48e"
+        }
+      }
+    },
+    "channel_dcn_v2": {
+      "variant": "channel_dcn_v2",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.026099999999999998,
+      "ndcg10": 0.013311330269127758,
+      "rare_top10_hits": 5,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 4,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch5.pt",
+          "sha256": "aef7f1bae89c8f586cfb93cc6db684dbdb0af4d0a4a957a25b388e387599edbe"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch5.pt",
+          "sha256": "84eb373f4864dc8b2cf8a7e7a4e8bdb47949d8aac9890ecef7bb3e6a22e71f55"
+        }
+      }
+    }
+  },
+  "baselines": {
+    "original": {
+      "hr10": 0.0184,
+      "ndcg10": 0.009842097383390189,
+      "rare_top10_hits": 0,
+      "recall500": 0.1656
+    },
+    "fixed": {
+      "hr10": 0.0184,
+      "ndcg10": 0.009842097383390189,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647
+    }
+  },
+  "source_digests": {
+    "scripts/prepare_channel_rank.py": "ea606d0625c73a31c21a12c38dfedcbc404b0adad35ef8ff820d933b73efe28d",
+    "scripts/build_channel_features.py": "3fdce270d6e57eb7ab5eff53749288f08066e889e488ec6e0a48a962ba7a0cb3",
+    "scripts/run_channel_rank.py": "3dfe2ee3906b3eab775a514c502b34f2bc6947a9b0a436e4c49ceab4932fb175",
+    "taac_retrieval/channel_features.py": "06a8bcc0f2b37d9bed25c170de41cc9ef29f10a32859ccba4134682818828b2e",
+    "taac_retrieval/channel_ranker.py": "b8fb007c91ab566aa7f234b55826fc885adcb0547688c833ca7c2f150407304c"
+  },
+  "total_configurations": 45,
+  "all_configurations": [
+    {
+      "variant": "basic_mlp",
+      "epoch": 1,
+      "scale": 0.25,
+      "hr10": 0.0184,
+      "ndcg10": 0.009843899464539702,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch1.pt",
+          "sha256": "c7ca8e4f560c6e32cf8da2c8d13e5dc9982dfb38d13b2fc1889b4ad04eb0ed99"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch1.pt",
+          "sha256": "b329accab9d12f7d07d77598fec99b948c65898407212cac9d9613da907a13de"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 1,
+      "scale": 0.5,
+      "hr10": 0.0183,
+      "ndcg10": 0.009860378445529214,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": false,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch1.pt",
+          "sha256": "c7ca8e4f560c6e32cf8da2c8d13e5dc9982dfb38d13b2fc1889b4ad04eb0ed99"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch1.pt",
+          "sha256": "b329accab9d12f7d07d77598fec99b948c65898407212cac9d9613da907a13de"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 1,
+      "scale": 1,
+      "hr10": 0.0184,
+      "ndcg10": 0.009883345555731487,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch1.pt",
+          "sha256": "c7ca8e4f560c6e32cf8da2c8d13e5dc9982dfb38d13b2fc1889b4ad04eb0ed99"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch1.pt",
+          "sha256": "b329accab9d12f7d07d77598fec99b948c65898407212cac9d9613da907a13de"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 2,
+      "scale": 0.25,
+      "hr10": 0.0183,
+      "ndcg10": 0.00990037242799948,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": false,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch2.pt",
+          "sha256": "745d11b9b64e294d1908702e4348fe05b39a85ca8e1913019323cab5e80a6279"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch2.pt",
+          "sha256": "eb97e1d5dc4505bea25ec9b17cb25159a00fc772caae389404e25f237847a5ae"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 2,
+      "scale": 0.5,
+      "hr10": 0.0189,
+      "ndcg10": 0.010022908059963968,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch2.pt",
+          "sha256": "745d11b9b64e294d1908702e4348fe05b39a85ca8e1913019323cab5e80a6279"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch2.pt",
+          "sha256": "eb97e1d5dc4505bea25ec9b17cb25159a00fc772caae389404e25f237847a5ae"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 2,
+      "scale": 1,
+      "hr10": 0.0194,
+      "ndcg10": 0.010279007881851468,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch2.pt",
+          "sha256": "745d11b9b64e294d1908702e4348fe05b39a85ca8e1913019323cab5e80a6279"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch2.pt",
+          "sha256": "eb97e1d5dc4505bea25ec9b17cb25159a00fc772caae389404e25f237847a5ae"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 3,
+      "scale": 0.25,
+      "hr10": 0.0187,
+      "ndcg10": 0.009939878837211244,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch3.pt",
+          "sha256": "a2711566bc6b9b440bb6a894763fd97d3975a614f03a413b4154ac49a2209ca4"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch3.pt",
+          "sha256": "2ed920730e2fab8c2923701c7d7287a47f6669edc2e9f941438d370cb70dde1e"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 3,
+      "scale": 0.5,
+      "hr10": 0.0194,
+      "ndcg10": 0.010303760417143783,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch3.pt",
+          "sha256": "a2711566bc6b9b440bb6a894763fd97d3975a614f03a413b4154ac49a2209ca4"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch3.pt",
+          "sha256": "2ed920730e2fab8c2923701c7d7287a47f6669edc2e9f941438d370cb70dde1e"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 3,
+      "scale": 1,
+      "hr10": 0.020900000000000002,
+      "ndcg10": 0.01119252402389689,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch3.pt",
+          "sha256": "a2711566bc6b9b440bb6a894763fd97d3975a614f03a413b4154ac49a2209ca4"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch3.pt",
+          "sha256": "2ed920730e2fab8c2923701c7d7287a47f6669edc2e9f941438d370cb70dde1e"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 4,
+      "scale": 0.25,
+      "hr10": 0.019200000000000002,
+      "ndcg10": 0.010155115006670419,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch4.pt",
+          "sha256": "e1ad2d16a35d114656ed049501ee25c4c78116a307da9224903186705c136f93"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch4.pt",
+          "sha256": "d86cda68fc7848f05741f41da5d8fe845eefd1a7ae8adf212aa55e08ee51ba0c"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 4,
+      "scale": 0.5,
+      "hr10": 0.0208,
+      "ndcg10": 0.010883312317860019,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch4.pt",
+          "sha256": "e1ad2d16a35d114656ed049501ee25c4c78116a307da9224903186705c136f93"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch4.pt",
+          "sha256": "d86cda68fc7848f05741f41da5d8fe845eefd1a7ae8adf212aa55e08ee51ba0c"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 4,
+      "scale": 1,
+      "hr10": 0.0228,
+      "ndcg10": 0.012005202907460459,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch4.pt",
+          "sha256": "e1ad2d16a35d114656ed049501ee25c4c78116a307da9224903186705c136f93"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch4.pt",
+          "sha256": "d86cda68fc7848f05741f41da5d8fe845eefd1a7ae8adf212aa55e08ee51ba0c"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 5,
+      "scale": 0.25,
+      "hr10": 0.019299999999999998,
+      "ndcg10": 0.010208867012600698,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch5.pt",
+          "sha256": "51f95e21dad5e79d908b29445f8f3896b5043df3d92c7299e9990533718d1d05"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch5.pt",
+          "sha256": "81f3bc5eefbc7a001023e9842add4218ee9019cc66adb9bfccb831212f11ce25"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 5,
+      "scale": 0.5,
+      "hr10": 0.020900000000000002,
+      "ndcg10": 0.010939901847449106,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch5.pt",
+          "sha256": "51f95e21dad5e79d908b29445f8f3896b5043df3d92c7299e9990533718d1d05"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch5.pt",
+          "sha256": "81f3bc5eefbc7a001023e9842add4218ee9019cc66adb9bfccb831212f11ce25"
+        }
+      }
+    },
+    {
+      "variant": "basic_mlp",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.0237,
+      "ndcg10": 0.01240694107881696,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2026/epoch5.pt",
+          "sha256": "51f95e21dad5e79d908b29445f8f3896b5043df3d92c7299e9990533718d1d05"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/basic_mlp_seed2027/epoch5.pt",
+          "sha256": "81f3bc5eefbc7a001023e9842add4218ee9019cc66adb9bfccb831212f11ce25"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 1,
+      "scale": 0.25,
+      "hr10": 0.0183,
+      "ndcg10": 0.009801773905897822,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": false,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch1.pt",
+          "sha256": "5a0637b3681f5663d4258b396cddff42ccd5fb1089180b04dac335e52e0fb205"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch1.pt",
+          "sha256": "a3ae417b1da5d5f9a6afb562e25f219cffccd9f4939bfe0b1e44deb5ba1a62e1"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 1,
+      "scale": 0.5,
+      "hr10": 0.0187,
+      "ndcg10": 0.009900595423305823,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch1.pt",
+          "sha256": "5a0637b3681f5663d4258b396cddff42ccd5fb1089180b04dac335e52e0fb205"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch1.pt",
+          "sha256": "a3ae417b1da5d5f9a6afb562e25f219cffccd9f4939bfe0b1e44deb5ba1a62e1"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 1,
+      "scale": 1,
+      "hr10": 0.019200000000000002,
+      "ndcg10": 0.010013783900625987,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch1.pt",
+          "sha256": "5a0637b3681f5663d4258b396cddff42ccd5fb1089180b04dac335e52e0fb205"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch1.pt",
+          "sha256": "a3ae417b1da5d5f9a6afb562e25f219cffccd9f4939bfe0b1e44deb5ba1a62e1"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 2,
+      "scale": 0.25,
+      "hr10": 0.0189,
+      "ndcg10": 0.009955651075769439,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch2.pt",
+          "sha256": "dc5e45d7617d1b8c9c32593c1943660938b07d63a6c851c51ed1978d0c447c6a"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch2.pt",
+          "sha256": "72cd357b7b5554374180fda84d2810db9eefb5057c295139f2766ace5d822ac0"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 2,
+      "scale": 0.5,
+      "hr10": 0.018799999999999997,
+      "ndcg10": 0.009888200656288766,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch2.pt",
+          "sha256": "dc5e45d7617d1b8c9c32593c1943660938b07d63a6c851c51ed1978d0c447c6a"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch2.pt",
+          "sha256": "72cd357b7b5554374180fda84d2810db9eefb5057c295139f2766ace5d822ac0"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 2,
+      "scale": 1,
+      "hr10": 0.019799999999999998,
+      "ndcg10": 0.010172270132747477,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch2.pt",
+          "sha256": "dc5e45d7617d1b8c9c32593c1943660938b07d63a6c851c51ed1978d0c447c6a"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch2.pt",
+          "sha256": "72cd357b7b5554374180fda84d2810db9eefb5057c295139f2766ace5d822ac0"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 3,
+      "scale": 0.25,
+      "hr10": 0.019000000000000003,
+      "ndcg10": 0.010092277888063446,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch3.pt",
+          "sha256": "79dea8eb7b7f35ca16e3f24f585087cbeac9a32663d6e361c6e0ae015e45c83b"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch3.pt",
+          "sha256": "2706b20d9ba08ee34cf70750ef3d178f6e1c67a0c4c07200efe626d45372327b"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 3,
+      "scale": 0.5,
+      "hr10": 0.0202,
+      "ndcg10": 0.010642629580220667,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch3.pt",
+          "sha256": "79dea8eb7b7f35ca16e3f24f585087cbeac9a32663d6e361c6e0ae015e45c83b"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch3.pt",
+          "sha256": "2706b20d9ba08ee34cf70750ef3d178f6e1c67a0c4c07200efe626d45372327b"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 3,
+      "scale": 1,
+      "hr10": 0.0206,
+      "ndcg10": 0.010729534324550967,
+      "rare_top10_hits": 7,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 6,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch3.pt",
+          "sha256": "79dea8eb7b7f35ca16e3f24f585087cbeac9a32663d6e361c6e0ae015e45c83b"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch3.pt",
+          "sha256": "2706b20d9ba08ee34cf70750ef3d178f6e1c67a0c4c07200efe626d45372327b"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 4,
+      "scale": 0.25,
+      "hr10": 0.0195,
+      "ndcg10": 0.010277686849087612,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch4.pt",
+          "sha256": "5a7385ba91a9576ad28c8531919262882b84669ef6dafe50d6a1d0ef4745116c"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch4.pt",
+          "sha256": "5cdbcc7561f7c41a468f158214d7f83f54a38759e4f5fea3491132f50a8a5cc7"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 4,
+      "scale": 0.5,
+      "hr10": 0.0208,
+      "ndcg10": 0.010783659547634376,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch4.pt",
+          "sha256": "5a7385ba91a9576ad28c8531919262882b84669ef6dafe50d6a1d0ef4745116c"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch4.pt",
+          "sha256": "5cdbcc7561f7c41a468f158214d7f83f54a38759e4f5fea3491132f50a8a5cc7"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 4,
+      "scale": 1,
+      "hr10": 0.022199999999999998,
+      "ndcg10": 0.011524327566975688,
+      "rare_top10_hits": 5,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 4,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch4.pt",
+          "sha256": "5a7385ba91a9576ad28c8531919262882b84669ef6dafe50d6a1d0ef4745116c"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch4.pt",
+          "sha256": "5cdbcc7561f7c41a468f158214d7f83f54a38759e4f5fea3491132f50a8a5cc7"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 5,
+      "scale": 0.25,
+      "hr10": 0.019799999999999998,
+      "ndcg10": 0.010408849079839267,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch5.pt",
+          "sha256": "fc15bb5887e1f84e0816a7a8129ca0535b0a7b555dca649acaec7a351b667394"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch5.pt",
+          "sha256": "b7ae5bdcc611a95b1ada04a9b1e1e681eb48df308f0567ca2428055c8cddf48e"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 5,
+      "scale": 0.5,
+      "hr10": 0.0217,
+      "ndcg10": 0.011126220566620845,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch5.pt",
+          "sha256": "fc15bb5887e1f84e0816a7a8129ca0535b0a7b555dca649acaec7a351b667394"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch5.pt",
+          "sha256": "b7ae5bdcc611a95b1ada04a9b1e1e681eb48df308f0567ca2428055c8cddf48e"
+        }
+      }
+    },
+    {
+      "variant": "channel_mlp",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.0243,
+      "ndcg10": 0.01243278282156161,
+      "rare_top10_hits": 2,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 1,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2026/epoch5.pt",
+          "sha256": "fc15bb5887e1f84e0816a7a8129ca0535b0a7b555dca649acaec7a351b667394"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_mlp_seed2027/epoch5.pt",
+          "sha256": "b7ae5bdcc611a95b1ada04a9b1e1e681eb48df308f0567ca2428055c8cddf48e"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 1,
+      "scale": 0.25,
+      "hr10": 0.0187,
+      "ndcg10": 0.009928752919813778,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch1.pt",
+          "sha256": "9c0e26eca8f72d72d5ecc9a9031da39db59dfa53c096d968e03cc301f823b6ed"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch1.pt",
+          "sha256": "8ddc8536d5371cf939b7b1ed2f2a7ea96ec430e6be659cae2c151882e7b99254"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 1,
+      "scale": 0.5,
+      "hr10": 0.019,
+      "ndcg10": 0.010038280714729472,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch1.pt",
+          "sha256": "9c0e26eca8f72d72d5ecc9a9031da39db59dfa53c096d968e03cc301f823b6ed"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch1.pt",
+          "sha256": "8ddc8536d5371cf939b7b1ed2f2a7ea96ec430e6be659cae2c151882e7b99254"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 1,
+      "scale": 1,
+      "hr10": 0.019200000000000002,
+      "ndcg10": 0.009984627912341507,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch1.pt",
+          "sha256": "9c0e26eca8f72d72d5ecc9a9031da39db59dfa53c096d968e03cc301f823b6ed"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch1.pt",
+          "sha256": "8ddc8536d5371cf939b7b1ed2f2a7ea96ec430e6be659cae2c151882e7b99254"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 2,
+      "scale": 0.25,
+      "hr10": 0.0185,
+      "ndcg10": 0.009915909545302215,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch2.pt",
+          "sha256": "ffa2dfc16fd6daf8aff377f12f0af3a7f65a218b5bb7ea5361dab5c55d54ab4e"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch2.pt",
+          "sha256": "f7a2053be31909c042e4dc5a9dbd43ff75269781ccf09b0fd57ff952868e0415"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 2,
+      "scale": 0.5,
+      "hr10": 0.018799999999999997,
+      "ndcg10": 0.010054403978493276,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch2.pt",
+          "sha256": "ffa2dfc16fd6daf8aff377f12f0af3a7f65a218b5bb7ea5361dab5c55d54ab4e"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch2.pt",
+          "sha256": "f7a2053be31909c042e4dc5a9dbd43ff75269781ccf09b0fd57ff952868e0415"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 2,
+      "scale": 1,
+      "hr10": 0.02,
+      "ndcg10": 0.010309826212499908,
+      "rare_top10_hits": 4,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 4,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch2.pt",
+          "sha256": "ffa2dfc16fd6daf8aff377f12f0af3a7f65a218b5bb7ea5361dab5c55d54ab4e"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch2.pt",
+          "sha256": "f7a2053be31909c042e4dc5a9dbd43ff75269781ccf09b0fd57ff952868e0415"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 3,
+      "scale": 0.25,
+      "hr10": 0.019200000000000002,
+      "ndcg10": 0.010215355283039317,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch3.pt",
+          "sha256": "2fb29f03feced13f5145fa73ee9b3950738af29bb6e259ba9b396123bef737f7"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch3.pt",
+          "sha256": "423b713dd0383085d7b64d6a5453f2f4de091f42684056ed260c5f1748b97d0b"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 3,
+      "scale": 0.5,
+      "hr10": 0.0204,
+      "ndcg10": 0.010617613583066472,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch3.pt",
+          "sha256": "2fb29f03feced13f5145fa73ee9b3950738af29bb6e259ba9b396123bef737f7"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch3.pt",
+          "sha256": "423b713dd0383085d7b64d6a5453f2f4de091f42684056ed260c5f1748b97d0b"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 3,
+      "scale": 1,
+      "hr10": 0.0213,
+      "ndcg10": 0.01072736855153568,
+      "rare_top10_hits": 8,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 6,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch3.pt",
+          "sha256": "2fb29f03feced13f5145fa73ee9b3950738af29bb6e259ba9b396123bef737f7"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch3.pt",
+          "sha256": "423b713dd0383085d7b64d6a5453f2f4de091f42684056ed260c5f1748b97d0b"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 4,
+      "scale": 0.25,
+      "hr10": 0.02,
+      "ndcg10": 0.010423180090206038,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch4.pt",
+          "sha256": "972217429f0359ce7d6cd806c08fe3866e19cef71d476d04fe245aa73c3cb9e6"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch4.pt",
+          "sha256": "2455fed5bace599a8fabeb572c01252603d582ac608470f2eca60bced9b14109"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 4,
+      "scale": 0.5,
+      "hr10": 0.0212,
+      "ndcg10": 0.010804649257915109,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch4.pt",
+          "sha256": "972217429f0359ce7d6cd806c08fe3866e19cef71d476d04fe245aa73c3cb9e6"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch4.pt",
+          "sha256": "2455fed5bace599a8fabeb572c01252603d582ac608470f2eca60bced9b14109"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 4,
+      "scale": 1,
+      "hr10": 0.0242,
+      "ndcg10": 0.012141466223061285,
+      "rare_top10_hits": 7,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 5,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch4.pt",
+          "sha256": "972217429f0359ce7d6cd806c08fe3866e19cef71d476d04fe245aa73c3cb9e6"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch4.pt",
+          "sha256": "2455fed5bace599a8fabeb572c01252603d582ac608470f2eca60bced9b14109"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 5,
+      "scale": 0.25,
+      "hr10": 0.0205,
+      "ndcg10": 0.01057285519984007,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch5.pt",
+          "sha256": "aef7f1bae89c8f586cfb93cc6db684dbdb0af4d0a4a957a25b388e387599edbe"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch5.pt",
+          "sha256": "84eb373f4864dc8b2cf8a7e7a4e8bdb47949d8aac9890ecef7bb3e6a22e71f55"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 5,
+      "scale": 0.5,
+      "hr10": 0.0221,
+      "ndcg10": 0.011137116723865246,
+      "rare_top10_hits": 0,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 0,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch5.pt",
+          "sha256": "aef7f1bae89c8f586cfb93cc6db684dbdb0af4d0a4a957a25b388e387599edbe"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch5.pt",
+          "sha256": "84eb373f4864dc8b2cf8a7e7a4e8bdb47949d8aac9890ecef7bb3e6a22e71f55"
+        }
+      }
+    },
+    {
+      "variant": "channel_dcn_v2",
+      "epoch": 5,
+      "scale": 1,
+      "hr10": 0.026099999999999998,
+      "ndcg10": 0.013311330269127758,
+      "rare_top10_hits": 5,
+      "recall500": 0.1647,
+      "eligible": true,
+      "new_channel_top10": 4,
+      "checkpoints": {
+        "2026": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2026/epoch5.pt",
+          "sha256": "aef7f1bae89c8f586cfb93cc6db684dbdb0af4d0a4a957a25b388e387599edbe"
+        },
+        "2027": {
+          "checkpoint": "artifacts/channel_rank_v1/checkpoints/channel_dcn_v2_seed2027/epoch5.pt",
+          "sha256": "84eb373f4864dc8b2cf8a7e7a4e8bdb47949d8aac9890ecef7bb3e6a22e71f55"
+        }
+      }
+    }
+  ],
+  "fresh_rows_sha256": "1d28e66045a9cc598692961f8d0f58acb3017081a11d15487f4736bc04a28ebb"
+}

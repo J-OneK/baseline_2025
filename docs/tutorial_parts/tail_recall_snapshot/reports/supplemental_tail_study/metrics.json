@@ -1,0 +1,526 @@
+{
+  "status": "completed_confirmation",
+  "plan": {
+    "scope": "A small auxiliary recall channel for zero-click long-tail ads; original main model and query encoder are retained",
+    "seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "score_modes": [
+      "raw_ip",
+      "cosine"
+    ],
+    "quotas": [
+      1,
+      5
+    ],
+    "budget": 500,
+    "protected_top": 10,
+    "proposal_k": 25,
+    "eligibility": {
+      "min_events": 1,
+      "max_events": 5,
+      "training_clicks": 0
+    },
+    "guards": {
+      "overall_retention": 0.99,
+      "minimum_positive_seeds": 2
+    },
+    "bootstrap": {
+      "replicates": 2000,
+      "seed": 9133
+    },
+    "selection": {
+      "development": "Previously inspected old 10000-user validation cohort, evaluated with three reused main-model checkpoints; no new training",
+      "eligibility": "All-user fixed-budget evaluation: mean overall Recall500 retains at least 99% of same-main baseline, cold and clicked-tail Recall500 do not decrease, mean zero-click-tail Recall500 strictly increases, and at least two of three seed-specific models gain a zero-click-tail target",
+      "primary": "Among passing configurations maximize three-seed mean zero-click-tail Recall500",
+      "ties": "Then maximize mean overall Recall500, then prefer smaller quota, then raw_ip over cosine",
+      "grid_limit": "Only raw_ip/cosine crossed with quota1/quota5; no other score mode, quota, model, training or routing search",
+      "failure": "If no configuration passes, stop without opening the new confirmation targets",
+      "confirmation": "Lock score mode, quota, model identities and cohort before one three-model confirmation; do not reselect after confirmation",
+      "confirmation_success": "Apply the same point guards on confirmation: overall retention>=0.99, no cold or clicked-tail decrease, strictly positive mean zero-click-tail Recall500 gain, and at least two seed-specific models gain; report uncertainty separately and stop without retuning if these fail"
+    },
+    "inference": {
+      "auxiliary_items": "Original item encoder with only the explicit item-ID embedding contribution set to zero for eligible candidates; all original attributes and embedding81 remain",
+      "raw_ip": "Frozen original query dot auxiliary candidate vector",
+      "cosine": "Normalize query and auxiliary candidate vectors for this auxiliary channel only; main-channel scores and ranking stay raw inner product",
+      "exclusions": "Exclude padding, visible history and every main Top500 ID before selecting the 25 auxiliary proposals",
+      "fusion": "Protect main Top10 and every existing candidate with train-event frequency<=5; replace only tail positions of nonrare main candidates with novel eligible proposals, preserving exactly500 unique candidates",
+      "quota": "Maximum replacements per query; use fewer if fewer proposals or removable candidates exist",
+      "routing": "Apply the same rule to every user; eligibility and protection depend only on training counts and visible history, never on the held-out target"
+    },
+    "reporting": {
+      "primary": "Absolute zero-click-tail hit counts and Recall500, gains/losses, overall retention and per-model results",
+      "checks": "Fixed500 unique IDs, no visible-history items, unchanged main Top10, preserved existing cold/tail candidates, aligned users/targets/model identities",
+      "uncertainty": "Paired seed-model/user bootstrap intervals; point guards alone do not establish stable or significant improvement. Structural nonnegative rare-target differences can still have a zero lower confidence bound"
+    },
+    "limitations": [
+      "Post-hoc feasibility quotas5/10/25 were previously inspected; this is a separately registered follow-up, not an untouched original hypothesis.",
+      "The three checkpoints are reused trained main models, not three newly trained auxiliary models or three independent user samples.",
+      "The explicit item-ID contribution is removed only in the auxiliary candidate view; the original high-cardinality attributes remain, so this is not a pure text-only encoder.",
+      "Cold and clicked-tail Recall500 preservation is structural, not evidence that the auxiliary channel learned to improve them.",
+      "Protecting Top10 means final Top10 metrics remain unchanged; this study concerns candidate coverage only.",
+      "No new training, network, ranking model or automatic replacement of the main model/index is introduced.",
+      "The confirmation cohort contains training-population users with previously unopened held-out behaviors; this is not new-user cold start or global-time production replay."
+    ]
+  },
+  "development": [
+    {
+      "key": "raw_ip_q1",
+      "score_mode": "raw_ip",
+      "quota": 1,
+      "groups": {
+        "all": {
+          "baseline_recall": 0.2306,
+          "recall": 0.23026666666666665,
+          "baseline_hits": 2306.0,
+          "hits": 2302.6666666666665,
+          "gained": 0.3333333333333333,
+          "lost": 3.6666666666666665
+        },
+        "cold_0": {
+          "baseline_recall": 0.08396560445118867,
+          "recall": 0.08396560445118867,
+          "baseline_hits": 55.333333333333336,
+          "hits": 55.333333333333336,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "tail_1_5": {
+          "baseline_recall": 0.007290095525389644,
+          "recall": 0.007541478129713424,
+          "baseline_hits": 9.666666666666666,
+          "hits": 10.0,
+          "gained": 0.3333333333333333,
+          "lost": 0.0
+        },
+        "zero_click_tail": {
+          "baseline_recall": 0.0006937218175511621,
+          "recall": 0.0010405827263267429,
+          "baseline_hits": 0.6666666666666666,
+          "hits": 1.0,
+          "gained": 0.3333333333333333,
+          "lost": 0.0
+        },
+        "clicked_tail": {
+          "baseline_recall": 0.024657534246575342,
+          "recall": 0.024657534246575342,
+          "baseline_hits": 9.0,
+          "hits": 9.0,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "mid_6_50": {
+          "baseline_recall": 0.06855473140031468,
+          "recall": 0.0684423465947404,
+          "baseline_hits": 203.33333333333334,
+          "hits": 203.0,
+          "gained": 0.0,
+          "lost": 0.3333333333333333
+        },
+        "head_gt50": {
+          "baseline_recall": 0.4035782663233644,
+          "recall": 0.4029180695847363,
+          "baseline_hits": 2037.6666666666667,
+          "hits": 2034.3333333333333,
+          "gained": 0.0,
+          "lost": 3.3333333333333335
+        }
+      },
+      "passed": false,
+      "reasons": [
+        "insufficient_positive_seed_models"
+      ],
+      "positive_seed_models": 1
+    },
+    {
+      "key": "raw_ip_q5",
+      "score_mode": "raw_ip",
+      "quota": 5,
+      "groups": {
+        "all": {
+          "baseline_recall": 0.2306,
+          "recall": 0.22893333333333332,
+          "baseline_hits": 2306.0,
+          "hits": 2289.3333333333335,
+          "gained": 2.0,
+          "lost": 18.666666666666668
+        },
+        "cold_0": {
+          "baseline_recall": 0.08396560445118867,
+          "recall": 0.08396560445118867,
+          "baseline_hits": 55.333333333333336,
+          "hits": 55.333333333333336,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "tail_1_5": {
+          "baseline_recall": 0.007290095525389644,
+          "recall": 0.008798391151332328,
+          "baseline_hits": 9.666666666666666,
+          "hits": 11.666666666666666,
+          "gained": 2.0,
+          "lost": 0.0
+        },
+        "zero_click_tail": {
+          "baseline_recall": 0.0006937218175511621,
+          "recall": 0.0027748872702046483,
+          "baseline_hits": 0.6666666666666666,
+          "hits": 2.6666666666666665,
+          "gained": 2.0,
+          "lost": 0.0
+        },
+        "clicked_tail": {
+          "baseline_recall": 0.024657534246575342,
+          "recall": 0.024657534246575342,
+          "baseline_hits": 9.0,
+          "hits": 9.0,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "mid_6_50": {
+          "baseline_recall": 0.06855473140031468,
+          "recall": 0.06776803776129468,
+          "baseline_hits": 203.33333333333334,
+          "hits": 201.0,
+          "gained": 0.0,
+          "lost": 2.3333333333333335
+        },
+        "head_gt50": {
+          "baseline_recall": 0.4035782663233644,
+          "recall": 0.4003433023040866,
+          "baseline_hits": 2037.6666666666667,
+          "hits": 2021.3333333333333,
+          "gained": 0.0,
+          "lost": 16.333333333333332
+        }
+      },
+      "passed": true,
+      "reasons": [],
+      "positive_seed_models": 3
+    },
+    {
+      "key": "cosine_q1",
+      "score_mode": "cosine",
+      "quota": 1,
+      "groups": {
+        "all": {
+          "baseline_recall": 0.2306,
+          "recall": 0.23023333333333332,
+          "baseline_hits": 2306.0,
+          "hits": 2302.3333333333335,
+          "gained": 0.0,
+          "lost": 3.6666666666666665
+        },
+        "cold_0": {
+          "baseline_recall": 0.08396560445118867,
+          "recall": 0.08396560445118867,
+          "baseline_hits": 55.333333333333336,
+          "hits": 55.333333333333336,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "tail_1_5": {
+          "baseline_recall": 0.007290095525389644,
+          "recall": 0.007290095525389644,
+          "baseline_hits": 9.666666666666666,
+          "hits": 9.666666666666666,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "zero_click_tail": {
+          "baseline_recall": 0.0006937218175511621,
+          "recall": 0.0006937218175511621,
+          "baseline_hits": 0.6666666666666666,
+          "hits": 0.6666666666666666,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "clicked_tail": {
+          "baseline_recall": 0.024657534246575342,
+          "recall": 0.024657534246575342,
+          "baseline_hits": 9.0,
+          "hits": 9.0,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "mid_6_50": {
+          "baseline_recall": 0.06855473140031468,
+          "recall": 0.0684423465947404,
+          "baseline_hits": 203.33333333333334,
+          "hits": 203.0,
+          "gained": 0.0,
+          "lost": 0.3333333333333333
+        },
+        "head_gt50": {
+          "baseline_recall": 0.4035782663233644,
+          "recall": 0.4029180695847363,
+          "baseline_hits": 2037.6666666666667,
+          "hits": 2034.3333333333333,
+          "gained": 0.0,
+          "lost": 3.3333333333333335
+        }
+      },
+      "passed": false,
+      "reasons": [
+        "no_zero_click_tail_gain",
+        "insufficient_positive_seed_models"
+      ],
+      "positive_seed_models": 0
+    },
+    {
+      "key": "cosine_q5",
+      "score_mode": "cosine",
+      "quota": 5,
+      "groups": {
+        "all": {
+          "baseline_recall": 0.2306,
+          "recall": 0.22883333333333333,
+          "baseline_hits": 2306.0,
+          "hits": 2288.3333333333335,
+          "gained": 1.0,
+          "lost": 18.666666666666668
+        },
+        "cold_0": {
+          "baseline_recall": 0.08396560445118867,
+          "recall": 0.08396560445118867,
+          "baseline_hits": 55.333333333333336,
+          "hits": 55.333333333333336,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "tail_1_5": {
+          "baseline_recall": 0.007290095525389644,
+          "recall": 0.008044243338360986,
+          "baseline_hits": 9.666666666666666,
+          "hits": 10.666666666666666,
+          "gained": 1.0,
+          "lost": 0.0
+        },
+        "zero_click_tail": {
+          "baseline_recall": 0.0006937218175511621,
+          "recall": 0.001734304543877905,
+          "baseline_hits": 0.6666666666666666,
+          "hits": 1.6666666666666667,
+          "gained": 1.0,
+          "lost": 0.0
+        },
+        "clicked_tail": {
+          "baseline_recall": 0.024657534246575342,
+          "recall": 0.024657534246575342,
+          "baseline_hits": 9.0,
+          "hits": 9.0,
+          "gained": 0.0,
+          "lost": 0.0
+        },
+        "mid_6_50": {
+          "baseline_recall": 0.06855473140031468,
+          "recall": 0.06776803776129468,
+          "baseline_hits": 203.33333333333334,
+          "hits": 201.0,
+          "gained": 0.0,
+          "lost": 2.3333333333333335
+        },
+        "head_gt50": {
+          "baseline_recall": 0.4035782663233644,
+          "recall": 0.4003433023040866,
+          "baseline_hits": 2037.6666666666667,
+          "hits": 2021.3333333333333,
+          "gained": 0.0,
+          "lost": 16.333333333333332
+        }
+      },
+      "passed": true,
+      "reasons": [],
+      "positive_seed_models": 2
+    }
+  ],
+  "selected": {
+    "key": "raw_ip_q5",
+    "score_mode": "raw_ip",
+    "quota": 5,
+    "groups": {
+      "all": {
+        "baseline_recall": 0.2306,
+        "recall": 0.22893333333333332,
+        "baseline_hits": 2306.0,
+        "hits": 2289.3333333333335,
+        "gained": 2.0,
+        "lost": 18.666666666666668
+      },
+      "cold_0": {
+        "baseline_recall": 0.08396560445118867,
+        "recall": 0.08396560445118867,
+        "baseline_hits": 55.333333333333336,
+        "hits": 55.333333333333336,
+        "gained": 0.0,
+        "lost": 0.0
+      },
+      "tail_1_5": {
+        "baseline_recall": 0.007290095525389644,
+        "recall": 0.008798391151332328,
+        "baseline_hits": 9.666666666666666,
+        "hits": 11.666666666666666,
+        "gained": 2.0,
+        "lost": 0.0
+      },
+      "zero_click_tail": {
+        "baseline_recall": 0.0006937218175511621,
+        "recall": 0.0027748872702046483,
+        "baseline_hits": 0.6666666666666666,
+        "hits": 2.6666666666666665,
+        "gained": 2.0,
+        "lost": 0.0
+      },
+      "clicked_tail": {
+        "baseline_recall": 0.024657534246575342,
+        "recall": 0.024657534246575342,
+        "baseline_hits": 9.0,
+        "hits": 9.0,
+        "gained": 0.0,
+        "lost": 0.0
+      },
+      "mid_6_50": {
+        "baseline_recall": 0.06855473140031468,
+        "recall": 0.06776803776129468,
+        "baseline_hits": 203.33333333333334,
+        "hits": 201.0,
+        "gained": 0.0,
+        "lost": 2.3333333333333335
+      },
+      "head_gt50": {
+        "baseline_recall": 0.4035782663233644,
+        "recall": 0.4003433023040866,
+        "baseline_hits": 2037.6666666666667,
+        "hits": 2021.3333333333333,
+        "gained": 0.0,
+        "lost": 16.333333333333332
+      }
+    },
+    "passed": true,
+    "reasons": [],
+    "positive_seed_models": 3
+  },
+  "confirmation": {
+    "key": "raw_ip_q5",
+    "score_mode": "raw_ip",
+    "quota": 5,
+    "groups": {
+      "all": {
+        "baseline_recall": 0.23083333333333333,
+        "recall": 0.22970000000000002,
+        "baseline_hits": 2308.3333333333335,
+        "hits": 2297.0,
+        "gained": 1.6666666666666667,
+        "lost": 13.0
+      },
+      "cold_0": {
+        "baseline_recall": 0.08807134894091416,
+        "recall": 0.08807134894091416,
+        "baseline_hits": 52.666666666666664,
+        "hits": 52.666666666666664,
+        "gained": 0.0,
+        "lost": 0.0
+      },
+      "tail_1_5": {
+        "baseline_recall": 0.005938548928479215,
+        "recall": 0.007229537825974696,
+        "baseline_hits": 7.666666666666667,
+        "hits": 9.333333333333334,
+        "gained": 1.6666666666666667,
+        "lost": 0.0
+      },
+      "zero_click_tail": {
+        "baseline_recall": 0.0,
+        "recall": 0.0018832391713747645,
+        "baseline_hits": 0.0,
+        "hits": 1.6666666666666667,
+        "gained": 1.6666666666666667,
+        "lost": 0.0
+      },
+      "clicked_tail": {
+        "baseline_recall": 0.018883415435139574,
+        "recall": 0.018883415435139574,
+        "baseline_hits": 7.666666666666667,
+        "hits": 7.666666666666667,
+        "gained": 0.0,
+        "lost": 0.0
+      },
+      "mid_6_50": {
+        "baseline_recall": 0.07181208053691275,
+        "recall": 0.07125279642058165,
+        "baseline_hits": 214.0,
+        "hits": 212.33333333333334,
+        "gained": 0.0,
+        "lost": 1.6666666666666667
+      },
+      "head_gt50": {
+        "baseline_recall": 0.39641395439485483,
+        "recall": 0.3942051581887871,
+        "baseline_hits": 2034.0,
+        "hits": 2022.6666666666667,
+        "gained": 0.0,
+        "lost": 11.333333333333334
+      }
+    },
+    "passed": true,
+    "reasons": [],
+    "positive_seed_models": 3
+  },
+  "paired_intervals": {
+    "all": {
+      "mean": -0.0011333333333333334,
+      "ci95": [
+        -0.0018,
+        -0.0005
+      ],
+      "unique_users_with_gain": 3,
+      "users": 10000
+    },
+    "cold_0": {
+      "mean": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "unique_users_with_gain": 0,
+      "users": 598
+    },
+    "tail_1_5": {
+      "mean": 0.0012909888974954814,
+      "ci95": [
+        0.0,
+        0.0038729666924864447
+      ],
+      "unique_users_with_gain": 3,
+      "users": 1291
+    },
+    "zero_click_tail": {
+      "mean": 0.0018832391713747645,
+      "ci95": [
+        0.0,
+        0.005649717514124294
+      ],
+      "unique_users_with_gain": 3,
+      "users": 885
+    }
+  },
+  "confirmation_targets_evaluated": true,
+  "original_main_replaced": false,
+  "source_manifest": {
+    "scripts/run_supplemental_tail.py": "7df18784d942614d40bad00e20e73bb9bef20cce557633dda45b3752c59a45fa",
+    "configs/supplemental_tail.json": "e3374ca649eaae1095657fc54e22ad2345fbdb1209ca091713a797731718b10f",
+    "model.py": "ef0536aee1bbfe29c77bb3fc031583c2b9cedcc855350af0f55e5f0773bd54c0",
+    "scripts/run_click_support.py": "424ac91e504a0d34c399b4e30ce3eb7986114653586d111376bbaf5f922bd261",
+    "taac_retrieval/tail_channel.py": "091f32f51849ed4e83b1561123b24581e272827d2c923ff547061e295c2bfc74",
+    "taac_retrieval/click_support.py": "7d868ec2deb0a0374ff019f46f7ed601494dbc6a1218b5e453a2d0ecda8b3edc",
+    "taac_retrieval/model.py": "b0abcd5f5302e8c2609d2cab09920556bd4cd0e240f948c0bdd43d6c5c1c33e0",
+    "taac_retrieval/data.py": "d78e70868643ed4ff5a2cdd0dad39334c65f186d644642d9b02fce591d82f428",
+    "taac_retrieval/metrics.py": "c15e68465809a4afc7a90505db16a03f6b04384e1a9f979e5bd9b54b259cb91b",
+    "taac_retrieval/coverage.py": "2355b917c54013b3bffb79a638e3e8897b606bf1c83393783ba841588466686b",
+    "taac_retrieval/train.py": "871b8ab575e4b11fb1aa07f5336886730a160fcdc875d253d56543ba231f30c7",
+    "taac_retrieval/objectives.py": "0f0dfef8f85e72759da42f3690f9e291f41fff507ab5c7093602dbb42035caa7",
+    "taac_retrieval/evaluate_checkpoint.py": "1d148c5d3f83b8359cdd40f69fa18c6e58615e87ce6f74e3e8d4cf8de58c6e9e"
+  }
+}

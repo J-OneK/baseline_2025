@@ -1,0 +1,73 @@
+{
+  "split": "val",
+  "evaluation_index": 1,
+  "user_row": 212,
+  "user_rid": 2582,
+  "retrieval_execution": "Cached fixed candidates",
+  "seed": 2026,
+  "variant": "din_attention",
+  "checkpoint_epoch": 2,
+  "retrieved_candidates": 500,
+  "blend_alpha": 0.1,
+  "score_scope": "CTR score is for the selected logged-event cohort; blended score is a ranking score, not CTR.",
+  "history_aggregation": "Candidate-conditioned softmax",
+  "recommendations": [
+    {
+      "rank": 1,
+      "local_id": 1461838,
+      "oid": 20003396556,
+      "recall_rank": 1,
+      "blended_score": 5.583339691162109,
+      "observed_event_click_score": 0.15962432324886322,
+      "history_attention": [
+        {
+          "local_id": 1069995,
+          "oid": 20004929710,
+          "attention_weight": 0.4231615960597992
+        },
+        {
+          "local_id": 1006391,
+          "oid": 20001598550,
+          "attention_weight": 0.39910775423049927
+        },
+        {
+          "local_id": 1355547,
+          "oid": 20003078528,
+          "attention_weight": 0.08268337696790695
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "local_id": 402587,
+      "oid": 20000936496,
+      "recall_rank": 2,
+      "blended_score": 4.295966148376465,
+      "observed_event_click_score": 0.21721212565898895,
+      "history_attention": [
+        {
+          "local_id": 1069995,
+          "oid": 20004929710,
+          "attention_weight": 0.33074045181274414
+        },
+        {
+          "local_id": 1006391,
+          "oid": 20001598550,
+          "attention_weight": 0.30661720037460327
+        },
+        {
+          "local_id": 1355547,
+          "oid": 20003078528,
+          "attention_weight": 0.2002844363451004
+        }
+      ]
+    }
+  ],
+  "post_ranking_audit": {
+    "target_local_id": 714523,
+    "target_oid": 20001843892,
+    "recall_rank": null,
+    "reranked_rank": null,
+    "note": "Target identity is used for display only after scoring; never injected into candidates."
+  }
+}

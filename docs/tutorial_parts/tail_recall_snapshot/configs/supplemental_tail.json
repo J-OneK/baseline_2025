@@ -1,0 +1,45 @@
+{
+  "scope": "A small auxiliary recall channel for zero-click long-tail ads; original main model and query encoder are retained",
+  "seeds": [2026, 2027, 2028],
+  "score_modes": ["raw_ip", "cosine"],
+  "quotas": [1, 5],
+  "budget": 500,
+  "protected_top": 10,
+  "proposal_k": 25,
+  "eligibility": {"min_events": 1, "max_events": 5, "training_clicks": 0},
+  "guards": {"overall_retention": 0.99, "minimum_positive_seeds": 2},
+  "bootstrap": {"replicates": 2000, "seed": 9133},
+  "selection": {
+    "development": "Previously inspected old 10000-user validation cohort, evaluated with three reused main-model checkpoints; no new training",
+    "eligibility": "All-user fixed-budget evaluation: mean overall Recall500 retains at least 99% of same-main baseline, cold and clicked-tail Recall500 do not decrease, mean zero-click-tail Recall500 strictly increases, and at least two of three seed-specific models gain a zero-click-tail target",
+    "primary": "Among passing configurations maximize three-seed mean zero-click-tail Recall500",
+    "ties": "Then maximize mean overall Recall500, then prefer smaller quota, then raw_ip over cosine",
+    "grid_limit": "Only raw_ip/cosine crossed with quota1/quota5; no other score mode, quota, model, training or routing search",
+    "failure": "If no configuration passes, stop without opening the new confirmation targets",
+    "confirmation": "Lock score mode, quota, model identities and cohort before one three-model confirmation; do not reselect after confirmation",
+    "confirmation_success": "Apply the same point guards on confirmation: overall retention>=0.99, no cold or clicked-tail decrease, strictly positive mean zero-click-tail Recall500 gain, and at least two seed-specific models gain; report uncertainty separately and stop without retuning if these fail"
+  },
+  "inference": {
+    "auxiliary_items": "Original item encoder with only the explicit item-ID embedding contribution set to zero for eligible candidates; all original attributes and embedding81 remain",
+    "raw_ip": "Frozen original query dot auxiliary candidate vector",
+    "cosine": "Normalize query and auxiliary candidate vectors for this auxiliary channel only; main-channel scores and ranking stay raw inner product",
+    "exclusions": "Exclude padding, visible history and every main Top500 ID before selecting the 25 auxiliary proposals",
+    "fusion": "Protect main Top10 and every existing candidate with train-event frequency<=5; replace only tail positions of nonrare main candidates with novel eligible proposals, preserving exactly500 unique candidates",
+    "quota": "Maximum replacements per query; use fewer if fewer proposals or removable candidates exist",
+    "routing": "Apply the same rule to every user; eligibility and protection depend only on training counts and visible history, never on the held-out target"
+  },
+  "reporting": {
+    "primary": "Absolute zero-click-tail hit counts and Recall500, gains/losses, overall retention and per-model results",
+    "checks": "Fixed500 unique IDs, no visible-history items, unchanged main Top10, preserved existing cold/tail candidates, aligned users/targets/model identities",
+    "uncertainty": "Paired seed-model/user bootstrap intervals; point guards alone do not establish stable or significant improvement. Structural nonnegative rare-target differences can still have a zero lower confidence bound"
+  },
+  "limitations": [
+    "Post-hoc feasibility quotas5/10/25 were previously inspected; this is a separately registered follow-up, not an untouched original hypothesis.",
+    "The three checkpoints are reused trained main models, not three newly trained auxiliary models or three independent user samples.",
+    "The explicit item-ID contribution is removed only in the auxiliary candidate view; the original high-cardinality attributes remain, so this is not a pure text-only encoder.",
+    "Cold and clicked-tail Recall500 preservation is structural, not evidence that the auxiliary channel learned to improve them.",
+    "Protecting Top10 means final Top10 metrics remain unchanged; this study concerns candidate coverage only.",
+    "No new training, network, ranking model or automatic replacement of the main model/index is introduced.",
+    "The confirmation cohort contains training-population users with previously unopened held-out behaviors; this is not new-user cold start or global-time production replay."
+  ]
+}

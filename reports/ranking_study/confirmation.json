@@ -1,0 +1,671 @@
+{
+  "plan": {
+    "seed": 5481,
+    "users": 5000,
+    "variant": "mean_mlp",
+    "alpha": 0.1,
+    "selected_checkpoints": {
+      "2026": {
+        "path": "/home/jyk/project/baseline_2025_ranking/artifacts/ranking_content_v1/training/mean_mlp_seed2026/best.pt",
+        "sha256": "c442f9b71e0ca341360a0d570c2af69e285e1f3a6517b71bfc60581716641312"
+      },
+      "2027": {
+        "path": "/home/jyk/project/baseline_2025_ranking/artifacts/ranking_content_v1/training/mean_mlp_seed2027/best.pt",
+        "sha256": "e9c0fa66897d54deac9b3a8a613b927c057870274645c81e3d5361bfeb812f3b"
+      }
+    },
+    "selection_file_sha256": "3953ba287dad5ed47354c02a31f6dd6214cedba8c2450879142db218500df353",
+    "split": "val",
+    "scope": "New held-out events of training-population users, not new-user cold start",
+    "rule": "One-shot confirmation, no epoch/architecture/alpha changes after results",
+    "test_evaluated": false
+  },
+  "registration": {
+    "registered_at_utc": "2026-11-25T05:45:55.940179+00:00"
+  },
+  "cohort_identity": {
+    "exclusion_sources": [
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/baseline/data/eval_indices.npy",
+        "indices_sha256": "63de6a358fca848358f21ae4954bf07895b36909287f64f54422d38cfe4b1c40",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/baseline/data/user_rids.npy",
+        "user_rids_sha256": "b279c5f30fdac7ca748bdca56f44c0f0bd5bf5684f83a9ba91f9b57dcc3a1a7d",
+        "users": 2000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/data/eval_indices.npy",
+        "indices_sha256": "5b114866c9294762964fea2e26167ad358dfee3ebac9bfc92639e638e91709aa",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/reference_data/eval_indices.npy",
+        "indices_sha256": "889babfc51d3b8c0dd3ec87b3924b76fc4e4c8da453386041cac0020eb54dedb",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/reference_data/user_rids.npy",
+        "user_rids_sha256": "5fdb4af8a5db9ba5b6a748cee8a8080db8c0f3ec9b4e154efa175bada1547f1c",
+        "users": 2
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/data/eval_indices.npy",
+        "indices_sha256": "5b114866c9294762964fea2e26167ad358dfee3ebac9bfc92639e638e91709aa",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/reference_data/eval_indices.npy",
+        "indices_sha256": "889babfc51d3b8c0dd3ec87b3924b76fc4e4c8da453386041cac0020eb54dedb",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/reference_data/user_rids.npy",
+        "user_rids_sha256": "5fdb4af8a5db9ba5b6a748cee8a8080db8c0f3ec9b4e154efa175bada1547f1c",
+        "users": 2
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/data/eval_indices.npy",
+        "indices_sha256": "5b114866c9294762964fea2e26167ad358dfee3ebac9bfc92639e638e91709aa",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/reference_data/eval_indices.npy",
+        "indices_sha256": "889babfc51d3b8c0dd3ec87b3924b76fc4e4c8da453386041cac0020eb54dedb",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/reference_data/user_rids.npy",
+        "user_rids_sha256": "5fdb4af8a5db9ba5b6a748cee8a8080db8c0f3ec9b4e154efa175bada1547f1c",
+        "users": 2
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/eval_indices.npy",
+        "indices_sha256": "bfe277de352fabd13d53eda762a4eda895e4a4d52cdd27176c5308e565b921ce",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/objective_study/confirm_eval_indices.npy",
+        "indices_sha256": "8ccfc140bb38719cc37eaf57096b075886ac71c58f99c8ff9de225c394775c5f",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/infonce_supervision/preflight/eval16.npy",
+        "indices_sha256": "bc934e1e7eb0574826ffa672a6130348d095bdb1cc83ed8c9a890e8796b7627b",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 16
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/cohort.npy",
+        "indices_sha256": "bbe53b412965daed5f4d9010e8c7405424e844eb641efbabc30cc2fefeb725b2",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_v2/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/cohort.npy",
+        "indices_sha256": "bbe53b412965daed5f4d9010e8c7405424e844eb641efbabc30cc2fefeb725b2",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/cohort.npy",
+        "indices_sha256": "bbe53b412965daed5f4d9010e8c7405424e844eb641efbabc30cc2fefeb725b2",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/tutorial_demo_tail_extension/data/user_rids.npy",
+        "user_rids_sha256": "42bd618cdbcd4d8a0341c72342d56e863aa347ed7ae6ec91bb882a49f21d50b6",
+        "users": 6
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_click_support/artifacts/candidate_regularization_v1/cohorts/development.npy",
+        "indices_sha256": "8ccfc140bb38719cc37eaf57096b075886ac71c58f99c8ff9de225c394775c5f",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_click_support/artifacts/click_support_v1/cohorts/development.npy",
+        "indices_sha256": "8ccfc140bb38719cc37eaf57096b075886ac71c58f99c8ff9de225c394775c5f",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_click_support/artifacts/candidate_regularization_v1/cohorts/confirmation.npy",
+        "indices_sha256": "96b401ed6540919df30565118ed77cde17f85167a09d22cbef60b573c556a766",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_content_exp/artifacts/content_retrieval_v1/cohorts/confirmation.npy",
+        "indices_sha256": "e597c6d86ad9333cd9b2cdd02ab592e30f9f840a3975fb4571d0b5afb53d4ab4",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_click_support/artifacts/click_support_v1/cohorts/confirmation.npy",
+        "indices_sha256": "96b401ed6540919df30565118ed77cde17f85167a09d22cbef60b573c556a766",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 10000
+      },
+      {
+        "indices": "/home/jyk/project/baseline_2025_content_exp/artifacts/content_retrieval_v1/cohorts/development.npy",
+        "indices_sha256": "0a9f45d5a8d011579c7a92fd11581e2a16c7cb2a9e0cbd37b6f88c0482964385",
+        "user_rids": "/home/jyk/project/baseline_2025/artifacts/objective_study/scale_data/user_rids.npy",
+        "user_rids_sha256": "2411ad1d39afa9c027b5f46c2881357a3b7e0ee442c13602382a75d81a99dae7",
+        "users": 2000
+      }
+    ],
+    "excluded_unique_rids": 41582,
+    "eligible_current_users": 78630,
+    "cohort_sha256": "65bccd48037e68d45e879d6d021e6ea09921fc3dc3c4ebd9ee31eed887a5bb65",
+    "overlap_with_known_evaluation_users": 0,
+    "selected_user_rids_sha256": "9d07f6932133ff8085b64429031f0e0a3cfbb006fd1b1cd715fd66356e607ecd"
+  },
+  "runs": [
+    {
+      "seed": 2026,
+      "baseline": {
+        "HR10": 0.0246,
+        "NDCG10": 0.012753598288893544,
+        "Recall500": 0.1652,
+        "users": 5000,
+        "retrieval_k": 500,
+        "covered_users": 826,
+        "conditional_HR10": 0.14891041162227603,
+        "conditional_NDCG10": 0.07720095816521515,
+        "groups": {
+          "all": {
+            "users": 5000,
+            "targets_in_max_k": 826,
+            "Recall@10": 0.0246,
+            "NDCG@10": 0.012753598288893544,
+            "hits_at_10": 123,
+            "Recall@100": 0.0858,
+            "NDCG@100": 0.024482846696180723,
+            "hits_at_100": 429,
+            "Recall@500": 0.1652,
+            "NDCG@500": 0.03466653542645239,
+            "hits_at_500": 826,
+            "conditional_Recall@10_given_Top500": 0.14891041162227603,
+            "target_rank_bands": {
+              "1_10": 123,
+              "11_100": 306,
+              "101_500": 397,
+              "outside_500": 4174
+            }
+          },
+          "cold_0": {
+            "users": 582,
+            "targets_in_max_k": 49,
+            "Recall@10": 0.001718213058419244,
+            "NDCG@10": 0.0004966749593090857,
+            "hits_at_10": 1,
+            "Recall@100": 0.012027491408934709,
+            "NDCG@100": 0.0022947997895888354,
+            "hits_at_100": 7,
+            "Recall@500": 0.08419243986254296,
+            "NDCG@500": 0.011438113687798792,
+            "hits_at_500": 49,
+            "conditional_Recall@10_given_Top500": 0.02040816326530612,
+            "target_rank_bands": {
+              "1_10": 1,
+              "11_100": 6,
+              "101_500": 42,
+              "outside_500": 533
+            }
+          },
+          "tail_1_5": {
+            "users": 1014,
+            "targets_in_max_k": 5,
+            "Recall@10": 0.0,
+            "NDCG@10": 0.0,
+            "hits_at_10": 0,
+            "Recall@100": 0.0,
+            "NDCG@100": 0.0,
+            "hits_at_100": 0,
+            "Recall@500": 0.004930966469428008,
+            "NDCG@500": 0.0005987165736545011,
+            "hits_at_500": 5,
+            "conditional_Recall@10_given_Top500": 0.0,
+            "target_rank_bands": {
+              "1_10": 0,
+              "11_100": 0,
+              "101_500": 5,
+              "outside_500": 1009
+            }
+          },
+          "mid_6_50": {
+            "users": 1739,
+            "targets_in_max_k": 96,
+            "Recall@10": 0.0011500862564692352,
+            "NDCG@10": 0.00036478627314394163,
+            "hits_at_10": 2,
+            "Recall@100": 0.01897642323174238,
+            "NDCG@100": 0.0034312300729248246,
+            "hits_at_100": 33,
+            "Recall@500": 0.055204140310523286,
+            "NDCG@500": 0.008078510524538661,
+            "hits_at_500": 96,
+            "conditional_Recall@10_given_Top500": 0.020833333333333332,
+            "target_rank_bands": {
+              "1_10": 2,
+              "11_100": 31,
+              "101_500": 63,
+              "outside_500": 1643
+            }
+          },
+          "head_gt50": {
+            "users": 1665,
+            "targets_in_max_k": 676,
+            "Recall@10": 0.07207207207207207,
+            "NDCG@10": 0.03774448245594745,
+            "hits_at_10": 120,
+            "Recall@100": 0.23363363363363363,
+            "NDCG@100": 0.06913618673065863,
+            "hits_at_100": 389,
+            "Recall@500": 0.406006006006006,
+            "NDCG@500": 0.09130334327814095,
+            "hits_at_500": 676,
+            "conditional_Recall@10_given_Top500": 0.17751479289940827,
+            "target_rank_bands": {
+              "1_10": 120,
+              "11_100": 269,
+              "101_500": 287,
+              "outside_500": 989
+            }
+          }
+        }
+      },
+      "ranked": {
+        "HR10": 0.0256,
+        "NDCG10": 0.013235289623764914,
+        "Recall500": 0.1652,
+        "users": 5000,
+        "retrieval_k": 500,
+        "covered_users": 826,
+        "conditional_HR10": 0.1549636803874092,
+        "conditional_NDCG10": 0.08011676527702732,
+        "groups": {
+          "all": {
+            "users": 5000,
+            "targets_in_max_k": 826,
+            "Recall@10": 0.0256,
+            "NDCG@10": 0.013235289623764914,
+            "hits_at_10": 128,
+            "Recall@100": 0.0874,
+            "NDCG@100": 0.02495634148134877,
+            "hits_at_100": 437,
+            "Recall@500": 0.1652,
+            "NDCG@500": 0.034917159137527326,
+            "hits_at_500": 826,
+            "conditional_Recall@10_given_Top500": 0.1549636803874092,
+            "target_rank_bands": {
+              "1_10": 128,
+              "11_100": 309,
+              "101_500": 389,
+              "outside_500": 4174
+            }
+          },
+          "cold_0": {
+            "users": 582,
+            "targets_in_max_k": 49,
+            "Recall@10": 0.001718213058419244,
+            "NDCG@10": 0.0005172336695257409,
+            "hits_at_10": 1,
+            "Recall@100": 0.010309278350515464,
+            "NDCG@100": 0.0020698775907574104,
+            "hits_at_100": 6,
+            "Recall@500": 0.08419243986254296,
+            "NDCG@500": 0.011498224608422548,
+            "hits_at_500": 49,
+            "conditional_Recall@10_given_Top500": 0.02040816326530612,
+            "target_rank_bands": {
+              "1_10": 1,
+              "11_100": 5,
+              "101_500": 43,
+              "outside_500": 533
+            }
+          },
+          "tail_1_5": {
+            "users": 1014,
+            "targets_in_max_k": 5,
+            "Recall@10": 0.0,
+            "NDCG@10": 0.0,
+            "hits_at_10": 0,
+            "Recall@100": 0.0,
+            "NDCG@100": 0.0,
+            "hits_at_100": 0,
+            "Recall@500": 0.004930966469428008,
+            "NDCG@500": 0.0006029611221641273,
+            "hits_at_500": 5,
+            "conditional_Recall@10_given_Top500": 0.0,
+            "target_rank_bands": {
+              "1_10": 0,
+              "11_100": 0,
+              "101_500": 5,
+              "outside_500": 1009
+            }
+          },
+          "mid_6_50": {
+            "users": 1739,
+            "targets_in_max_k": 96,
+            "Recall@10": 0.0011500862564692352,
+            "NDCG@10": 0.0003730869523398862,
+            "hits_at_10": 2,
+            "Recall@100": 0.020126509488211614,
+            "NDCG@100": 0.0036105291419803154,
+            "hits_at_100": 35,
+            "Recall@500": 0.055204140310523286,
+            "NDCG@500": 0.008115778651911387,
+            "hits_at_500": 96,
+            "conditional_Recall@10_given_Top500": 0.020833333333333332,
+            "target_rank_bands": {
+              "1_10": 2,
+              "11_100": 33,
+              "101_500": 61,
+              "outside_500": 1643
+            }
+          },
+          "head_gt50": {
+            "users": 1665,
+            "targets_in_max_k": 676,
+            "Recall@10": 0.07507507507507508,
+            "NDCG@10": 0.039175147094919836,
+            "hits_at_10": 125,
+            "Recall@100": 0.23783783783783785,
+            "NDCG@100": 0.0704494465291407,
+            "hits_at_100": 396,
+            "Recall@500": 0.406006006006006,
+            "NDCG@500": 0.09199344583302485,
+            "hits_at_500": 676,
+            "conditional_Recall@10_given_Top500": 0.1849112426035503,
+            "target_rank_bands": {
+              "1_10": 125,
+              "11_100": 271,
+              "101_500": 280,
+              "outside_500": 989
+            }
+          }
+        }
+      },
+      "checkpoint_sha256": "c442f9b71e0ca341360a0d570c2af69e285e1f3a6517b71bfc60581716641312",
+      "gained_users": 7,
+      "lost_users": 2,
+      "test_evaluated": false
+    },
+    {
+      "seed": 2027,
+      "baseline": {
+        "HR10": 0.0242,
+        "NDCG10": 0.012250803219187636,
+        "Recall500": 0.1828,
+        "users": 5000,
+        "retrieval_k": 500,
+        "covered_users": 914,
+        "conditional_HR10": 0.1323851203501094,
+        "conditional_NDCG10": 0.06701752308089516,
+        "groups": {
+          "all": {
+            "users": 5000,
+            "targets_in_max_k": 914,
+            "Recall@10": 0.0242,
+            "NDCG@10": 0.012250803219187636,
+            "hits_at_10": 121,
+            "Recall@100": 0.0904,
+            "NDCG@100": 0.02509323153707936,
+            "hits_at_100": 452,
+            "Recall@500": 0.1828,
+            "NDCG@500": 0.03695718011535377,
+            "hits_at_500": 914,
+            "conditional_Recall@10_given_Top500": 0.1323851203501094,
+            "target_rank_bands": {
+              "1_10": 121,
+              "11_100": 331,
+              "101_500": 462,
+              "outside_500": 4086
+            }
+          },
+          "cold_0": {
+            "users": 582,
+            "targets_in_max_k": 38,
+            "Recall@10": 0.0,
+            "NDCG@10": 0.0,
+            "hits_at_10": 0,
+            "Recall@100": 0.005154639175257732,
+            "NDCG@100": 0.0008047285479858353,
+            "hits_at_100": 3,
+            "Recall@500": 0.06529209621993128,
+            "NDCG@500": 0.008277770994300538,
+            "hits_at_500": 38,
+            "conditional_Recall@10_given_Top500": 0.0,
+            "target_rank_bands": {
+              "1_10": 0,
+              "11_100": 3,
+              "101_500": 35,
+              "outside_500": 544
+            }
+          },
+          "tail_1_5": {
+            "users": 1014,
+            "targets_in_max_k": 17,
+            "Recall@10": 0.0009861932938856016,
+            "NDCG@10": 0.0003111093459425333,
+            "hits_at_10": 1,
+            "Recall@100": 0.0009861932938856016,
+            "NDCG@100": 0.0003111093459425333,
+            "hits_at_100": 1,
+            "Recall@500": 0.016765285996055226,
+            "NDCG@500": 0.002192241105200117,
+            "hits_at_500": 17,
+            "conditional_Recall@10_given_Top500": 0.058823529411764705,
+            "target_rank_bands": {
+              "1_10": 1,
+              "11_100": 0,
+              "101_500": 16,
+              "outside_500": 997
+            }
+          },
+          "mid_6_50": {
+            "users": 1739,
+            "targets_in_max_k": 177,
+            "Recall@10": 0.005175388154111558,
+            "NDCG@10": 0.0022562037199226476,
+            "hits_at_10": 9,
+            "Recall@100": 0.0327774583093732,
+            "NDCG@100": 0.007465407035810393,
+            "hits_at_100": 57,
+            "Recall@500": 0.10178263369752731,
+            "NDCG@500": 0.016314146110618877,
+            "hits_at_500": 177,
+            "conditional_Recall@10_given_Top500": 0.05084745762711865,
+            "target_rank_bands": {
+              "1_10": 9,
+              "11_100": 48,
+              "101_500": 120,
+              "outside_500": 1562
+            }
+          },
+          "head_gt50": {
+            "users": 1665,
+            "targets_in_max_k": 682,
+            "Recall@10": 0.06666666666666667,
+            "NDCG@10": 0.034243251021145324,
+            "hits_at_10": 111,
+            "Recall@100": 0.23483483483483483,
+            "NDCG@100": 0.06708708586090634,
+            "hits_at_100": 391,
+            "Recall@500": 0.4096096096096096,
+            "NDCG@500": 0.08971471789252057,
+            "hits_at_500": 682,
+            "conditional_Recall@10_given_Top500": 0.1627565982404692,
+            "target_rank_bands": {
+              "1_10": 111,
+              "11_100": 280,
+              "101_500": 291,
+              "outside_500": 983
+            }
+          }
+        }
+      },
+      "ranked": {
+        "HR10": 0.0244,
+        "NDCG10": 0.012399227775854142,
+        "Recall500": 0.1828,
+        "users": 5000,
+        "retrieval_k": 500,
+        "covered_users": 914,
+        "conditional_HR10": 0.13347921225382933,
+        "conditional_NDCG10": 0.06782947360970537,
+        "groups": {
+          "all": {
+            "users": 5000,
+            "targets_in_max_k": 914,
+            "Recall@10": 0.0244,
+            "NDCG@10": 0.012399227775854142,
+            "hits_at_10": 122,
+            "Recall@100": 0.09,
+            "NDCG@100": 0.025177413231292377,
+            "hits_at_100": 450,
+            "Recall@500": 0.1828,
+            "NDCG@500": 0.037118514584671435,
+            "hits_at_500": 914,
+            "conditional_Recall@10_given_Top500": 0.13347921225382933,
+            "target_rank_bands": {
+              "1_10": 122,
+              "11_100": 328,
+              "101_500": 464,
+              "outside_500": 4086
+            }
+          },
+          "cold_0": {
+            "users": 582,
+            "targets_in_max_k": 38,
+            "Recall@10": 0.0,
+            "NDCG@10": 0.0,
+            "hits_at_10": 0,
+            "Recall@100": 0.003436426116838488,
+            "NDCG@100": 0.0005456641451292464,
+            "hits_at_100": 2,
+            "Recall@500": 0.06529209621993128,
+            "NDCG@500": 0.00828015894078962,
+            "hits_at_500": 38,
+            "conditional_Recall@10_given_Top500": 0.0,
+            "target_rank_bands": {
+              "1_10": 0,
+              "11_100": 2,
+              "101_500": 36,
+              "outside_500": 544
+            }
+          },
+          "tail_1_5": {
+            "users": 1014,
+            "targets_in_max_k": 17,
+            "Recall@10": 0.0009861932938856016,
+            "NDCG@10": 0.00029687376298223,
+            "hits_at_10": 1,
+            "Recall@100": 0.0009861932938856016,
+            "NDCG@100": 0.00029687376298223,
+            "hits_at_100": 1,
+            "Recall@500": 0.016765285996055226,
+            "NDCG@500": 0.002180221518590165,
+            "hits_at_500": 17,
+            "conditional_Recall@10_given_Top500": 0.058823529411764705,
+            "target_rank_bands": {
+              "1_10": 1,
+              "11_100": 0,
+              "101_500": 16,
+              "outside_500": 997
+            }
+          },
+          "mid_6_50": {
+            "users": 1739,
+            "targets_in_max_k": 177,
+            "Recall@10": 0.005175388154111558,
+            "NDCG@10": 0.0022796323055018844,
+            "hits_at_10": 9,
+            "Recall@100": 0.0327774583093732,
+            "NDCG@100": 0.0075497573886636775,
+            "hits_at_100": 57,
+            "Recall@500": 0.10178263369752731,
+            "NDCG@500": 0.01642672414146032,
+            "hits_at_500": 177,
+            "conditional_Recall@10_given_Top500": 0.05084745762711865,
+            "target_rank_bands": {
+              "1_10": 9,
+              "11_100": 48,
+              "101_500": 120,
+              "outside_500": 1562
+            }
+          },
+          "head_gt50": {
+            "users": 1665,
+            "targets_in_max_k": 682,
+            "Recall@10": 0.06726726726726727,
+            "NDCG@10": 0.03467317015275613,
+            "hits_at_10": 112,
+            "Recall@100": 0.23423423423423423,
+            "NDCG@100": 0.06735100992759552,
+            "hits_at_100": 390,
+            "Recall@500": 0.4096096096096096,
+            "NDCG@500": 0.09008810962040102,
+            "hits_at_500": 682,
+            "conditional_Recall@10_given_Top500": 0.16422287390029325,
+            "target_rank_bands": {
+              "1_10": 112,
+              "11_100": 278,
+              "101_500": 292,
+              "outside_500": 983
+            }
+          }
+        }
+      },
+      "checkpoint_sha256": "e9c0fa66897d54deac9b3a8a613b927c057870274645c81e3d5361bfeb812f3b",
+      "gained_users": 6,
+      "lost_users": 5,
+      "test_evaluated": false
+    }
+  ],
+  "aggregate": {
+    "baseline": {
+      "HR10": 0.024399999999999998,
+      "NDCG10": 0.01250220075404059,
+      "Recall500": 0.174
+    },
+    "ranked": {
+      "HR10": 0.025,
+      "NDCG10": 0.012817258699809528,
+      "Recall500": 0.174
+    }
+  },
+  "paired_differences": {
+    "HR10": {
+      "mean": 0.0006,
+      "ci95": [
+        -0.0006,
+        0.0018
+      ],
+      "per_seed": [
+        0.001,
+        0.0002
+      ]
+    },
+    "NDCG10": {
+      "mean": 0.00031505794576893923,
+      "ci95": [
+        -0.00023224566710078746,
+        0.000805625120351999
+      ],
+      "per_seed": [
+        0.0004816913348713721,
+        0.00014842455666650648
+      ]
+    }
+  },
+  "test_evaluated": false,
+  "no_post_confirmation_tuning": true,
+  "source_sha256": "770456e8dafd108ee674d6c4a9896c4ababbddcb921dbc74a6ac8d90ce0282ac"
+}

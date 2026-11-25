@@ -1,0 +1,27 @@
+{
+  "ranking_config": "configs/ranking_study.json",
+  "outputs": "artifacts/group_recall_v1",
+  "fields": [
+    "102",
+    "122"
+  ],
+  "recent_events": 40,
+  "max_posting": 8192,
+  "quotas": {
+    "cold": 5,
+    "tail": 5
+  },
+  "protected_top": 100,
+  "proposal_count_per_bucket": 80,
+  "modes": [
+    "mean",
+    "match"
+  ],
+  "click_bonus": 0.04,
+  "seeds": [
+    2026,
+    2027
+  ],
+  "selection_rule": "Primary challenger is match. Mean is a diagnostic control. Run fresh confirmation if development mean Recall500 overall >= baseline, cold gains >=3 distinct users across paired seeds, and there is no cold or tail Top10 net loss.",
+  "description": "Restricted cold and tail catalog using matched anonymous categorical features and normalized embedding81. Replace unprotected candidates within budget500. Reuse frozen MLP and freeze original score distribution statistics for both candidate orderings."
+}

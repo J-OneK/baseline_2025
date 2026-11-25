@@ -1,0 +1,22 @@
+<div class="lab" id="tail-lab" aria-labelledby="tail-lab-title">
+  <h3 id="tail-lab-title">动手：补一个长尾，为什么可能丢掉原有命中？</h3>
+  <p><strong>这是合成手算练习。</strong>为便于看清每个位置，把真实实验的“500候选、保护前10、最多补5个”缩小为“8候选、保护前2、最多补3个”。这里的广告ID与分数安排不代表真实实验成绩。</p>
+  <p>主列表为 <code>[10,20,30,40,50,60,70,80]</code>。广告30是冷启动，40是已有点击的长尾，两者也受保护。教学待处理清单 <code>[60,90,100,90,110]</code> 故意混入杂项：60不符合长尾资格且已在主列表、100已在用户历史、90重复。依次检查训练资格、主列表、历史与重复后，合法新提议为 <code>[90,110]</code>。</p>
+  <p class="source-note">正式的 <code>retrieve_tail()</code> 从资格子集搜索，先排除历史与全部主候选，再取Top-K，本身不会返回头部60或重复90。这里把检查步骤拆开供手算；正式 <code>fuse_tail()</code> 会拒绝头部提议。</p>
+  <div class="controls">
+    <label for="tail-quota">最多补几个
+      <input id="tail-quota" type="range" min="0" max="3" step="1" value="2" aria-describedby="tail-lab-note">
+      <output class="value" id="tail-quota-value" for="tail-quota">2</output>
+    </label>
+    <label for="tail-target">事后评估目标
+      <select id="tail-target" aria-describedby="tail-lab-note">
+        <option value="90" selected>90：可由辅助补回的零点击长尾</option>
+        <option value="80">80：可能因替换丢失的中频广告</option>
+        <option value="30">30：受保护的冷启动</option>
+        <option value="40">40：受保护的有点击长尾</option>
+      </select>
+    </label>
+  </div>
+  <p class="source-note" id="tail-lab-note">目标下拉框只在列表生成后计算命中，绝不参与资格、过滤或融合。保持配额不动、切换目标，候选列表应完全相同；把配额调到3，也最多只能加入2个合法新提议。</p>
+  <div class="lab-output" id="tail-output" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

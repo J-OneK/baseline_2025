@@ -1,0 +1,295 @@
+<section class="chapter" id="data">
+  <div class="chapter-kicker">数据入口 · 理解每个数字代表什么</div>
+  <h2>原始数据、特征与四层编号</h2>
+  <p class="lead">模型最终处理的是整数和浮点数组。第一件事是说明这些数字来自哪张表、怎样连接起来，以及某个整数究竟是广告编号、特征类别，还是数组下标。</p>
+  <div class="checkpoint"><strong>这一章的目标</strong><p>能画出行为、用户、广告和内容向量的关联；能区分单值特征、多值特征和连续向量；能追踪一条广告从 OID 到模型 ID Embedding 的完整路径。</p></div>
+
+  <h3>一份推荐数据集，由多张表共同描述</h3>
+  <p>本项目从 <code>TencentGR-1M/</code> 读取 Parquet。Parquet 是列式文件格式：同一目录可以有多个分片，PyArrow 将这些分片作为一张表扫描。每行可以包含整数，也可以包含列表或嵌套结构。下面的内容用 Python 字典展示表中一行的逻辑结构，原始存储格式仍然是 Parquet。</p>
+  <pre><code>TencentGR-1M/
+├── seq/                       用户的行为序列
+├── user_feat/                 用户的静态属性
+├── item_feat/                 广告的静态属性
+├── mm_emb/emb_81_32_parquet/   本项目读取的32维预计算内容向量
+├── candidate/                 官方候选广告表，当前项目用于覆盖审计
+└── indexer.pkl                官方提供的ID和类别值映射</code></pre>
+  <div class="table-wrap"><table><thead><tr><th>数据表</th><th>一行代表什么</th><th>关键字段</th><th>当前主链路怎样使用</th></tr></thead><tbody>
+    <tr><td><code>seq</code></td><td>一个用户的行为列表</td><td><code>user_id</code>、<code>seq</code>；事件中有 <code>item_id/action_type/timestamp</code></td><td>构造历史、训练监督和留出目标</td></tr>
+    <tr><td><code>user_feat</code></td><td>一个用户的属性</td><td>用户RID、4个单值字段、4个多值字段</td><td>构造用户 token</td></tr>
+    <tr><td><code>item_feat</code></td><td>一个广告的属性</td><td>广告RID、13个单值字段</td><td>构造广告表示</td></tr>
+    <tr><td><code>emb_81_32_parquet</code></td><td>一个广告的32维向量</td><td><code>anonymous_cid</code> 是字符串形式的广告OID；<code>emb</code> 是浮点列表</td><td>作为广告编码器的一个内容分支输入</td></tr>
+    <tr><td><code>candidate</code></td><td>一个官方候选广告</td><td>广告OID、<code>retrieval_id</code>、结构化属性</td><td>统计官方候选对本地留出目标的覆盖</td></tr>
+    <tr><td><code>indexer.pkl</code></td><td>Python映射字典</td><td><code>i/u/f</code> 等映射</td><td>OID关联，以及类别词表大小等信息</td></tr>
+  </tbody></table></div>
+
+  <h3>实际数据长这样</h3>
+  <p>以下是本地数据中抽取的记录，每张表分别取样，它们不一定属于同一个用户或同一个广告。仅展示部分字段和向量元素。</p>
+  <pre><code># seq：一行的前三个事件
+{
+  "user_id": 953188,
+  "seq": [
+    {"item_id": 2905777, "action_type": 0, "timestamp": 1745919240},
+    {"item_id": 728757,  "action_type": 0, "timestamp": 1745919475},
+    {"item_id": 3161041, "action_type": 0, "timestamp": 1746024819}
+  ]
+}
+
+# user_feat：单值与多值并存
+{
+  "user_id": 19,
+  "103": 36, "104": 2, "105": 7, "109": 2,
+  "106": [6], "107": [15], "108": None, "110": None
+}
+
+# item_feat：一条广告记录的部分属性
+{"item_id": 26, "100": 4, "117": 382, "118": 692}
+
+# 81号内容向量：这里列出32个元素中的前4个
+{
+  "anonymous_cid": "20000000029",
+  "emb": [0.1540394574, -0.2112597078, 0.1163704768, -0.2093958408]
+}</code></pre>
+  <p>原始行为 <code>action_type=0</code> 表示曝光，<code>1</code> 表示点击，实际文件还存在缺失动作。项目清洗后会重新编码动作，后文给出对照。匿名字段 <code>100/103/106</code> 的业务含义没有公开；代码按类别特征处理，不能将某个字段直接解释为年龄或性别。</p>
+
+  <h3>字段分组：单值、多值与内容向量</h3>
+  {{code:taac_retrieval/prepare.py:16:20}}
+  <p><code>ITEM_FIELDS</code> 列出13个广告单值离散字段，<code>USER_FIELDS</code> 列出4个用户单值离散字段，<code>USER_ARRAY_FIELDS</code> 列出4个用户多值离散字段。它们是根据原始列名在代码中声明的分组，读取时显式选择这些列。一个单值字段如 <code>103=36</code>，一次查一个类别；一个多值字段如 <code>106=[3,8,12]</code>，查三个类别的 Embedding 后求和。</p>
+  <div class="formula">多值字段表示：<var>e</var><sub>106</sub>(<var>u</var>) = ∑<sub><var>v</var> ∈ feature<sub>106</sub>(<var>u</var>)</sub> Embedding<sub>106</sub>(<var>v</var>)</div>
+  <p>这里的数组长度表示取值个数，和单个 Embedding 的32维是两个概念。81号向量则已经是预先计算的32个连续浮点数，不会逐元素当类别查表；模型会使用一个线性层投影它。</p>
+  <p><code>PROTOCOL_VERSION=2</code> 是代码定义的预处理协议标记，会进入缓存配置检查。它不属于数据字段，也不参与模型输入。现有历史没有说明从1到2的具体迁移，教程只按当前代码解释它的作用。</p>
+
+  <h3>同一广告，为什么会出现四套整数</h3>
+  <p>原始数据已经做过官方重映射；为了只存储抽样目录，项目又生成自己的紧凑映射；为了不给未训练广告分配独立ID参数，又增加一个训练ID查找表。它们依次承担不同工作：</p>
+  <div class="table-wrap"><table><thead><tr><th>名称</th><th>谁生成</th><th>解决什么问题</th><th>查找方式</th></tr></thead><tbody>
+    <tr><td>OID</td><td>数据集提供的原始标识</td><td>关联内容向量、输出最终广告标识</td><td><code>indexer['i']</code> 提供 OID→RID</td></tr>
+    <tr><td>RID</td><td>官方映射</td><td>行为表和属性表中的整数键</td><td><code>rid_to_local[RID]</code> 得到 local ID</td></tr>
+    <tr><td>local ID</td><td><code>prepare.py</code></td><td>让本项目数组按0…N紧凑存储</td><td><code>catalog_rids[local]</code>、<code>catalog_oids[local]</code> 反查</td></tr>
+    <tr><td>ID Embedding 行号</td><td>训练频次决定</td><td>只给训练可见广告分配独立ID参数</td><td><code>item_id_lookup[local]</code></td></tr>
+  </tbody></table></div>
+  <p>官方映射中的实际例子是 <code>indexer['i'][20004268480] = 1</code>，即某个广告OID对应官方RID 1。它在本项目是否出现、被映射到哪个local ID，要由本次抽样目录决定，不能从这个映射单独得出。</p>
+  <div class="example"><strong>一个明确标为合成的映射例子</strong><pre><code>本次目录的 catalog_rids = [0, 2, 6, 9]
+所以：RID 2 → local 1；RID 6 → local 2；RID 9 → local 3
+
+若 train_counts = [0, 3, 0, 7]，则
+item_id_lookup = [0, 1, 0, 2]
+
+RID 6 → local 2 → ID Embedding 第0行（训练未见，共享OOV）
+RID 9 → local 3 → ID Embedding 第2行（训练见过）</code></pre></div>
+  <p>训练未见广告依然有目录行、OID和静态属性，也可以被内容编码器计算向量。它没有独立的训练ID参数；能否被成功推荐，要由共享属性与内容分支的泛化能力决定。</p>
+
+  <h3>这次教程用哪一条序列贯穿全流程</h3>
+  <p>后续使用下表作为<strong>可控合成教学序列</strong>。它不是公开数据集中抽出的真实用户，而是专门覆盖点击、曝光、未知动作、重复广告和留出目标的例子。表中的广告整数先作为输入RID；由于本例的RID连续，为便于手算可把它们的local ID也设为同样数字。真实数据通常不相等。</p>
+  <div class="table-wrap"><table><thead><tr><th>序列下标</th><th>时间</th><th>广告</th><th>原始动作</th><th>教学用途</th></tr></thead><tbody>
+    <tr><td>0</td><td>10</td><td>1</td><td>曝光0</td><td>训练历史</td></tr>
+    <tr><td>1</td><td>20</td><td>2</td><td>点击1</td><td>训练中的点击监督</td></tr>
+    <tr><td>2</td><td>30</td><td>3</td><td>未知None</td><td>保留上下文</td></tr>
+    <tr><td>3</td><td>40</td><td>4</td><td>曝光0</td><td>训练历史</td></tr>
+    <tr><td>4</td><td>50</td><td>5</td><td>曝光0</td><td>训练历史末端</td></tr>
+    <tr><td>5</td><td>60</td><td>6</td><td>点击1</td><td>验证目标</td></tr>
+    <tr><td>6</td><td>70</td><td>6</td><td>点击1</td><td>重复广告，不能再作留出目标</td></tr>
+    <tr><td>7</td><td>80</td><td>7</td><td>曝光0</td><td>测试历史末端</td></tr>
+    <tr><td>8</td><td>90</td><td>8</td><td>点击1</td><td>测试目标</td></tr>
+    <tr><td>9</td><td>100</td><td>9</td><td>曝光0</td><td>在测试时间之后，只存在于保留序列和静态目录</td></tr>
+  </tbody></table></div>
+  <p class="source-note">表格对应后续章节所有训练移位与切片数字。局部样本演示设置 <code>max_history=10</code> 以便完整显示；主配置仍是100，所以真实主模型的输入长度为101。</p>
+  <div class="callout"><strong>主角用户与背景用户</strong><p>这张表只展开主角用户。若整个数据集只有这个人，全局训练可见广告池就是1至5，恰好都被他的seen排除，会没有可用负例。配套可运行演示包含主角在内的12个合成用户，由背景用户提供其他训练可见广告；其中广告6和8也在其他用户的训练前缀出现，所以它们在完整演示中属于全局warm广告。不能根据一个人的历史就判定全局冷启动。</p></div>
+  <details class="checkpoint"><summary>自检：用户字段106的列表，与 seq 列表有什么区别？</summary><p><code>106</code> 是某个静态属性的多值取值集合，当前模型将各值向量求和；<code>seq</code> 是有时间顺序和动作的事件列表，使用位置编码、因果注意力处理。二者都采用列表存储，但建模含义和处理方式不同。</p></details>
+</section>
+
+<section class="chapter" id="prepare">
+  <div class="chapter-kicker">数据准备 · 把协议落实为数组</div>
+  <h2>从 Parquet 到可训练缓存</h2>
+  <p class="lead"><code>prepare()</code> 负责把多张表连接成统一目录和用户数组。这里同时决定“训练能看到什么”和“最终评估会检索哪些广告”，因此这些规则本身就是项目实验结论的一部分。</p>
+  <div class="checkpoint"><strong>这一章的目标</strong><p>能手算教学用户的切分位置；知道训练频次和词表在哪个范围统计；能说明候选目录的静态快照假设；能解释为什么扩大实验后要重新冻结评估用户。</p></div>
+
+  <h3>先固定配置与来源，再抽样用户</h3>
+  {{code:taac_retrieval/prepare.py:71:105}}
+  <p><code>source_signature()</code> 对源文件路径、大小、修改时间等信息组成的列表求SHA256，作为缓存来源标记。它没有逐字节哈希所有原始数据。预处理配置还包含抽样上限、种子、历史长度、最小历史、评估人数和协议版本。只有完成标记 <code>metadata.json</code> 存在且配置完全一致，旧缓存才会被复用。</p>
+  <p>用户是从 <code>user_feat</code> 中均匀、无放回抽样的，主方案上限为300,000。随后逐个用户检查行为序列；不满足留出规则的用户被排除，所以历史实测最后保留280,985名用户。抽样上限不等于最终训练人数。</p>
+  {{code:taac_retrieval/prepare.py:107:132}}
+  <p>这里使用分批扫描，并先筛选用户ID，再把少量命中的行转为Python对象。这样不需要把所有原始序列一次性转换成巨大的Python列表。每个用户的 <code>seq</code> 传入下面的 <code>clean_and_split()</code>。</p>
+
+  <h3>清洗与留出：完整读一遍当前函数</h3>
+  {{code:taac_retrieval/prepare.py:27:68}}
+  <div class="table-wrap"><table><thead><tr><th>代码阶段</th><th>实际行为</th><th>为什么这样做</th></tr></thead><tbody>
+    <tr><td>过滤事件</td><td>事件非空、广告ID存在且大于0、时间存在</td><td>后续排序、查表和切片需要有效ID与时间</td></tr>
+    <tr><td>排序与截断</td><td>按时间稳定排序，取最后 <code>max_history</code> 个事件</td><td>固定最大窗口，保留最近行为</td></tr>
+    <tr><td>生成eligible</td><td>点击、广告此前未在窗口出现、严格更早历史足够</td><td>留出一个可以在过滤已见广告后仍被推荐的目标</td></tr>
+    <tr><td>选择test</td><td>最后一个合格点击</td><td>模拟该用户较晚的一次推荐</td></tr>
+    <tr><td>选择val</td><td>时间严格早于test的最后一个合格点击</td><td>先用验证选模型，再评估更晚目标</td></tr>
+    <tr><td>返回</td><td>完整保留序列及 <code>train_cut/val_cut/test_cut/val_pos/test_pos</code></td><td>后续用边界构造不同输入</td></tr>
+  </tbody></table></div>
+  <p><code>seen</code> 会收录曝光、点击和未知动作中的所有广告。先曝光再点击同一广告时，该点击不能成为留出目标；它仍然留在序列中，也可能在训练前缀中提供点击监督。此规则只检查截断后保留的窗口，不能声称知道用户全部生命周期的历史。</p>
+  <p><code>min_history=5</code> 约束目标之前至少有五个严格更早的有效事件。教学样例的广告2虽然是点击，但它之前只有一个事件，所以不是留出候选；广告6在下标5首次出现且是点击，成为候选；下标6再次点击广告6不再合格；下标8首次点击广告8合格。</p>
+  <pre><code>eligible = [(5, 5), (8, 8)]
+val_pos = 5, val_cut = 5
+test_pos = 8, test_cut = 8
+train_cut = val_cut = 5
+
+训练事件范围 = items[:5] = [1, 2, 3, 4, 5]
+验证输入历史 = items[:5]，目标 items[5] = 6
+测试输入历史 = items[:8]，目标 items[8] = 8</code></pre>
+  <p>验证点击广告6以及后面的重复点击，在测试时已经是过去，所以可以进入测试历史；模型权重仍然来自训练前缀。测试目标后的广告9不进入训练、验证或测试输入。</p>
+
+  <h3>同时间戳为什么要用 searchsorted(left)</h3>
+  <p><code>pos</code> 是目标事件在数组中的位置，<code>cut</code> 是可见历史的右开边界。时间唯一时常常相等；有相同时间戳时则不同。</p>
+  <pre><code>times = [10, 20, 30, 30, 40]
+# 下标     0   1   2   3   4
+
+目标 pos=3，时间30
+cut = searchsorted(times, 30, side='left') = 2
+历史使用 clean[:2]，只有时间10、20</code></pre>
+  <div class="formula">可见历史 <var>H</var>(<var>t</var>) = {事件 <var>e</var> | time(<var>e</var>) &lt; <var>t</var>}</div>
+  <p>稳定排序只保证同一时间戳内保留原顺序，无法证明它们真的先后发生。严格小于目标时间，才能避免把同时发生的事件当作可用过去。验证目标也必须严格早于测试目标；即使存在两个合格点击，如果都在同一时刻，仍可能无法完成切分而返回 <code>None</code>。</p>
+
+  <h3>动作编码与返回结构</h3>
+  <div class="table-wrap"><table><thead><tr><th>原始动作</th><th>缓存动作</th><th>主click-only方案中的作用</th></tr></thead><tbody>
+    <tr><td>曝光0</td><td>1</td><td>保留历史上下文，不提供正例监督</td></tr>
+    <tr><td>点击1</td><td>2</td><td>保留上下文，目标位置可提供点击监督</td></tr>
+    <tr><td>None或其他动作</td><td>3</td><td>保留上下文，不提供监督，也不成为留出目标</td></tr>
+    <tr><td>补齐/用户token</td><td>0</td><td>占位；与真实未知动作3区分</td></tr>
+  </tbody></table></div>
+  <pre><code># 教学用户的真实函数输出；times在Python中是NumPy数组
+{
+  'items': [1, 2, 3, 4, 5, 6, 6, 7, 8, 9],
+  'actions': [1, 2, 3, 1, 1, 2, 2, 1, 2, 1],
+  'times': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+  'train_cut': 5, 'val_cut': 5, 'test_cut': 8,
+  'val_pos': 5, 'test_pos': 8
+}</code></pre>
+
+  <h3>生成紧凑目录、训练频次与缓存</h3>
+  {{code:taac_retrieval/prepare.py:133:173}}
+  <p>清洗后的每个用户占一行，序列写入固定宽度的数组，未使用位置填0。<code>catalog_rids=np.unique(items)</code> 从<strong>完整保留序列</strong>建立固定广告目录，因此可能包含验证、测试目标和测试时刻之后出现的广告ID。训练频次则只在每个用户的 <code>items[:train_cut]</code> 上统计。</p>
+  <div class="formula">count(<var>i</var>) = ∑<sub><var>u</var></sub> ∑<sub>0 ≤ <var>j</var> &lt; train_cut(<var>u</var>)</sub> 𝟙[items(<var>u</var>, <var>j</var>) = <var>i</var>]</div>
+  <p>这个计数包含所有训练前缀事件，而不只是点击。<code>count(i)=0</code> 才是本项目评估中的广告冷启动定义。某个广告从没在当前用户出现，但在其他用户训练前缀出现过，仍然是全局训练可见广告。</p>
+  <div class="callout warn"><strong>评估假设必须讲准确</strong><p>该项目采用已知公共静态目录的离线实验：广告ID和内容目录可提前知道，但用户的留出行为不进入训练历史。这属于代码中写明的 <em>transductive public static catalog</em> 假设。它没有做到所有用户共享一个全局时间截止点，也不等同于真实生产系统未来新广告上线的回测。静态目录已知与使用未来点击训练参数，是需要分别判断的两件事。</p></div>
+  <p>缓存中的 <code>item_id_lookup</code> 把计数大于0的广告映射到1开始的独立Embedding行；未训练广告映射到0。后续检索目录仍保留所有广告，编码时再使用这张表。</p>
+
+  <h3>广告属性：只在训练可见广告上拟合词表</h3>
+  {{code:taac_retrieval/prepare.py:175:207}}
+  <p>先根据RID将 <code>item_feat</code> 写入按local ID索引的13列矩阵，并把缺失值填0。接着每个字段独立取训练可见广告上的唯一类别值，再将全目录的类别映射到新词表。训练可见集合之外的新类别映射为0。</p>
+  <div class="example"><strong>手算一个字段</strong><pre><code>训练可见广告在100号字段的值：[4, 9, 4]
+加上缺失值0，得到词表 vocabulary=[0, 4, 9]
+
+原值0 → 类别行0
+原值4 → 类别行1
+原值9 → 类别行2
+原值12 → 训练词表未见 → 类别行0
+
+feature_sizes['100'] = 3</code></pre></div>
+  <p><code>feature_sizes[field]</code> 是模型为该字段创建Embedding表需要的行数。广告ID冷启动和属性OOV不是同一个概念：一个训练未见广告仍可能使用训练见过的属性值，从而共享对应参数。</p>
+
+  <h3>用户单值与多值属性</h3>
+  {{code:taac_retrieval/prepare.py:209:230}}
+  <p>被保留用户按RID排序，映射到1开始的内部用户行号；第0行保留给空白。4个单值字段存入 <code>user_sparse.npy</code>，缺失值填0。4个多值字段分别保存为 <code>user_array_106.npy</code> 等：去除列表中的空值，按该字段在保留用户中的最大长度补0。</p>
+  <p>这些用户属性值沿用官方编码，当前代码没有对用户字段再做与广告相同的训练可见广告词表重拟合。当前评估也沿用同一批用户，而不是对训练完全未见的新用户做独立冷启动实验。</p>
+
+  <h3>81号向量：按OID精确关联</h3>
+  {{code:taac_retrieval/prepare.py:231:256}}
+  <p><code>catalog_oids</code> 给出每个local广告的OID。代码先将OID排序，使用二分查找定位向量表中的 <code>anonymous_cid</code>，把字符串键转成64位整数后核对相等。随后检查每条向量恰好32维且没有NaN/无穷值，再写入 <code>item_mm81</code>。</p>
+  <p><code>mm_present</code> 标记哪些广告确实成功取得有效向量；没匹配到或向量无效时，该行保留全0。这个标记用于审计和分桶，不是主模型额外的一维输入。内容输入为0时，后续有偏置的线性层仍可能产生共享默认输出。</p>
+
+  <h3>metadata.json 是缓存说明书</h3>
+  {{code:taac_retrieval/prepare.py:257:290}}
+  <p>真实用户和广告数据存储在配套 <code>.npy</code> 数组中；JSON负责记录配置、规模、字段分组、词表大小、内容覆盖率和协议说明。主方案历史缓存的重要实际值为：</p>
+  <pre><code>{
+  "users": 280985,
+  "catalog_items": 2708122,
+  "training_events": 19361659,
+  "train_seen_items": 2385886,
+  "evaluation_users_per_split": 10000
+}</code></pre>
+  <p><code>candidate</code> 表只用于统计官方候选覆盖；当前项目的检索候选是全部2,708,122个目录广告，而不是官方66万候选。最后才写出 <code>metadata.json</code>，表示整次准备完成，避免中断的半成品被误当成完整缓存。</p>
+
+  <h3>为什么还要 freeze_cohort()</h3>
+  {{code:taac_retrieval/cohorts.py:13:32}}
+  <p>早期100,000抽样实验已经查看过2,000名用户的测试表现。扩大实验时，代码先从大缓存中按源表中的用户RID排除这2,000名用户，再用种子3107选择10,000名用户，保存固定行号与SHA256。主训练、评估和不同种子模型使用同一个固定队列。</p>
+  <p>验证与测试使用的是这同一批10,000名用户的不同时间目标，不是互不相交的两批用户。扩展的三种子确认阶段用新队列减少先前小实验测试反馈的影响；后来的冷启动和深度研究又复用了验证队列，其结论属于开发探索。</p>
+  <details class="checkpoint"><summary>自检：为什么items数组里出现验证目标，不等于训练看到了验证点击？</summary><p>完整数组是统一存储容器。训练实际取 <code>items[:train_cut]</code>；目标虽存在于后面的存储位置，但不进入训练上下文或训练监督。另一方面，全保留序列会影响静态目录的存在性，所以该协议仍应描述为已知公共目录的逐用户时间留出。</p></details>
+  <details class="checkpoint"><summary>自检：min_history=5为何不保证至少有5个点击训练样本？</summary><p>它统计的是严格更早的有效事件数，曝光和未知事件也计数。主模型之后只在目标动作编码为2的位置计算损失，某个合格用户甚至可能没有有效训练点击位置；训练循环会跳过整批有效位置数为0的情况。</p></details>
+</section>
+
+<section class="chapter" id="dataset">
+  <div class="chapter-kicker">样本构造 · 亲手对齐输入与目标</div>
+  <h2>一个用户怎样变成训练张量</h2>
+  <p class="lead">数组缓存告诉我们事件在哪里，<code>SequenceDataset</code> 则决定模型在每个位置看到什么、预测什么。这一章用相同教学用户，把补齐、用户token、下一事件移位和点击监督逐列展开。</p>
+  <div class="checkpoint"><strong>这一章的目标</strong><p>能手写train/val/test三种样本；能区分历史动作与目标动作；知道用户token为什么用广告0占位；能解释负采样排除的seen为什么比移位后的输入多一个末尾事件。</p></div>
+
+  <h3>先加载数组，避免反复解析原始表</h3>
+  {{code:taac_retrieval/data.py:11:32}}
+  <p><code>PreparedData</code> 读取 <code>metadata.json</code> 和若干数组。<code>np.load(..., mmap_mode='c')</code> 使用写时复制的内存映射：数据可按需访问，修改映射不回写原文件。它不等于把所有数组一次性复制成Python对象。模型还会将所需特征数组转换成张量buffer，设备内存的实际占用仍要单独考虑。</p>
+  <p><code>num_users</code> 来自用户行数，<code>num_items</code> 来自目录长度减去0号占位行。冻结队列可通过 <code>set_eval_indices()</code> 覆盖默认评估索引；检查去重、非空和有效范围，防止不同实验不小心评估不同用户。</p>
+
+  <h3>make_input：左补齐 + 显式用户token</h3>
+  {{code:taac_retrieval/data.py:35:47}}
+  <p>历史上限为 <var>H</var> 时，输入长度固定为 <var>L</var>=<var>H</var>+1，多出来的位置用于用户token。保留历史放在最右侧，用户token放在历史前一格，剩余左侧位置是PAD。</p>
+  <div class="formula">start = (<var>H</var> + 1) − 历史事件数 − 1</div>
+  <p>主配置 <var>H</var>=100，所以 <var>L</var>=101；下面演示 <var>H</var>=10、<var>L</var>=11，算法完全相同。</p>
+  <div class="table-wrap"><table><thead><tr><th>数组</th><th>它描述什么</th><th>0/1/2等编码</th></tr></thead><tbody>
+    <tr><td><code>items</code></td><td>这个位置的广告local ID</td><td>真实广告大于0；PAD和用户token的广告ID占位均为0</td></tr>
+    <tr><td><code>kinds</code></td><td>这个位置的token类型</td><td>0=PAD、1=广告、2=用户token</td></tr>
+    <tr><td><code>actions</code></td><td>这个输入事件的历史动作</td><td>0=PAD/用户、1=曝光、2=点击、3=未知</td></tr>
+  </tbody></table></div>
+  <p>用户token位置的 <code>items=0</code> 不表示它是PAD；模型依据 <code>kinds=2</code> 把用户属性编码放进去。<code>user</code> 字段提供内部用户行号，且 <code>user=row+1</code>，为第0行留出占位。</p>
+
+  <h3>训练：将整段前缀右移一格作为预测目标</h3>
+  {{code:taac_retrieval/data.py:50:77}}
+  <p>训练遍历全部保留用户；验证和测试只遍历冻结评估队列。每个用户先按当前split的cut取前缀。教学用户训练前缀为 <code>[1,2,3,4,5]</code>，内部动作是 <code>[1,2,3,1,1]</code>。</p>
+  <p>代码传给 <code>make_input()</code> 的是 <code>prefix[:-1]</code>：训练输入中的广告为 <code>[1,2,3,4]</code>，右对齐的正目标则是完整前缀 <code>[1,2,3,4,5]</code>。用户token自然补上第一个预测位置：</p>
+  <pre><code>忽略左侧PAD，只看有效位置：
+输入token          U    1    2    3    4
+positive           1    2    3    4    5
+target_actions     1    2    3    1    1
+click-only监督     ×    ✓    ×    ×    ×</code></pre>
+  <p>当前主模型只监督目标动作是点击的位置。因此这个用户贡献的唯一InfoNCE正例，是“看到用户信息及广告1的上下文 → 预测点击广告2”。广告2的点击可以作为后面位置的已观察历史；未知动作的广告3也可以作为历史上下文。</p>
+
+  <h3>全部11列展开：与真实函数输出逐项一致</h3>
+  <p>以下数组已用当前 <code>clean_and_split()</code> 和 <code>SequenceDataset.__getitem__()</code> 实际计算核对。表中“U”只用于显示，真实 <code>items</code> 数组在该位置仍然为0。</p>
+  <div class="table-wrap"><table><thead><tr><th>字段 / 下标</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody>
+    <tr><th>可读输入</th><td>PAD</td><td>PAD</td><td>PAD</td><td>PAD</td><td>PAD</td><td>PAD</td><td>U</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+    <tr><th>items</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+    <tr><th>kinds</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+    <tr><th>actions</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>1</td></tr>
+    <tr><th>positive</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+    <tr><th>target_actions</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>1</td><td>1</td></tr>
+    <tr><th>主监督mask</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+  </tbody></table></div>
+  <p><code>actions</code> 与 <code>target_actions</code> 错一格，因为一个描述当前已观察输入，一个描述下一事件的标签。把它们混用，会把“当前输入是否点击”误当成“目标是否点击”。主模型不额外加历史动作Embedding，但仍然保留这些标签用于监督选择与对照实验。</p>
+
+  <h3>seen：整个训练前缀的排除集合</h3>
+  <pre><code>训练样本的 seen = [1,2,3,4,5,0,0,0,0,0]
+移位后的输入广告 = [1,2,3,4]
+它们不完全相同：seen还包含前缀末端广告5。</code></pre>
+  <p>负采样要排除这个用户整个训练前缀中见过的广告。否则最后一个训练事件可能被误当作同一用户其他位置的负例。该策略也会排除某个较早训练位置之后、但仍处于训练前缀内的广告；这属于当前训练负例定义，不能声称每个训练位置的负采样只参考该位置之前的历史。</p>
+  <p>真实负例池来自 <code>train_counts&gt;0</code> 的全局训练可见广告，并从中均匀采样。当前代码允许重复抽中同一负例，所以64个负例是64次采样，不保证64个不同广告。它不读取验证和测试目标来“特别避开答案”。具体损失和采样拒绝逻辑见后续训练章节。</p>
+
+  <h3>验证与测试：保留完整合法历史，预测一个留出目标</h3>
+  <p>验证、测试不会把历史再右移一格。它们直接把该阶段的完整前缀传入 <code>make_input()</code>，让最后一个历史广告对应的位置产生用户查询向量。</p>
+  <pre><code># 验证：cut=5，目标广告6
+items   = [0,0,0,0,0,0,1,2,3,4,5]
+kinds   = [0,0,0,0,0,2,1,1,1,1,1]
+actions = [0,0,0,0,0,0,1,2,3,1,1]
+target  = 6
+
+# 测试：cut=8，目标广告8
+items   = [0,0,0,1,2,3,4,5,6,6,7]
+kinds   = [0,0,2,1,1,1,1,1,1,1,1]
+actions = [0,0,0,1,2,3,1,1,2,2,1]
+target  = 8</code></pre>
+  <p>注意验证输入最后一个广告是5，而不是4。训练中的移位是为了产生多个下一事件监督；验证和测试则需要用完全部可见历史。主模型的 <code>predict()</code> 取序列最后一格表示，因此左补齐也让“最后一格就是最新真实历史”保持一致。</p>
+
+  <h3>一个样本怎样成为 batch</h3>
+  <p>PyTorch DataLoader把多个用户样本堆叠：单用户 <code>items</code> 从 <code>[L]</code> 变成 <code>[B,L]</code>，用户行号从一个整数变成 <code>[B]</code>。在主配置中 <code>L=101</code>，训练 <code>B</code> 通常为128；最后一个batch可以更小。</p>
+  <div class="table-wrap"><table><thead><tr><th>字段</th><th>单用户</th><th>一批用户</th><th>说明</th></tr></thead><tbody>
+    <tr><td>items / kinds / actions</td><td>[L]</td><td>[B,L]</td><td>模型的序列输入</td></tr>
+    <tr><td>user / row</td><td>标量</td><td>[B]</td><td>模型用户行号 / 缓存0起始行号</td></tr>
+    <tr><td>positive / target_actions</td><td>[L]</td><td>[B,L]</td><td>仅训练样本的逐位置目标</td></tr>
+    <tr><td>seen</td><td>[H]</td><td>[B,H]</td><td>仅训练样本的负采样排除历史</td></tr>
+    <tr><td>target</td><td>标量</td><td>[B]</td><td>验证/测试每用户唯一的留出广告</td></tr>
+  </tbody></table></div>
+  <p>模型先产生 <code>[B,L,32]</code> 的全部位置状态。点击mask再选出 <code>M</code> 个有效位置，得到 <code>[M,32]</code>。<code>M</code> 是该batch内的监督位置数，不等于用户数B；教学用户贡献1个位置，别的用户可能贡献多个或零个。</p>
+  <details class="checkpoint"><summary>自检：用户token与PAD的items都是0，模型怎么区分？</summary><p>看 <code>kinds</code>。PAD的kinds=0、用户token的kinds=2；模型用后者注入 <code>encode_users(user)</code>，并用前者处理有效位置与注意力掩码。广告ID数组的0只是这个槽位没有广告ID。</p></details>
+  <details class="checkpoint"><summary>自检：教学用户到底在哪个位置计算click-only损失？</summary><p>H=10时，只有数组下标7的target_actions为2且positive非0。这个位置的输入广告是1，目标是2。下标8的输入广告2虽然发生过点击，但它预测的下一目标广告3是未知动作，因此该位置不参与主方案的点击损失。</p></details>
+  <details class="checkpoint"><summary>自检：若训练前缀为[A,B,C]，忽略PAD后应当怎么对齐？</summary><p>输入为 <code>[U,A,B]</code>，positive为 <code>[A,B,C]</code>。用户token预测A，A位置预测B，B位置预测C；哪些预测位置贡献损失，仍由对应target_actions决定。验证时若合法历史为[A,B,C]，输入则使用 <code>[U,A,B,C]</code>，并在最后一格预测独立留出目标。</p></details>
+</section>

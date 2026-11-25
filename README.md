@@ -1,10 +1,10 @@
-# Tencent Ads Sequential Retrieval
+# Tencent Ads Retrieval and Listwise Ranking
 
 [中文说明](README_CN.md) · [Code walkthrough](docs/code_walkthrough.md) · [Release scope](docs/release.md)
 
 A recommendation retrieval project built on the TAAC 2025 SASRec-style baseline and the public TencentGR-1M data. The main branch contains a complete path from Parquet preparation to exact evaluation, vector export, persisted Faiss indexes, and a local Top-10 recommendation demo.
 
-The selected model uses one causal Transformer block, 32-dimensional representations, click-only supervision, and sampled InfoNCE with 64 negatives. Its contribution is the data/evaluation pipeline, controlled objective comparisons, and faithful inner-product retrieval engineering. It is not an implementation of an entire generative recommendation paper.
+The retriever uses one causal Transformer block, 32-dimensional representations, click-only supervision, and sampled InfoNCE with 64 negatives. The full recommendation path adds content matches for cold and tail ads and reranks the fixed 500 candidates with a channel-aware DCN V2 trained on retrieved lists.
 
 ```text
 Public Parquet → chronological user holdouts → array cache
@@ -17,7 +17,17 @@ user token + causal event history → user vector
 vector export → Faiss HNSW (MIPS → L2) → history filter → Top-10 ad OIDs
 ```
 
-## Recorded results
+## Confirmed ranking results
+
+The locked ranker improved **HR@10 from 2.233% to 2.917%** and **NDCG@10 from 0.01225 to 0.01602** on 6,000 held-out validation users, averaged across two seeds. On the same candidate lists, the paired 95% interval for HR@10 gain was +0.383 to +0.992 percentage points. The content channel recovered two tail targets that made the final Top 10. [Ranking protocol, results and replay](docs/ranking_extension.md)
+
+With the ranking artifacts available, run the full path for a recorded user:
+
+```bash
+python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target
+```
+
+## Historical retrieval and index results
 
 Historical local confirmation used 280,985 eligible users, 2,708,122 fixed candidate ads, 10,000 evaluation users per split, and three seeds (2026–2028).
 
@@ -56,7 +66,7 @@ python scripts/run_main.py --stage recommend --split val --index 0 --device cuda
 
 The default configuration is [configs/main.json](configs/main.json); outputs go to `artifacts/showcase/`. Use the same `--root` value for every stage when choosing another output directory. `--stage all` runs the full pipeline, including test evaluation. Preparation scans the public snapshot and creates both the historical reference cache and the larger cache needed to reproduce the cohort exclusion rule. Full training/evaluation is a workstation workload; `--device cpu` is supported but may be slow. The older `requirements.txt` plus `requirements-project-extra.txt` remain available for an existing legacy environment.
 
-Training selects a checkpoint with validation and skips test labels. The explicit evaluation stage evaluates the frozen checkpoint. Recommendation defaults to validation user 0 in the fixed cohort; `--index` is a cohort position, not an arbitrary public user ID. The output contains ad OIDs, raw inner-product scores, and local timing components. No independent learned ranking model is attached.
+Training selects a checkpoint with validation and skips test labels. The explicit evaluation stage evaluates the frozen checkpoint. Recommendation defaults to validation user 0 in the fixed cohort; `--index` is a cohort position, not an arbitrary public user ID. The output contains ad OIDs, raw inner-product scores, and local timing components. The content channel and listwise ranker have a separate [offline entry point](docs/ranking_extension.md).
 
 ## Read the project
 
@@ -65,8 +75,8 @@ Training selects a checkpoint with validation and skips test labels. The explici
 - [Release and evidence](docs/release.md): historical metrics, artifact identity and remaining limitations.
 - [Branches](docs/branches.md): supervision, cold-start and depth experiments.
 
-`taac_retrieval/` contains the current pipeline. Root-level `model.py`, `dataset.py`, `main.py`, `infer.py` and related files retain the supplied baseline lineage; the current model reuses its attention and feed-forward blocks. The [upstream English documentation](docs/upstream_baseline_en.md) and [Chinese documentation](docs/upstream_baseline_zh.md) remain available. The original objective study and its reproduction runner remain on main because they support the selected model. Later exploratory models live on research branches.
+`taac_retrieval/` contains the current pipeline. Root-level `model.py`, `dataset.py`, `main.py`, `infer.py` and related files retain the supplied baseline lineage; the current model reuses its attention and feed-forward blocks. The [upstream English documentation](docs/upstream_baseline_en.md) and [Chinese documentation](docs/upstream_baseline_zh.md) remain available. The original objective study and its reproduction runner remain on main because they support the selected model. Generative and other exploratory comparisons live on research branches.
 
 ## Scope
 
-This is an offline, per-user holdout study using a public static catalog, not an official private-test result or an online experiment. Cold and tail Top-10 performance remains weak, and there is no separate ranking service. The project uses the supplied 32-dimensional embedding family **81**, not a newly trained text encoder. See the [release notes](docs/release.md) before quoting metrics.
+This is an offline, per-user holdout study using a public static catalog, not an official private-test result or an online experiment. The ranking confirmation and retrieval test use different cohorts and catalog sizes. Cold and tail Top-10 performance remains weak. The project uses the supplied 32-dimensional embedding family **81**, not a newly trained text encoder. See the [release notes](docs/release.md) before quoting metrics.

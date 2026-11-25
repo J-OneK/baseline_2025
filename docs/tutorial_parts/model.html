@@ -1,0 +1,238 @@
+<section class="chapter" id="model">
+  <div class="chapter-kicker">04 · 从特征到可检索的向量</div>
+  <h2>模型：把“广告是什么”和“用户刚做了什么”变成同一种向量</h2>
+  <p class="lead">这一章要完成一张可以自己重画的结构图：广告特征先得到 32 维表示，用户属性组成一个用户 token，二者构成时间序列；一个因果注意力块给每个有效位置生成上下文表示，最后的位置用作检索向量。</p>
+  <div class="checkpoint"><strong>读完应能回答：</strong>480 和 288 从哪里来？用户 token 与补齐位置为何都可能在 <code>items</code> 中写 0？因果掩码允许哪些位置互相看见？为什么训练时有很多状态，推理时只拿一个状态？</div>
+
+  <h3>4.1 先认识模型的接口与主配置</h3>
+  <p>当前主方案实例化 <code>SequenceRetriever</code>，默认 <code>hidden=32</code>、<code>blocks=1</code>、<code>heads=1</code>、<code>dropout=0.2</code>。主模型的 <code>use_actions=False</code>；带动作 embedding 的版本是保留的原始对照之一。模型将输入序列处理成 <code>[B,L,32]</code>，其中 B 是批用户数，L 是含补齐和用户 token 的固定长度。</p>
+  {{code:taac_retrieval/model.py:18:47}}
+  <div class="table-wrap"><table><thead><tr><th>模块/数据</th><th>是否训练</th><th>用途</th></tr></thead><tbody>
+    <tr><td><code>item_emb</code>、<code>user_emb</code></td><td>是</td><td>广告训练 ID、用户 local ID 的查表表示</td></tr>
+    <tr><td><code>sparse_emb[field]</code></td><td>是</td><td>各匿名属性分别拥有独立的 embedding 表</td></tr>
+    <tr><td><code>item_mm81</code></td><td>否，buffer</td><td>数据集提供的 32 维预计算向量</td></tr>
+    <tr><td><code>mm_projection</code>、两侧 DNN</td><td>是</td><td>学习如何使用内容和属性</td></tr>
+    <tr><td>位置 embedding、Q/K/V、FFN、LayerNorm</td><td>是</td><td>学习时间顺序、历史交互和特征变换</td></tr>
+  </tbody></table></div>
+  <p><code>register_buffer(..., persistent=False)</code> 让特征数组跟随模型移动到 CPU/GPU，但不把这些大数组打进 <code>state_dict()</code>。因此读取权重时还需要对应的数据缓存；checkpoint 并非独立包含全量广告特征的压缩包。<code>81</code> 号原始向量不被梯度更新，后面的线性投影会被更新。</p>
+
+  <h3>4.2 广告编码：15 路特征，480 维拼接，压回 32 维</h3>
+  {{code:taac_retrieval/model.py:59:66}}
+  <p><code>ids</code> 是本项目的广告 local ID，可以是一维的候选列表，也可以是 <code>[B,L]</code> 的历史序列，或 <code>[M,64]</code> 的训练负例。PyTorch embedding 和线性层保留所有前导维，因此同一个函数同时服务历史、正例、负例和离线广告向量导出。</p>
+  <ol>
+    <li><code>item_id_lookup[ids]</code> 把广告 local ID 转成训练 ID 表编号。训练没有见过的广告转到 0，训练可见广告有自己的行。</li>
+    <li><code>item_emb(lookup)</code> 产生一组 32 维 ID 特征。</li>
+    <li>13 个广告属性分别查各自的 embedding 表，产生 13 组 32 维特征。</li>
+    <li>原始 <code>item_mm81[ids]</code> 经 <code>mm_projection</code> 产生一组 32 维内容特征。</li>
+    <li>按最后一维拼接，再经一个线性层与 ReLU，得到最终 32 维广告向量。</li>
+  </ol>
+  <div class="formula" role="math">
+    <p>c<sub>i</sub> = [ E<sub>ID</sub>(lookup(i)) ∥ E<sub>100</sub>(f<sub>100</sub>(i)) ∥ ⋯ ∥ E<sub>116</sub>(f<sub>116</sub>(i)) ∥ (W<sub>81</sub>m<sub>i</sub> + b<sub>81</sub>) ]</p>
+    <p>dim(c<sub>i</sub>) = (1 + 13 + 1) × 32 = 480</p>
+    <p>v<sub>i</sub> = ReLU(W<sub>item</sub>c<sub>i</sub> + b<sub>item</sub>) ∈ ℝ<sup>32</sup></p>
+  </div>
+  <p>符号 <code>∥</code> 表示拼接；W 和 b 是可学习的矩阵和偏置。PyTorch 的 <code>nn.Linear(480,32)</code> 对任意一条输入 480 维向量执行这一步。ReLU 的定义是 <code>ReLU(x)=max(0,x)</code>，逐维把负数置零。</p>
+  <div class="example"><strong>接续同一个用户：</strong>训练输入中的广告 1 先取广告 1 的 ID、13 个属性以及 81 向量，再得到 <code>v₁</code>；点击监督的目标广告 2、同批抽出的负例广告也调用同一个 <code>encode_items()</code>。这让“历史里作为输入的广告”和“候选库里作为推荐对象的广告”共享一套编码参数。</div>
+  <div class="callout"><strong>广告冷启动的具体含义：</strong>一个训练未见广告仍然有 local ID，ID 分支会取零行；已知属性和值得利用的 81 向量仍能产生向量。它有表示并不自动保证它排得好：内容分支有没有学到泛化能力，要由冷启动分桶的实测结果回答。广告 local ID 为 0 则是补齐标记，函数末尾的乘法会把整条输出强制清零。</div>
+  <p class="source-note">细节：内容缺失时缓存中的原始 81 向量填零；模型没有单独输入 <code>mm_present</code> 指示位。带偏置的投影和 DNN 仍可能输出非零表示，因此“内容向量填零”与“最终广告向量为零”也不是同一件事。</p>
+
+  <h3>4.3 用户编码：一个 ID、四个单值字段、四个多值字段</h3>
+  {{code:taac_retrieval/model.py:68:74}}
+  <p>用户侧的输入有 9 路：用户 ID 一路，<code>103/104/105/109</code> 四路，<code>106/107/108/110</code> 四路。每路最终都是 32 维，拼接得到 <code>9×32=288</code> 维，再经过 <code>Linear(288,32)+ReLU</code>。</p>
+  <div class="formula" role="math">
+    <p>a<sub>u,f</sub> = Σ<sub>j ∈ 用户 u 的字段 f 的取值列表</sub> E<sub>f</sub>(j)</p>
+    <p>e<sub>u</sub> = ReLU(W<sub>user</sub>[E<sub>user</sub>(u) ∥ 四个单值表示 ∥ 四个求和后的多值表示] + b<sub>user</sub>)</p>
+  </div>
+  <p>多值特征如 <code>[3,8,12]</code> 会先生成 <code>[3,32]</code>，再用 <code>.sum(-2)</code> 对“列表长度”那一维求和，得到 <code>[32]</code>。补齐用的 0 在 embedding 表中为零，不增加求和结果。这里采用求和池化，没有除以列表长度；多值列表长度和重复值可能影响表示的大小。</p>
+  <p>缓存用户行从 1 开始对应模型用户 ID。原始业务用户标识不直接传入 <code>user_emb</code>；已保留用户的映射和特征数组必须相互对齐。当前离线主链路围绕这批固定用户评估，广告冷启动实验也不等于完整的新用户冷启动方案。</p>
+
+  <h3>4.4 把用户与广告放入同一个序列</h3>
+  {{code:taac_retrieval/model.py:76:84}}
+  <p><code>kinds</code> 才决定每个位置是什么：0 是补齐，1 是广告，2 是用户 token。<code>items</code> 在用户 token 位置也写 0，但 <code>kinds=2</code> 会让这个位置接收 <code>encode_users(users)</code>；普通补齐位置的 <code>kinds=0</code> 会让它保持为零。</p>
+  <div class="table-wrap"><table><thead><tr><th>位置类型</th><th><code>item_mask</code></th><th><code>user_mask</code></th><th><code>valid</code></th><th>编码来源</th></tr></thead><tbody>
+    <tr><td>PAD</td><td>False</td><td>False</td><td>False</td><td>零</td></tr>
+    <tr><td>用户 token U</td><td>False</td><td>True</td><td>True</td><td>用户属性向量 e<sub>u</sub></td></tr>
+    <tr><td>广告</td><td>True</td><td>False</td><td>True</td><td>广告向量 v<sub>i</sub></td></tr>
+  </tbody></table></div>
+  <p><code>positions = valid.long().cumsum(1) * valid</code> 让左侧 PAD 的位置编码编号为 0，真实 token 从 1 连续增加。即使两个用户左侧补齐长度不同，它们的第一个真实用户 token 都用位置 1。</p>
+  <pre><code>可见 token： PAD PAD PAD U  A  B  C
+valid：       0   0   0  1  1  1  1
+positions：   0   0   0  1  2  3  4</code></pre>
+  <div class="formula" role="math"><p>x<sub>t</sub> = Dropout(√32 · content<sub>t</sub> + P<sub>position(t)</sub>)，随后对 PAD 位置乘零</p></div>
+  <p>内容向量先乘 <code>sqrt(hidden)</code> 再加位置 embedding。这是本实现对内容与位置信号尺度的设定；不能仅凭该缩放断言效果一定更好，相关收益要靠对照实验检验。Dropout 训练时随机丢弃部分分量并对保留值缩放，<code>eval()</code> 时关闭。</p>
+  <div class="callout"><strong>主模型怎样使用行为类型？</strong><code>use_actions=False</code> 时，不把历史动作 embedding 加到输入；但曝光/未知行为对应的广告仍在历史序列中，而且 <code>target_actions</code> 会在训练时决定监督位置。模型始终分配 <code>action_emb</code>，用于让动作对照版本共享参数的随机初始化可控；主方案不经过该分支时，这张表不通过主损失获得梯度。</div>
+
+  <h3>4.5 因果掩码：每个位置只能看到当前位置及以前的有效输入</h3>
+  {{code:taac_retrieval/model.py:85:90}}
+  <p><code>tril()</code> 生成下三角矩阵。对广告 A 所在输入位置而言，允许读取 U 和 A 的表示，不能读取之后的 B/C。训练输入已经右移，因此 A 位置读取 A 后预测 B，这与“不能看到未来目标 B”一致。</p>
+  <div class="table-wrap"><table><thead><tr><th>查询位置 ↓ / 被读取位置 →</th><th>U</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody>
+    <tr><td>U</td><td>✓</td><td>×</td><td>×</td><td>×</td></tr>
+    <tr><td>A</td><td>✓</td><td>✓</td><td>×</td><td>×</td></tr>
+    <tr><td>B</td><td>✓</td><td>✓</td><td>✓</td><td>×</td></tr>
+    <tr><td>C</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+  </tbody></table></div>
+  <p><code>valid.unsqueeze(1)</code> 再限制 key 侧：有效查询不能读取左侧 PAD。对 PAD 查询行，代码额外允许它关注自己，使其 softmax 不会面对一整行负无穷；这一行为只用于数值稳定，块末尾会再次将 PAD 的状态清零。在本实现传入的布尔 <code>attn_mask</code> 中，<code>True</code> 表示允许关注。</p>
+
+  <h3>4.6 一层自注意力到底计算了什么？</h3>
+  <p>Q 可以理解为“这个位置正在寻找什么”，K 是“各位置提供什么检索线索”，V 是“被聚合的信息”。三者都来自同一输入 X，所以称为自注意力。三个矩阵先由学习到的线性变换产生。</p>
+  <div class="formula" role="math">
+    <p>Q = XW<sub>Q</sub> + b<sub>Q</sub>，K = XW<sub>K</sub> + b<sub>K</sub>，V = XW<sub>V</sub> + b<sub>V</sub></p>
+    <p>S<sub>t,j</sub> = (q<sub>t</sub> · k<sub>j</sub>) / √d<sub>k</sub> + A<sub>t,j</sub>，其中允许位置 A=0，禁止位置 A=−∞</p>
+    <p>α<sub>t,j</sub> = exp(S<sub>t,j</sub>) / Σ<sub>r</sub> exp(S<sub>t,r</sub>)</p>
+    <p>z<sub>t</sub> = Σ<sub>j</sub> α<sub>t,j</sub>v<sub>j</sub>，AttentionOutput = zW<sub>O</sub> + b<sub>O</sub></p>
+  </div>
+  <p>主方案只有一个 head，<code>dₖ=32</code>。Q/K/V 经变形为 <code>[B,1,L,32]</code>，注意力分数是 <code>[B,1,L,L]</code>，输出还原为 <code>[B,L,32]</code>。缩放除以 √d<sub>k</sub>，用于控制点积随维数增长时的尺度，让 softmax 的数值和梯度更容易处理。</p>
+  {{code:model.py:11:63}}
+  <p>类名叫 <code>FlashMultiHeadAttention</code>，当前运行路径会优先调用 PyTorch 的 <code>scaled_dot_product_attention</code>。具体底层使用哪种 attention kernel 还取决于设备、数据类型和可用后端；类名本身不证明一定运行了某种 Flash 内核。源码还保留了显式矩阵乘法、softmax 的回退实现，便于对照上面的数学过程。</p>
+
+  <h3>4.7 残差、FFN 和 LayerNorm：逐项对照当前实现</h3>
+  {{code:taac_retrieval/model.py:91:95}}
+  {{code:model.py:66:79}}
+  <p>注意力先聚合各位置的信息；FFN 再独立变换每个位置的特征。这里的两个 <code>Conv1d(...,kernel_size=1)</code> 等价于逐 token 的两次线性投影，不沿时间维混合邻居。中间宽度仍为 32，没有扩大到常见教材里的 4 倍宽度。</p>
+  <div class="formula" role="math">
+    <p>H′ = LN<sub>attn</sub>(X + Attention(X))</p>
+    <p>F(H′) = Dropout<sub>2</sub>(Linear<sub>2</sub>(ReLU(Dropout<sub>1</sub>(Linear<sub>1</sub>(H′)))))</p>
+    <p>H″ = LN<sub>ffn</sub>(H′ + F(H′))；最后再经过 LN<sub>final</sub> 并将 PAD 清零</p>
+  </div>
+  <p><strong>按当前主分支核对：</strong>根目录的 FFN 函数直接返回两层卷积变换的输出，残差加法发生在外层 <code>hidden + ffn(hidden)</code>，这一处只有一次外部残差。阅读时要同时核对调用方和被调用方，不能只凭函数名想象其中是否已有残差。</p>
+  <div class="formula" role="math">
+    <p>μ = (1/D)Σ<sub>d=1…D</sub>x<sub>d</sub>，σ² = (1/D)Σ<sub>d=1…D</sub>(x<sub>d</sub>−μ)²</p>
+    <p>LN(x)<sub>d</sub> = γ<sub>d</sub>(x<sub>d</sub>−μ)/√(σ²+ε) + β<sub>d</sub>，本实现 ε=10<sup>−8</sup></p>
+  </div>
+  <p>LayerNorm 在每个 token 的 32 个特征维上做归一化，γ/β 是可学习参数。它不对同一个 batch 的不同用户混合统计。残差让输入信息有直接通路流向后面的层，LayerNorm 调整表示尺度；它们仍属于可训练模型的一部分，而不是数据清洗操作。</p>
+
+  <h3>4.8 一条样例如何贯穿编码过程？</h3>
+  <div class="example">
+    <p>主例子的训练前缀是 <code>[1,2,3,4,5]</code>，动作是 <code>[曝光,点击,未知,曝光,曝光]</code>。为了看清数组，教学窗口用 <code>max_history=10</code>，所以 L=11。</p>
+    <pre><code>输入 token： [PAD PAD PAD PAD PAD PAD U  1  2  3  4]
+目标广告：   [ 0   0   0   0   0   0  1  2  3  4  5]
+目标动作：   [ 0   0   0   0   0   0  1  2  3  1  1]
+点击监督：   [ ×   ×   ×   ×   ×   ×  ×  ✓  ×  ×  ×]</code></pre>
+    <p>广告 1 的输入位置生成状态 h<sub>7</sub>；因果掩码让它看到用户 token 和广告 1。该状态用来预测下一事件中的广告 2，而广告 2 恰好是点击，所以该位置参与主模型的 InfoNCE。数组下标从 0 开始，这里的 h<sub>7</sub> 指示例中第 8 个槽位。</p>
+    <p>训练与检索使用不同的读出方式：训练可在多个位置计算 next-event 监督；验证输入为 <code>[U,1,2,3,4,5]</code> 加左补齐，最后广告 5 的状态用于检索目标广告 6；测试输入为 <code>[U,1,2,3,4,5,6,6,7]</code> 加左补齐，最后广告 7 的状态用于检索目标广告 8。</p>
+  </div>
+  {{code:taac_retrieval/model.py:97:103}}
+  <p><code>predict()</code> 返回 <code>[:, -1]</code>，因为 <code>make_input()</code> 使用左补齐，最后一个槽位总是最后的真实历史 token（历史为空时是用户 token）。用户向量与候选广告向量的内积 <code>q·vᵢ</code> 就是检索分数；本项目没有在这里把两侧向量归一化成余弦分数。</p>
+  <div class="table-wrap"><table><thead><tr><th>张量</th><th>教学样例 B=1、L=11</th><th>主配置 L=101</th></tr></thead><tbody>
+    <tr><td>输入广告 ID</td><td><code>[1,11]</code></td><td><code>[B,101]</code></td></tr>
+    <tr><td>广告/用户 token 表示</td><td><code>[1,11,32]</code></td><td><code>[B,101,32]</code></td></tr>
+    <tr><td>因果 allowed 掩码</td><td><code>[1,11,11]</code></td><td><code>[B,101,101]</code></td></tr>
+    <tr><td>最终序列状态</td><td><code>[1,11,32]</code></td><td><code>[B,101,32]</code></td></tr>
+    <tr><td>推理检索向量</td><td><code>[1,32]</code></td><td><code>[B,32]</code></td></tr>
+  </tbody></table></div>
+  <details class="selfcheck"><summary>自测：主模型关闭动作 embedding，为什么曝光和点击还会发挥不同作用？</summary><p>它们对应的广告都进入历史，影响用户上下文；训练时根据 <code>target_actions==2</code> 只选点击目标计算损失。主模型没有把历史动作类型作为额外向量加到 token 上，但监督选择仍使用动作标签。</p></details>
+  <details class="selfcheck"><summary>自测：把 <code>predict()</code> 改为取 <code>[:,0]</code> 会怎样？</summary><p>第 0 槽位常常是左侧 PAD，它的状态被置零；即使不是 PAD，最早位置也没有读取后续历史的权限。当前最后位置的状态才包含全部合法的当前历史信息。</p></details>
+  <details class="selfcheck"><summary>自测：为何看起来只有一层，也包含不少可训练参数？</summary><p>一层描述的是注意力/FFN 块的数量；大规模 ID embedding、属性 embedding、内容投影、两侧 DNN、位置 embedding 和归一化参数都属于模型。结构深度、参数数量、数据与评估难度是不同维度，需分别说明。</p></details>
+</section>
+
+<section class="chapter" id="training">
+  <div class="chapter-kicker">05 · 从一个点击得到梯度</div>
+  <h2>训练：让真实下一次点击比采样广告得分更高</h2>
+  <p class="lead">模型现在能给任意“用户上下文—广告”组合打内积分数，但这些分数最初来自随机参数。训练用历史中的已知点击告诉模型应该提高哪个分数，同时用 64 个采样广告提供竞争对象。</p>
+  <div class="checkpoint"><strong>读完应能回答：</strong>一个 batch 有 B 个用户，为什么损失张量是 M×65？负例从哪里来、是否重复？“正例标签全为 0”与“点击标签是 2”为什么不冲突？best.pt 怎样被选出？</div>
+
+  <h3>5.1 先冻结可复现设置、数据队列与训练身份</h3>
+  {{code:taac_retrieval/train.py:24:42}}
+  {{code:taac_retrieval/train.py:45:76}}
+  <p>训练先固定 Python、NumPy、Torch 和 CUDA 的随机种子，并关闭若干不确定性选项。DataLoader 的随机打乱使用独立 CPU generator，负采样 generator 的种子为 <code>seed+17</code>。模型还记录缓存协议、评估队列 hash、共享参数初始化 hash、训练目标与负采样口径。</p>
+  <p>这些记录用于检查“是否在同一批数据、同一组评估用户和可比初始化下比较方案”。设置同一随机种子并不能让所有不同结构的模型有完全相同的计算路径；改变层数、随机调用顺序或并行索引构建，都可能改变后续随机轨迹。主分支保留的对照会检查匹配条件，并报告多个种子的变化。</p>
+  <p>优化器是 <code>Adam(lr=0.001, betas=(0.9,0.98))</code>。当前全量训练做 5 个 epoch，每次批取 128 个用户。模型选择使用验证集，与是否训练完成 5 轮是两个概念：最终保存的最佳 epoch 可以是第 2 或第 4 轮。</p>
+
+  <h3>5.2 点击 mask：选择的是“目标为点击”的位置</h3>
+  {{code:taac_retrieval/objectives.py:7:18}}
+  {{code:taac_retrieval/train.py:89:100}}
+  <p>主模型的目标名为 <code>click_infonce</code>，因此 <code>supervision_weights()</code> 返回 <code>target_actions==2</code> 的 0/1 权重。<code>positive!=0</code> 同时排除没有真实目标的补齐位置。两个条件相与，得到 <code>mask</code>。</p>
+  <div class="formula" role="math"><p>mask<sub>b,t</sub> = 𝟙[positive<sub>b,t</sub> ≠ 0] · 𝟙[target_action<sub>b,t</sub> = 2]；M = Σ<sub>b,t</sub> mask<sub>b,t</sub></p></div>
+  <p>此处看的是 <code>target_actions</code>，而非输入位置的 <code>actions</code>。输入广告 1 是曝光，但它预测的目标广告 2 是点击，因此广告 1 所在状态被选中。反过来，输入广告 2 虽然是点击，如果它接下来预测的是未知事件广告 3，该位置不参与主损失。</p>
+  <div class="example"><strong>主例子：</strong>训练前缀中只有广告 2 是点击，<code>B=1</code> 时得到 <code>M=1</code>。真实训练中一个用户可能贡献多个有效点击位置，因此 M 可以大于 B；一整个 batch 没有有效点击时，代码直接跳过该 batch。</div>
+
+  <h3>5.3 负例：从训练可见广告中均匀抽取，排除用户完整训练前缀</h3>
+  {{code:taac_retrieval/data.py:80:92}}
+  <p>候选池由 <code>np.flatnonzero(data.train_counts)</code> 产生。只有在某个用户训练前缀中出现过的广告，才进入这个训练负例池；它不是整个离线评估候选库，也不按广告频率加权抽样。</p>
+  <p><code>sample_negatives()</code> 先均匀抽一批广告，再重新采样与 <code>seen</code> 冲突的广告。<code>seen</code> 是该用户完整的训练前缀，包括最后一个训练事件；它不是只截到当前监督位置的历史。因而同一用户训练前缀中稍晚的已知广告也被排除。</p>
+  <div class="example"><p>主例子的 <code>seen</code> 是 <code>{1,2,3,4,5}</code>。假设其他用户让广告 10、11、12、13 进入了训练可见池，本用户可以抽到它们作为负例。</p><p>每个有效位置抽 64 个，允许有放回重复；池子中可选广告少于 64 时仍可以抽出 64 个。实际列序可能像 <code>[10,12,10,13,…]</code>。重复的同一广告在 InfoNCE 分母中按其出现次数计算。</p></div>
+  <p>采样不查询验证/测试目标。若某个未来目标恰好在其他用户的训练中出现，它也可能被本用户采为负例；这是没有未来偏好标签条件下的采样假负例问题。本项目没有通过读取留出标签“修正”负例池。均匀采样的未见广告也不意味着用户已明确不喜欢它。</p>
+  <p>如果一个用户的训练历史已经覆盖整个负例池，就无法抽到合法负例，函数会报错。重试次数用尽也会报错，而不会偷偷把非法历史广告当负例。</p>
+
+  <h3>5.4 从 B×L 个位置变成 M 个学习任务</h3>
+  {{code:taac_retrieval/train.py:113:123}}
+  <div class="table-wrap"><table><thead><tr><th>代码中的量</th><th>形状</th><th>解释</th></tr></thead><tbody>
+    <tr><td><code>encode_history(...)</code></td><td><code>[B,L,32]</code></td><td>所有输入位置的上下文状态</td></tr>
+    <tr><td><code>states = ...[mask]</code></td><td><code>[M,32]</code></td><td>仅保留有效点击目标对应的状态</td></tr>
+    <tr><td><code>positive</code></td><td><code>[M]</code></td><td>每个任务的真实下一点击广告 ID</td></tr>
+    <tr><td><code>row_indices</code></td><td><code>[M]</code></td><td>每个任务原来属于 batch 中哪个用户</td></tr>
+    <tr><td><code>negative</code></td><td><code>[M,64]</code></td><td>每个任务的 64 个采样广告 ID</td></tr>
+    <tr><td><code>encode_items(negative)</code></td><td><code>[M,64,32]</code></td><td>负广告向量</td></tr>
+    <tr><td><code>positive_logits</code></td><td><code>[M]</code></td><td>用户上下文与正广告向量的内积</td></tr>
+    <tr><td><code>negative_logits</code></td><td><code>[M,64]</code></td><td>上下文分别与 64 个负广告的内积</td></tr>
+  </tbody></table></div>
+  <p><code>row_indices = torch.where(mask)[0]</code> 很关键：同一个用户贡献的多个位置会多次出现同一个用户行号。用它索引 <code>batch['seen']</code>，就能为每个任务找回正确的历史排除集。</p>
+  <p><code>torch.einsum('md,mkd-&gt;mk', states, negative_vectors)</code> 的意思是：对每个任务 m，把它的 32 维状态与其第 k 个负广告的 32 维向量逐维相乘求和。维度 d 被求和消掉，结果保留任务 m 和负例 k。</p>
+
+  <h3>5.5 InfoNCE：65 个竞争对象，正例永远放第 0 列</h3>
+  {{code:taac_retrieval/objectives.py:33:37}}
+  <p>正例先通过 <code>unsqueeze(-1)</code> 变成 <code>[M,1]</code>，与 64 个负例沿最后一维拼接，得到 <code>[M,65]</code>。每行代表一个“从 65 个候选里识别真实下一点击”的分类任务。</p>
+  <div class="formula" role="math">
+    <p>s<sup>+</sup> = h · v<sub>positive</sub>，s<sup>−</sup><sub>k</sub> = h · v<sub>negative,k</sub></p>
+    <p>p<sup>+</sup> = exp(s<sup>+</sup>/T) / [exp(s<sup>+</sup>/T) + Σ<sub>k=1…64</sub> exp(s<sup>−</sup><sub>k</sub>/T)]</p>
+    <p>ℓ = −ln p<sup>+</sup>；L = (1/M) Σ<sub>m=1…M</sub> ℓ<sub>m</sub>，主配置 T=1</p>
+  </div>
+  <p>交叉熵函数会在内部稳定地处理 softmax/log-sum-exp，因此源码直接输入未归一化的分数，无需自己先调用 softmax。<code>torch.zeros(M, dtype=torch.long)</code> 的 0 是“正确类别位于第 0 列”，不是原始动作编码；它与点击内部编码 2 并不冲突。</p>
+  <div class="example">
+    <p><strong>可手算的 64 负例例子：</strong>设一个正例分数为 2，所有 64 个负例分数为 0，T=1。这些数值用于解释损失，未冒充历史模型打分。</p>
+    <div class="formula" role="math"><p>p<sup>+</sup> = e²/(e²+64) ≈ 0.103504；ℓ ≈ 2.268145</p></div>
+    <p>若 65 个分数完全相同，每个候选概率均为 1/65，损失是 <code>ln(65)≈4.174387</code>。把正例分数从 0 提到 2 后，损失降低，说明模型更容易从竞争者中识别正例。</p>
+  </div>
+  <div class="formula" role="math">
+    <p>∂ℓ/∂s<sup>+</sup> = (p<sup>+</sup>−1)/T；∂ℓ/∂s<sup>−</sup><sub>k</sub> = p<sup>−</sup><sub>k</sub>/T</p>
+    <p>示例中：正例导数 ≈ −0.896496；每个负例导数 ≈ +0.014008</p>
+  </div>
+  <p>梯度下降沿负梯度方向更新：负的正例分数导数推动正例分数增大，正的负例分数导数推动各负例分数减小。实际更新会通过内积继续传播到上下文编码器、广告特征编码器和 embedding 参数，参数共享会让多个样本的梯度共同影响表示。</p>
+  <p>温度 T 改变 softmax 对分数差的敏感程度，也缩放分数梯度。较低温度通常使概率更集中，但不能仅凭公式断言某个温度在本数据上最优。主项目固定 T=1，不能把未运行的温度调参写成实测结论。这里的分数也不直接等于线上点击概率；训练条件是人为抽取的 1+64 竞争集合。</p>
+
+  <h3>5.6 BCE 对照：对正负样本分别做二分类</h3>
+  {{code:taac_retrieval/objectives.py:21:30}}
+  {{code:taac_retrieval/train.py:101:112}}
+  <div class="formula" role="math">
+    <p>σ(s) = 1/(1+e<sup>−s</sup>)</p>
+    <p>BCE(s,y) = −y ln σ(s) − (1−y) ln(1−σ(s))</p>
+    <p>ℓ<sub>BCE,m</sub> = BCE(s<sup>+</sup><sub>m</sub>,1) + (1/K) Σ<sub>k=1…K</sub> BCE(s<sup>−</sup><sub>m,k</sub>,0)</p>
+    <p>L<sub>weighted</sub> = Σ<sub>m</sub>w<sub>m</sub>ℓ<sub>BCE,m</sub> / Σ<sub>m</sub>w<sub>m</sub></p>
+  </div>
+  <p>BCE 把每个分数与独立的正/负标签对应；InfoNCE 把正负候选放在同一个 softmax 分母竞争。当前多负例 BCE 使用负例损失的<strong>平均值</strong>，而不是把 64 项不加归一化地求和。这让改变负例数量时不会简单地把负例项权重扩大 64 倍。</p>
+  <div class="table-wrap"><table><thead><tr><th>目标</th><th>曝光目标权重</th><th>点击目标权重</th><th>未知目标</th><th>损失</th></tr></thead><tbody>
+    <tr><td><code>all_bce</code></td><td>1</td><td>1</td><td>不监督</td><td>BCE</td></tr>
+    <tr><td><code>weighted_bce</code></td><td>0.1（主研究配置）</td><td>1</td><td>不监督</td><td>加权 BCE</td></tr>
+    <tr><td><code>click_bce</code></td><td>0</td><td>1</td><td>不监督</td><td>BCE，可做 1/64 负例对照</td></tr>
+    <tr><td><code>click_infonce</code></td><td>0</td><td>1</td><td>不监督</td><td>InfoNCE，选定方案为 64 负例</td></tr>
+  </tbody></table></div>
+  <p>原目标 BCE 基线与最终主方案同时改变了监督范围、负例数和损失形式。原始实验保留 click BCE、click BCE-64 等中间对照，帮助区分这些因素。解释总收益时不能把所有变化都归因于某一个公式；两种目标的监督位置数和计算量也不同。</p>
+
+  <h3>5.7 从损失到参数更新：反向传播、梯度裁剪与 Adam</h3>
+  {{code:taac_retrieval/train.py:124:134}}
+  <p>每个 batch 开始时 <code>zero_grad(set_to_none=True)</code> 清除上一批梯度，随后 <code>loss.backward()</code> 沿计算图求导。模型原始特征 buffers 不参与更新；可学习参数的 <code>.grad</code> 会累积本批样本的梯度。</p>
+  <div class="formula" role="math">
+    <p>g ← ∇<sub>θ</sub>L；g ← g · min(1, 5/(‖g‖<sub>2</sub>+δ))</p>
+    <p>m<sub>t</sub> = 0.9m<sub>t−1</sub> + 0.1g<sub>t</sub>；v<sub>t</sub> = 0.98v<sub>t−1</sub> + 0.02g<sub>t</sub>²</p>
+    <p>m̂<sub>t</sub> = m<sub>t</sub>/(1−0.9<sup>t</sup>)；v̂<sub>t</sub> = v<sub>t</sub>/(1−0.98<sup>t</sup>)</p>
+    <p>θ<sub>t</sub> = θ<sub>t−1</sub> − ηm̂<sub>t</sub>/(√v̂<sub>t</sub>+ε)，η=0.001</p>
+  </div>
+  <p>第一行描述全局梯度范数超过 5 时的缩放；δ 表示实现中用于数值稳定的小量。Adam 则用梯度一阶矩和平方梯度二阶矩，分别为不同参数调整步长。这里写的是理解本配置所需的简化公式；代码实际使用 PyTorch 优化器。</p>
+  <p>损失非有限时立即报错，梯度裁剪也设置 <code>error_if_nonfinite=True</code>。这让 NaN/Inf 训练中断并留下可定位的日志，不会继续产出看似正常的指标。训练日志中的 <code>train_loss</code> 按有效监督位置数加权汇总，而非简单平均每个用户或每个 batch。</p>
+
+  <h3>5.8 验证选 epoch，固定之后再打开测试</h3>
+  {{code:taac_retrieval/train.py:137:162}}
+  <p>每个 epoch 结束，模型切换到评估模式，在固定验证队列与完整广告候选库上计算 NDCG@10、HR@10。比较元组 <code>(NDCG@10, HR@10)</code> 先看 NDCG，只有 NDCG 相同才比较 HR；严格大于已有最好成绩才覆盖 <code>best.pt</code>，完全持平时保留更早 epoch。</p>
+  <div class="example"><pre><code>epoch 1：验证 NDCG=0.010 → best.pt 保存 epoch 1
+epoch 2：验证 NDCG=0.014 → 覆盖为 epoch 2
+epoch 3：验证 NDCG=0.013 → 保留 epoch 2
+epoch 4：验证 NDCG=0.012 → 保留 epoch 2
+epoch 5：验证 NDCG=0.011 → 保留 epoch 2
+训练完成：重新加载 epoch 2 的 best.pt</code></pre><p>这是一组解释保存规则的示意成绩，不是本项目某个种子的真实曲线。真实最优 epoch 应查对应 <code>history.json</code> 与 <code>result.json</code>。</p></div>
+  <p>主入口和模型开发研究通过 <code>--skip-test</code> 让训练阶段不评估测试标签。之后独立的 <code>evaluate_checkpoint</code> 阶段评估已经冻结的 checkpoint，现有输出会拒绝被静默覆盖。通用 <code>train.py</code> 也保留不传 <code>--skip-test</code> 时在训练末尾评估一次测试的能力；阅读调用命令才能判断实际运行采用哪条路径。</p>
+  <p><code>best.pt</code> 除权重以外还保存 epoch、构造参数、缓存签名和评估用户下标。推理加载时检查缓存协议并恢复同一评估队列，随后向量导出与索引又用 checkpoint SHA 核对模型身份。保持这条来源链，才能把“某个训练结果”与“某次推荐输出”对应起来。</p>
+  <details class="selfcheck"><summary>自测：原始点击为 1、缓存点击为 2，为什么交叉熵标签又全是 0？</summary><p>原始 1 与缓存 2 用于表达行为类型；交叉熵的 0 是每行 65 个候选中正例所在的列号。它们属于不同的编码空间。</p></details>
+  <details class="selfcheck"><summary>自测：每个用户只留出一个测试目标，训练是否也只能有一个正样本？</summary><p>训练前缀使用所有满足目标动作要求的位置，一个用户可以有多个点击监督位置。每用户单个留出目标只是验证/测试协议，不限制训练前缀中可用点击的数量。</p></details>
+  <details class="selfcheck"><summary>自测：为什么从 <code>batch['seen']</code> 里排除广告 5，即使广告 5 没有放进训练输入？</summary><p>输入为了 next-event 对齐用了 <code>prefix[:-1]</code>，最后一个训练事件在 <code>positive</code> 中。完整训练前缀仍然已知广告 5，因此 <code>seen</code> 包括它，避免把它当该用户的负例。</p></details>
+  <details class="selfcheck"><summary>自测：InfoNCE 损失更低是否就证明完整候选库的 HR 更高？</summary><p>损失评价的是训练采样集合上的相对区分；最终指标还取决于全库排名、历史过滤、泛化和候选分布。需要独立验证集的完整检索指标选择 checkpoint，不能直接按训练损失宣布推荐更好。</p></details>
+</section>

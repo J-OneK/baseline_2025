@@ -1,10 +1,10 @@
-# 腾讯广告序列召回与向量检索
+# 腾讯广告序列召回与列表排序
 
 [English](README.md) · [完整代码导读](docs/code_walkthrough.md) · [版本与指标口径](docs/release.md)
 
 基于 TAAC 2025 提供的 SASRec 风格基线和公开 TencentGR-1M 数据，完成“Parquet 数据处理 → 序列模型训练 → 全候选精确评估 → 向量导出 → Faiss 持久化索引 → 推荐演示”的完整召回项目。
 
-主分支固定为 **1 层因果 Transformer、32 维表示、仅点击监督、InfoNCE-64**。项目重点是数据与评估协议、训练目标对照，以及保持原始内积语义的检索工程。它没有复现整篇生成式推荐论文，也没有独立的精排模型。
+主召回使用 **1 层因果 Transformer、32 维表示、仅点击监督、InfoNCE-64**。完整推荐方案加入 **同组内容辅助召回和 DCN V2 列表排序**。在固定 500 条候选内学习下一次点击的相对顺序。
 
 ```text
 公开 Parquet → 清洗与逐用户时间留出 → 数组缓存
@@ -17,7 +17,17 @@
 向量导出 → MIPS→L2 HNSW → 历史广告过滤 → Top-10 广告原始 ID
 ```
 
-## 已有实验结果
+## 完整推荐结果
+
+在两种子、6,000 名独立确认用户上，固定合并候选，比较内容 MLP 原融合分和通道感知 DCN V2。**HR@10 从 2.233% 到 2.917%，NDCG@10 从 0.01225 到 0.01602**。HR 差值的 95% 配对区间为 +0.383～+0.992 个百分点。两位用户的长尾目标经辅助召回与排序进入前十。[排序链路与结果](docs/ranking_extension.md)
+
+已有排序产物时，可现场重算一个实际用户的候选和推荐：
+
+```bash
+python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target
+```
+
+## 主召回与索引的历史实验
 
 历史确认实验包含 280,985 名有效用户、2,708,122 个固定候选广告，验证和测试各 10,000 名用户，种子为 2026、2027、2028。
 
@@ -65,8 +75,8 @@ python scripts/run_main.py --stage recommend --split val --index 0 --device cuda
 - [版本与证据边界](docs/release.md)：主模型、历史结果、可复现性及局限。
 - [分支说明](docs/branches.md)：监督方式、冷启动与模型深度的后续尝试。
 
-当前项目代码位于 `taac_retrieval/`。根目录的 `model.py`、`dataset.py`、`main.py`、`infer.py` 等保留原始基线来源；当前模型复用其中的注意力与前馈模块。[上游中文说明](docs/upstream_baseline_zh.md)和[英文说明](docs/upstream_baseline_en.md)保留作参考。主分支保留支持主方案选择的原始目标消融，之后的探索放在 `research/*` 分支。
+当前项目代码位于 `taac_retrieval/`。根目录的 `model.py`、`dataset.py`、`main.py`、`infer.py` 等保留原始基线来源；当前模型复用其中的注意力与前馈模块。[上游中文说明](docs/upstream_baseline_zh.md)和[英文说明](docs/upstream_baseline_en.md)保留作参考。主分支也保留列表排序消融与分桶报告。生成式召回等方法的对照见[研究分支](docs/branches.md)。
 
 ## 使用边界
 
-这是公开静态数据上的逐用户时间留出实验，不是官方私有测试成绩或线上 A/B。冷启动、长尾的 Top-10 仍然较弱。项目只接入现成的 **81 号 32 维向量**，没有训练新的文本编码器或实现语义 ID 自回归生成。简历及展示引用指标前，请先阅读[版本说明](docs/release.md)。
+这是公开静态数据上的逐用户时间留出实验，不是官方私有测试成绩或线上 A/B。排序确认与三种子召回测试使用不同缓存和用户队列。冷启动、长尾的 Top-10 仍然较弱。现成的 **81 号 32 维向量**同时用于广告编码和辅助候选匹配。简历及展示引用指标前，请先阅读[版本说明](docs/release.md)。

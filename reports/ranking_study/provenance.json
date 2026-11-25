@@ -1,0 +1,86 @@
+{
+  "base_main_commit": "398a3fb",
+  "branch": "research/ranking",
+  "first_stage_registration": {
+    "registered_at_utc": "2026-11-25T05:21:01.048114+00:00",
+    "test_evaluated": false
+  },
+  "followup_registration": {
+    "registered_at_utc": "2026-11-25T05:29:49.700247+00:00",
+    "phase": "Exploratory after first-stage frozen-vector ranking results",
+    "test_evaluated": false,
+    "first_stage_results_sha256": {
+      "mean_mlp_2026": "a4cda811f244b6456a4f973aefab2395396f8481a8c34549b93a57d13855f609",
+      "mean_mlp_2027": "821918ae75d5ddf39e1f6a36674efc1c625fae98074ba28009dceb888aa35e9b",
+      "din_attention_2026": "2f992bfb12c9366cd61b9562f92e88996fa50e5f64b2908a22b33c1eb3a66da1",
+      "din_attention_2027": "649f4273a15811c58b18980ab372b4fe34bddf19feb01dba5d2023bd8dbeaf72"
+    }
+  },
+  "first_stage_sources": {
+    "configs/ranking_study.json": "527290825da470017e06026085ecd2eb65f600f7917a25168f3d3a3209d0f498",
+    "model.py": "ef0536aee1bbfe29c77bb3fc031583c2b9cedcc855350af0f55e5f0773bd54c0",
+    "scripts/run_ranking_study.py": "dddb0694c17c51819fa2e5158d9f74c95534570b01076705410f62b563729074",
+    "taac_retrieval/coverage.py": "2355b917c54013b3bffb79a638e3e8897b606bf1c83393783ba841588466686b",
+    "taac_retrieval/data.py": "d78e70868643ed4ff5a2cdd0dad39334c65f186d644642d9b02fce591d82f428",
+    "taac_retrieval/evaluate_checkpoint.py": "ae7825dbde3ad6d5cc5ad00cfd8a7541469ef094cb3624f05932811218cf0171",
+    "taac_retrieval/metrics.py": "c15e68465809a4afc7a90505db16a03f6b04384e1a9f979e5bd9b54b259cb91b",
+    "taac_retrieval/model.py": "ebd211b566a970d507e8dcc6820870782384861e194d382d184764419063cad5",
+    "taac_retrieval/ranking_data.py": "2dd9db9f5620d9f3023add1be33a9ef7d9fa8a3790c3656368d444852340762c",
+    "taac_retrieval/ranking_metrics.py": "9f4483d48a0471a6cd6b753a5c296abd24fa79aa5f12f9c208713f3bbfd987e8",
+    "taac_retrieval/ranking_model.py": "2f2fe6a29845fa093d6e136d2f43d083969f07d3ffbd220b785a8c7975574393",
+    "taac_retrieval/ranking_train.py": "18620c3cc08daa9ad6e400664c7d418a4a0ce557d3f28b7cc53704fec6091d34",
+    "taac_retrieval/train.py": "871b8ab575e4b11fb1aa07f5336886730a160fcdc875d253d56543ba231f30c7",
+    "tests/test_ranking.py": "d915948814950294ab235c2f55d067903c48b576b1442c24d1354c1d3e9ec032"
+  },
+  "followup_sources": {
+    "configs/ranking_study.json": "527290825da470017e06026085ecd2eb65f600f7917a25168f3d3a3209d0f498",
+    "model.py": "ef0536aee1bbfe29c77bb3fc031583c2b9cedcc855350af0f55e5f0773bd54c0",
+    "scripts/run_ranking_study.py": "dddb0694c17c51819fa2e5158d9f74c95534570b01076705410f62b563729074",
+    "taac_retrieval/coverage.py": "2355b917c54013b3bffb79a638e3e8897b606bf1c83393783ba841588466686b",
+    "taac_retrieval/data.py": "d78e70868643ed4ff5a2cdd0dad39334c65f186d644642d9b02fce591d82f428",
+    "taac_retrieval/evaluate_checkpoint.py": "ae7825dbde3ad6d5cc5ad00cfd8a7541469ef094cb3624f05932811218cf0171",
+    "taac_retrieval/metrics.py": "c15e68465809a4afc7a90505db16a03f6b04384e1a9f979e5bd9b54b259cb91b",
+    "taac_retrieval/model.py": "ebd211b566a970d507e8dcc6820870782384861e194d382d184764419063cad5",
+    "taac_retrieval/ranking_data.py": "2dd9db9f5620d9f3023add1be33a9ef7d9fa8a3790c3656368d444852340762c",
+    "taac_retrieval/ranking_metrics.py": "9f4483d48a0471a6cd6b753a5c296abd24fa79aa5f12f9c208713f3bbfd987e8",
+    "taac_retrieval/ranking_model.py": "2f2fe6a29845fa093d6e136d2f43d083969f07d3ffbd220b785a8c7975574393",
+    "taac_retrieval/ranking_train.py": "18620c3cc08daa9ad6e400664c7d418a4a0ce557d3f28b7cc53704fec6091d34",
+    "taac_retrieval/train.py": "871b8ab575e4b11fb1aa07f5336886730a160fcdc875d253d56543ba231f30c7",
+    "tests/test_ranking.py": "d915948814950294ab235c2f55d067903c48b576b1442c24d1354c1d3e9ec032",
+    "configs/ranking_content_study.json": "c863c7c0052d40a33c2da1e0731470f15fa59e98cdaf7d2ce19e0fbaf60403fc",
+    "taac_retrieval/content_ranker.py": "4e7ce84317840674680cd9e8a4f6f069d2c4957abb0fdf849d780cefdf9f41d9",
+    "taac_retrieval/content_ranker_train.py": "e400f60a304c05099883119ce96c6efc2f3ff2f0b2f525191516d76dd1008984",
+    "scripts/run_content_ranking_study.py": "9861453242f572c614b3043e732e026cc072635142d62f225948f6d4ef966a19",
+    "tests/test_content_ranker.py": "9713afe027b60e77c1e7bdb269bf6dec1cc0078036d16ca6b93d9a8ce4e44f78"
+  },
+  "input_identity": {
+    "examples": {
+      "pointval_cuts.npy": "7146afb3e329926da84d47efc62b63ab5a418f2dfdc45308f4b0febbe10e64a4",
+      "train_cuts.npy": "1e1a5cc1557773a7d2ebe8735b2a61e815fb2545202d6663b346129f4ec94559",
+      "statistics_cut.npy": "fd27f383a88e4a182a6b605b774b4db453600b39cce685e11bf0e75c44eadf9e",
+      "pointval_history.npy": "c27d3823cb5d1470cf5216962ea3f92c3b108a8a15f67e831975011799fc7ef8",
+      "stats_events.npy": "5cd55bedca65419d21a1149f45202d8735274bf9ae2172e4012cd66f3a8e923b",
+      "pointval_positions.npy": "3dbdd9feaa5266b8fcc74e2e1b6f82962943bfa2a45fe9d89910a73442a66e21",
+      "pointval_items.npy": "edd70b45f9c93c11c57e9e9a3855c76abb68341f9bf8657007e2512c1b6d7187",
+      "train_items.npy": "865a81b9bd9c5bc981070c2ee273dfe438e19fcfab160cd83bd4fcea305e95de",
+      "train_rows.npy": "29813008ed97467d08a2d8088fac2a93847f05f4cbcce2951fdda5890f2e3ad1",
+      "stats_clicks.npy": "453102e424c9d739a80dc63d8a4cd3418f5e1b25218b2b27e8521aa3872d24d2",
+      "train_positions.npy": "a4431a97da489094eea566adb6539b13c8538f40243e3208254abbcb715d3b9a",
+      "pointval_labels.npy": "44bf52084bab2945b8c4106939370dd70fc9b5b6ba705aa71f393cf4a711d0e4",
+      "train_history.npy": "30ee9d4a8e72680ed614684efb5c334938d75f9c11b6b309e5062b074231de39",
+      "train_labels.npy": "2338950e0c723a55490f3c2bce0b49790972f36d1586c53f3aeab86e120c57fa",
+      "pointval_rows.npy": "f5880c2afa93964527953418cd5d39cdeebb9f22d24cbf94001d1d1f1697c479"
+    },
+    "features": {
+      "2026": {
+        "metadata_sha256": "f959d6173829c5e9e9c550a79fb1e625ed987d026c4af3eb70e7fbd30826d90e",
+        "checkpoint_sha256": "4e37fb0ad3cd1ccd981e019d6d0bee7a56a176b9dcaa6113b019583dca23d2ee"
+      },
+      "2027": {
+        "metadata_sha256": "0f00bb48b69bd968c4842854da178e6092a21a3708205fa4cadfab28ee721905",
+        "checkpoint_sha256": "ceadbadfd8fce3cb7519263e6e4c62d2b4f3ed73ee027ca04705ee74ffd98483"
+      }
+    }
+  },
+  "test_evaluated": false
+}

@@ -1,0 +1,131 @@
+{
+  "cohorts": {
+    "config": {
+      "ranking_config": "configs/ranking_study.json",
+      "group_config": "configs/group_recall.json",
+      "output": "artifacts/channel_rank_v1",
+      "fit_users": 24000,
+      "confirmation_users": 6000,
+      "cohort_seed": 29729,
+      "seeds": [
+        2026,
+        2027
+      ],
+      "epochs": 5,
+      "batch_size": 128,
+      "lr": 0.001,
+      "width": 32,
+      "cross_rank": 8,
+      "rare_weight": 2,
+      "l2_residual": 0.01,
+      "residual_scales": [
+        0.25,
+        0.5,
+        1
+      ],
+      "protocol": "Ranker learns a one-click candidate-list objective on distinct user held-out clicks outside prior evaluation cohorts. Frozen InfoNCE/CTR scores, fixed protected Top500 augmented with history proposals. Identical data across basic MLP, channel MLP and low-rank DCN-V2. Choose via paired development results. Fresh6k is reserved until lock."
+    },
+    "previous_cohorts_source_sha256": "bf65286f7157faf23b3195dd930bebd10506f3bb05f3c72f01309219424a2777",
+    "fit_population": 68630,
+    "cohorts": {
+      "fit": {
+        "users": 24000,
+        "rows_sha256": "5d8214d209f71d3733c2f77d349bb2fe9d84623d55ddc518789a3288da83d1e7"
+      },
+      "dev": {
+        "users": 5000,
+        "rows_sha256": "81be39b86ff797d7514f828574fdb44c454960273d394fcb67503a567286fc99"
+      },
+      "fresh": {
+        "users": 6000,
+        "rows_sha256": "1d28e66045a9cc598692961f8d0f58acb3017081a11d15487f4736bc04a28ebb"
+      }
+    },
+    "excluded_overlap": 0,
+    "timestamp_split": "strict per-user upstream validation boundary",
+    "test_evaluated": false
+  },
+  "disjoint_splits": true,
+  "training_features": {
+    "2026": {
+      "split": "fit",
+      "seed": 2026,
+      "initially_available": 24000,
+      "n_rows": 3943,
+      "ranker_checkpoint_sha256": "c442f9b71e0ca341360a0d570c2af69e285e1f3a6517b71bfc60581716641312",
+      "retrieval_candidates_sha256": "876292e1f7f3b6ae87ffd98179b059485797c58c2ae368c08b9cb086208bead4",
+      "features": [
+        "retrieval_z",
+        "ctr_z",
+        "train_events_log",
+        "early_clicks_log",
+        "content_present",
+        "added_channel",
+        "click_match_cosine",
+        "click_match_present",
+        "exposure_match_cosine",
+        "exposure_match_present",
+        "best_match_from_click",
+        "best_match_age_log",
+        "matched_fields",
+        "matched_posting_size_log",
+        "best_content_cosine"
+      ],
+      "basic_features": 5,
+      "aux_positives": 57,
+      "cold_targets": 259,
+      "tail_targets": 41,
+      "test_evaluated": false
+    },
+    "2027": {
+      "split": "fit",
+      "seed": 2027,
+      "initially_available": 24000,
+      "n_rows": 4270,
+      "ranker_checkpoint_sha256": "e9c0fa66897d54deac9b3a8a613b927c057870274645c81e3d5361bfeb812f3b",
+      "retrieval_candidates_sha256": "67882facde8665cc9ea52eaa064735b8f7c9a7c09cc80fcf8b8a376f4ef96309",
+      "features": [
+        "retrieval_z",
+        "ctr_z",
+        "train_events_log",
+        "early_clicks_log",
+        "content_present",
+        "added_channel",
+        "click_match_cosine",
+        "click_match_present",
+        "exposure_match_cosine",
+        "exposure_match_present",
+        "best_match_from_click",
+        "best_match_age_log",
+        "matched_fields",
+        "matched_posting_size_log",
+        "best_content_cosine"
+      ],
+      "basic_features": 5,
+      "aux_positives": 56,
+      "cold_targets": 242,
+      "tail_targets": 84,
+      "test_evaluated": false
+    }
+  },
+  "confirmation": {
+    "2026": {
+      "exact_candidate_budget": 500,
+      "history_filtered_users": 6000,
+      "fixed_baseline_top10_identity": true,
+      "all_top10_ids_in_candidates": true,
+      "negative_items_or_duplicates": false,
+      "target_rank_and_source_aligned": true
+    },
+    "2027": {
+      "exact_candidate_budget": 500,
+      "history_filtered_users": 6000,
+      "fixed_baseline_top10_identity": true,
+      "all_top10_ids_in_candidates": true,
+      "negative_items_or_duplicates": false,
+      "target_rank_and_source_aligned": true
+    }
+  },
+  "checkpoint_digests_verified": true,
+  "selection_digests_verified": true
+}

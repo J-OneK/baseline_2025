@@ -1,0 +1,178 @@
+{
+  "development_users": 2000,
+  "target_statistics": {
+    "all": {
+      "users": 2000,
+      "content_present": 1890,
+      "zero_training_clicks": 633,
+      "fields": {
+        "102": {
+          "history_matches": 712,
+          "clicked_history_matches": 239,
+          "matched_full_catalog_posting_median": 469.0
+        },
+        "121": {
+          "history_matches": 103,
+          "clicked_history_matches": 20,
+          "matched_full_catalog_posting_median": 11.0
+        },
+        "122": {
+          "history_matches": 717,
+          "clicked_history_matches": 240,
+          "matched_full_catalog_posting_median": 471.0
+        }
+      }
+    },
+    "cold_0": {
+      "users": 226,
+      "content_present": 214,
+      "zero_training_clicks": 226,
+      "fields": {
+        "102": {
+          "history_matches": 114,
+          "clicked_history_matches": 52,
+          "matched_full_catalog_posting_median": 373.5
+        },
+        "121": {
+          "history_matches": 15,
+          "clicked_history_matches": 6,
+          "matched_full_catalog_posting_median": 9.0
+        },
+        "122": {
+          "history_matches": 116,
+          "clicked_history_matches": 53,
+          "matched_full_catalog_posting_median": 398.5
+        }
+      }
+    },
+    "tail_1_5": {
+      "users": 426,
+      "content_present": 403,
+      "zero_training_clicks": 290,
+      "fields": {
+        "102": {
+          "history_matches": 178,
+          "clicked_history_matches": 55,
+          "matched_full_catalog_posting_median": 395.0
+        },
+        "121": {
+          "history_matches": 26,
+          "clicked_history_matches": 5,
+          "matched_full_catalog_posting_median": 7.5
+        },
+        "122": {
+          "history_matches": 180,
+          "clicked_history_matches": 55,
+          "matched_full_catalog_posting_median": 401.0
+        }
+      }
+    },
+    "mid_6_50": {
+      "users": 682,
+      "content_present": 651,
+      "zero_training_clicks": 116,
+      "fields": {
+        "102": {
+          "history_matches": 249,
+          "clicked_history_matches": 87,
+          "matched_full_catalog_posting_median": 644.0
+        },
+        "121": {
+          "history_matches": 40,
+          "clicked_history_matches": 6,
+          "matched_full_catalog_posting_median": 11.0
+        },
+        "122": {
+          "history_matches": 249,
+          "clicked_history_matches": 87,
+          "matched_full_catalog_posting_median": 644.0
+        }
+      }
+    },
+    "head_gt50": {
+      "users": 666,
+      "content_present": 622,
+      "zero_training_clicks": 1,
+      "fields": {
+        "102": {
+          "history_matches": 171,
+          "clicked_history_matches": 45,
+          "matched_full_catalog_posting_median": 481.0
+        },
+        "121": {
+          "history_matches": 22,
+          "clicked_history_matches": 3,
+          "matched_full_catalog_posting_median": 20.0
+        },
+        "122": {
+          "history_matches": 172,
+          "clicked_history_matches": 45,
+          "matched_full_catalog_posting_median": 488.5
+        }
+      }
+    }
+  },
+  "hits_by_seed_and_stage": {
+    "2026": {
+      "recall_top500": {
+        "all": 334,
+        "cold_0": 27,
+        "tail_1_5": 4,
+        "mid_6_50": 30,
+        "head_gt50": 273
+      },
+      "mlp_top100": {
+        "all": 158,
+        "cold_0": 8,
+        "tail_1_5": 0,
+        "mid_6_50": 8,
+        "head_gt50": 142
+      },
+      "mlp_top10": {
+        "all": 42,
+        "cold_0": 1,
+        "tail_1_5": 0,
+        "mid_6_50": 0,
+        "head_gt50": 41
+      },
+      "generative_top10": {
+        "all": 40,
+        "cold_0": 0,
+        "tail_1_5": 0,
+        "mid_6_50": 0,
+        "head_gt50": 40
+      }
+    },
+    "2027": {
+      "recall_top500": {
+        "all": 365,
+        "cold_0": 26,
+        "tail_1_5": 13,
+        "mid_6_50": 52,
+        "head_gt50": 274
+      },
+      "mlp_top100": {
+        "all": 182,
+        "cold_0": 12,
+        "tail_1_5": 4,
+        "mid_6_50": 9,
+        "head_gt50": 157
+      },
+      "mlp_top10": {
+        "all": 54,
+        "cold_0": 2,
+        "tail_1_5": 1,
+        "mid_6_50": 0,
+        "head_gt50": 51
+      },
+      "generative_top10": {
+        "all": 54,
+        "cold_0": 2,
+        "tail_1_5": 1,
+        "mid_6_50": 0,
+        "head_gt50": 51
+      }
+    }
+  },
+  "train_click_counts_use_only_train_prefix": true
+}

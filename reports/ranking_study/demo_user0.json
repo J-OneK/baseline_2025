@@ -1,0 +1,173 @@
+{
+  "split": "val",
+  "evaluation_index": 0,
+  "user_row": 8,
+  "user_rid": 141,
+  "retrieval_execution": "Fresh causal query and exactTop500 over frozen item vectors",
+  "seed": 2026,
+  "variant": "mean_mlp",
+  "checkpoint_epoch": 1,
+  "retrieved_candidates": 500,
+  "blend_alpha": 0.1,
+  "score_scope": "CTR score is for the selected logged-event cohort; blended score is a ranking score, not CTR.",
+  "history_aggregation": "Masked mean; listed weights are uniform",
+  "recommendations": [
+    {
+      "rank": 1,
+      "local_id": 280690,
+      "oid": 20002578716,
+      "recall_rank": 1,
+      "blended_score": 4.192379474639893,
+      "observed_event_click_score": 0.08131276816129684,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "local_id": 1335687,
+      "oid": 20002912561,
+      "recall_rank": 2,
+      "blended_score": 3.8714442253112793,
+      "observed_event_click_score": 0.08519101142883301,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "local_id": 556177,
+      "oid": 20004039624,
+      "recall_rank": 8,
+      "blended_score": 3.514819383621216,
+      "observed_event_click_score": 0.23367971181869507,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "local_id": 1146845,
+      "oid": 20003626514,
+      "recall_rank": 6,
+      "blended_score": 3.2830593585968018,
+      "observed_event_click_score": 0.11752860248088837,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "local_id": 1477863,
+      "oid": 20001289324,
+      "recall_rank": 3,
+      "blended_score": 3.1940040588378906,
+      "observed_event_click_score": 0.0658845603466034,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "local_id": 1050022,
+      "oid": 20002236113,
+      "recall_rank": 4,
+      "blended_score": 3.1417973041534424,
+      "observed_event_click_score": 0.06603439897298813,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "local_id": 1203566,
+      "oid": 20002468451,
+      "recall_rank": 5,
+      "blended_score": 3.0566582679748535,
+      "observed_event_click_score": 0.05982175096869469,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "local_id": 1251012,
+      "oid": 20002077355,
+      "recall_rank": 7,
+      "blended_score": 2.9683287143707275,
+      "observed_event_click_score": 0.062300603836774826,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "local_id": 1416573,
+      "oid": 20003691748,
+      "recall_rank": 9,
+      "blended_score": 2.9218575954437256,
+      "observed_event_click_score": 0.0733322948217392,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "local_id": 145952,
+      "oid": 20005456898,
+      "recall_rank": 10,
+      "blended_score": 2.843858003616333,
+      "observed_event_click_score": 0.0793033167719841,
+      "history_attention": [
+        {
+          "local_id": 499154,
+          "oid": 20005742981,
+          "attention_weight": 1.0
+        }
+      ]
+    }
+  ],
+  "post_ranking_audit": {
+    "target_local_id": 448923,
+    "target_oid": 20004318269,
+    "recall_rank": null,
+    "reranked_rank": null,
+    "note": "Target identity is used for display only after scoring; never injected into candidates."
+  }
+}

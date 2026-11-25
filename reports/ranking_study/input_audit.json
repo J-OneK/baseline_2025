@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "events_checked": 1124360,
+  "all_event_indices_labels_cuts_histories_reconstructed": true,
+  "early_statistics_independently_rebuilt": true,
+  "training_and_validation_events_disjoint": true,
+  "no_unknown_labels_or_repeated_ad_targets": true,
+  "queries_match_independent_truncated_histories": {
+    "2026": {
+      "train": 1.430511474609375e-06,
+      "pointval": 1.430511474609375e-06
+    },
+    "2027": {
+      "train": 3.337860107421875e-06,
+      "pointval": 3.337860107421875e-06
+    }
+  },
+  "candidates_are_fixed_unique_and_history_filtered": true,
+  "validation_history_checks_all_users": true,
+  "test_target_evaluated": false,
+  "source_sha256": "5e8742d4902ac2046af6f310af8014c7b1cedc49743ba9f6ab06e795a1e9de4a"
+}

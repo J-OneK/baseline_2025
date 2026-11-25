@@ -1,0 +1,164 @@
+<section class="chapter" id="tail-recall" aria-labelledby="tail-recall-title">
+  <div class="pill">阶段 08A · 新增研究：长尾补充召回</div>
+  <h2 id="tail-recall-title">保留原主模型，再补一条专门找长尾的通道</h2>
+  <p class="lead">这一章从你已经理解的“用户向量 q 与广告向量 v 做内积”出发，解释后来新增的辅助召回：为什么只处理零点击长尾、怎样复用原模型、如何在固定500个候选内融合，以及实际找回了什么、付出了什么代价。读完后，你应该能沿着同一个广告追踪资格筛选、向量生成、子集检索、候选融合和最终评估。</p>
+  <p class="callout">本章属于 <code>research/tail-recall</code> 研究分支，来源提交为 <code>d0b7374</code>。前面讲的主分支训练与 Faiss 推荐仍按原方式运行；新增通道没有自动接入主项目的默认 Top-10 出口。本页嵌入研究源码与报告快照，离线阅读时也可以核对。</p>
+
+  <h3>8A.1 先把目标说清楚：补回主通道漏掉的一小部分</h3>
+  <p>想象主通道是一位擅长整体推荐的检索员。它能在整个广告目录中找到较好的候选，却容易忽略只有很少历史、尤其从未收到训练点击的广告。我们不要求第二位检索员独立完成全部工作，而是给它一个更窄的任务：<strong>只在零点击长尾目录中，找一些主通道没找到的新候选。</strong></p>
+  <p>判断辅助通道时，要问“它额外补回了什么”，而不是只比较它单独的总体命中率。两个通道各自命中100个目标，如果命中的完全是同一批，合起来也没有新增；辅助只命中10个、却全是主通道遗漏的目标，才存在互补的可能。但候选预算固定时，它也可能挤掉原有命中，所以新增与丢失必须一起看。</p>
+  <div class="formula" role="math">候选净增命中 = 新增命中数 − 丢失命中数</div>
+  <p>此前按点击支持缩放 ID、训练时随机遮 ID 的尝试，改善过部分长尾，但让单通道的冷启动表现退步。这不等于“辅助通道没有价值”。本轮换成保留原主结果、少量补尾的设计，直接研究候选增量与替换代价。</p>
+
+  <h3>8A.2 “零点击长尾”里的两个计数，不是同一个东西</h3>
+  <p>对每个广告 <var>i</var>，先统计所有用户<strong>训练前缀</strong>里的信息。<var>n</var><sub>i</sub> 是事件次数，曝光、点击和未知事件都算；<var>c</var><sub>i</sub> 是其中的点击次数。留出的验证和确认点击不能回填进这些计数。</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>广告分组</th><th>训练事件次数 n<sub>i</sub></th><th>训练点击次数 c<sub>i</sub></th><th>本轮进入辅助目录吗？</th></tr></thead>
+    <tbody>
+      <tr><td>真正冷启动</td><td>0</td><td>0</td><td>不进入；原主列表中的冷广告受保护</td></tr>
+      <tr><td>零点击长尾</td><td>1～5</td><td>0</td><td>进入，本轮只补这一组</td></tr>
+      <tr><td>有点击长尾</td><td>1～5</td><td>至少1</td><td>不进入；原主列表中的这一组受保护</td></tr>
+      <tr><td>中频或头部</td><td>大于5</td><td>任意合法值</td><td>不进入辅助目录</td></tr>
+    </tbody>
+  </table></div>
+  <div class="formula" role="math">辅助资格池 E = { i | 1 ≤ n<sub>i</sub> ≤ 5 且 c<sub>i</sub> = 0 }</div>
+  <p>例如广告 A 在训练里有3次曝光、没有点击：<code>n=3,c=0</code>，符合资格。广告 B 有2次曝光、1次点击：<code>n=3,c=1</code>，也是长尾，但不在本轮辅助池中。广告 C 在所有训练前缀里从未出现：<code>n=0,c=0</code>，属于冷启动，不能混称为零点击长尾。</p>
+  {{code:research/tail-recall/taac_retrieval/tail_channel.py:12:24}}
+  <ol>
+    <li>先检查两个数组形状相同、都是整数，且点击数没有超过事件数。</li>
+    <li><code>(counts &gt;= 1) &amp; (counts &lt;= 5) &amp; (clickcounts == 0)</code> 为每个 local ID 生成是否入选的布尔值。</li>
+    <li><code>mask[0] = False</code> 排除 padding；<code>np.flatnonzero(mask)</code> 返回入选广告的 local ID，天然按升序排列。</li>
+  </ol>
+  <p>本轮辅助池实测有 <strong>1,583,588条广告</strong>。有过事件，只说明其 ID 可能通过上下文或负例获得过梯度；没有训练点击，意味着没有以这条广告自身作为点击正目标的学习信号。因此不能简单把“出现过”理解成“已经充分学好了偏好”。</p>
+  <p class="callout warn">资格池对所有用户使用同一规则。不能先查看用户的真实目标是长尾，再决定给这个用户走长尾通道。检索使用训练统计与可见历史，目标标签只在检索结束后计算指标时使用。</p>
+
+  <h3>8A.3 两条通道共用同一个 q，广告侧看法不同</h3>
+  <p>用户信息与历史仍通过原来的一层因果 Transformer，得到相同的32维查询 <var>q</var>。这次没有训练新的用户塔，也没有改变历史输入。差别只在辅助广告的编码：把显式广告 ID Embedding 那一块设为零，其余13个属性和81号向量照常经过原来的投影与融合层。</p>
+  <div class="example"><pre><code>用户属性＋可见历史 → 原用户编码器 → 同一个 q：[B,32]
+                                      ├→ 主广告表示：ID＋属性＋81 → 原主 Top-500
+                                      └→ 辅助广告表示：0＋属性＋81 → 零点击长尾新提议
+                                                                      ↓
+                                                       固定500预算的保护融合</code></pre></div>
+  <div class="formula" role="math">v<sub>main,i</sub> = ReLU(W · [e<sub>ID,i</sub>; e<sub>100,i</sub>; …; e<sub>116,i</sub>; Pm<sub>81,i</sub>] + b)</div>
+  <div class="formula" role="math">v<sub>aux,i</sub> = ReLU(W · [0<sub>32</sub>; e<sub>100,i</sub>; …; e<sub>116,i</sub>; Pm<sub>81,i</sub>] + b)</div>
+  <p>分号表示拼接。令 C 为这一批候选广告数，仍然是15块32维输入，拼成 <code>[C,480]</code>，由同一融合层变回 <code>[C,32]</code>；不是删掉 ID 后把线性层改成448维。当前每块 C≤8192；用户查询批次则是上图的 <code>[B,32]</code>。<var>W</var>、<var>b</var>、属性 Embedding 和81投影都复用原 checkpoint，没有新增可训练参数。</p>
+  {{code:research/tail-recall/taac_retrieval/tail_channel.py:27:51}}
+  <ol>
+    <li><code>model.training</code> 检查模型处于 <code>eval()</code>，<code>@torch.inference_mode()</code> 关闭梯度记录，本轮不反向传播。</li>
+    <li><code>new_zeros((len(chunk), model.hidden))</code> 创建与原权重同设备、同类型的零 ID 分量，没有修改原 Embedding 表。</li>
+    <li><code>parts.extend(...)</code> 读取13个原属性表示；<code>mm_projection(...)</code> 投影81向量。</li>
+    <li><code>torch.cat(...)</code> 拼接，<code>item_dnn</code> 和 <code>relu</code> 使用原广告融合逻辑。每批8192条只是控制中间内存。</li>
+    <li>最后检查所有向量有限，并将各块合为 <code>[N<sub>tail</sub>,32]</code>。</li>
+  </ol>
+  <p>本项目 padding/OOV 第0行本来就固定为零，因此当前显式零分量与使用该零行在数值上等价。这里没有把“训练出现过、但没点击”的广告重新定义为真正冷启动；只是对辅助候选使用另一种表示视图。</p>
+  <p class="callout">“去掉显式广告 ID”不等于“纯文本语义模型”。原属性仍含121等高基数字段，81也仍是官方提供的表示。准确说法是<strong>复用原共享特征、屏蔽显式 ID 分量的候选视图</strong>。</p>
+
+  <h3>8A.4 内积与余弦：这次到底比较了什么？</h3>
+  <div class="formula" role="math">s<sub>raw</sub>(u,i) = q<sub>u</sub><sup>T</sup>v<sub>aux,i</sub></div>
+  <div class="formula" role="math">s<sub>cos</sub>(u,i) = q<sub>u</sub><sup>T</sup>v<sub>aux,i</sub> / (‖q<sub>u</sub>‖ · ‖v<sub>aux,i</sub>‖)</div>
+  <p>内积同时受方向和长度影响；余弦关注方向。举一个<strong>人工设置的二维教学例子</strong>：<code>q=(1,0)</code>，A的向量为 <code>(2,2)</code>，B为 <code>(1,0)</code>。原始内积 A得2、B得1，A在前；余弦 A约0.707、B为1，B在前。归一化会改变候选排名，不是保持原内积排序的等价变换。</p>
+  <p>这里归一化的是<strong>经过属性融合、线性层和 ReLU 后的广告输出</strong>。原始81输入本来接近单位范数，也不能推出融合后的32维向量是单位向量。对固定用户，归一化 <var>q</var> 只是给全部分数乘同一个正比例，不改变候选顺序；实质差别来自是否归一化各广告 <var>v</var>。</p>
+  <p>这只是一个辅助评分对照，主通道仍保留原始内积分数与顺序。实际开发比较中 raw_ip 的补尾表现更好，最终锁定了它；不能因为余弦概念更直观就预设它更优。</p>
+
+  <h3>8A.5 子集的第几行，和广告 local ID 是两回事</h3>
+  <p>主目录的 local ID 连续，但筛选出的辅助目录只包含其中一部分。先用一个单独的映射例子：假设符合资格的 local ID 为 <code>[35,90,110]</code>，辅助向量矩阵只有3行：</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>辅助矩阵行号</th><th>local ID</th><th>对应向量</th></tr></thead>
+    <tbody><tr><td>0</td><td>35</td><td><code>vectors[0]</code></td></tr><tr><td>1</td><td>90</td><td><code>vectors[1]</code></td></tr><tr><td>2</td><td>110</td><td><code>vectors[2]</code></td></tr></tbody>
+  </table></div>
+  <p>检索返回辅助行号1，要通过 <code>local_ids[1]</code> 还原为广告90。不能直接用 <code>1+1=2</code>。因此这条子集检索不能照搬前面主 Faiss 索引的行号加1映射。</p>
+  <p>真正要搜索的集合，还要扣除用户已经见过的广告，以及原主 Top-500 全部广告。后者不是“不喜欢”，而是已经在主候选池里，继续占辅助名额没有增量。</p>
+  <div class="formula" role="math">A<sub>u</sub> = Top25<sub>i ∈ E ∖ (H<sub>u</sub> ∪ M<sub>u</sub>)</sub> s(u,i)</div>
+  <p><var>E</var> 是资格池，<var>H</var><sub>u</sub> 是可见历史，<var>M</var><sub>u</sub> 是原主500。<strong>先过滤、再取25个</strong>，保证名额用于真正的新候选。先取25、再发现其中20个已在主列表，会浪费本来可以检索到的后续提议。</p>
+  {{code:research/tail-recall/taac_retrieval/tail_channel.py:54:93}}
+  <ol>
+    <li><code>blocked = torch.cat((seen, main), dim=1)</code> 合并两个屏蔽来源。</li>
+    <li><code>torch.searchsorted(ids, blocked)</code> 在升序辅助ID里找插入位置。插入位置可能不是实际存在的广告，所以还要比较ID是否相等，得到 <code>valid</code>。</li>
+    <li>每块分数为 <code>queries @ vectors[start:stop].T</code>，形状为 <code>[B,block_items]</code>。</li>
+    <li>把当前块里需要屏蔽的位置改成 <code>-inf</code>，再取块内 Top-K，与之前的 Top-K 合并。</li>
+    <li><code>candidates = ids[start:stop][positions]</code> 立即把子集行位置还原成真正 local ID，后面的融合统一使用 local ID。</li>
+    <li>若合法候选不足，非有限分数的位置输出0，代表空提议，不能当成广告。后续融合会跳过0。</li>
+  </ol>
+  <p>这仍是分块<strong>精确检索</strong>：遍历辅助池所有向量，减少的是候选域和峰值分数矩阵。当前没有新增持久化的辅助 Faiss 索引，也没有新的辅助 ANN 召回率报告。</p>
+
+  <h3>8A.6 固定500个：补进去之前，必须知道谁会被移走</h3>
+  <p>如果保留原500再追加5个，候选池就是505；覆盖上涨可能部分来自预算变大。为了公平，本轮最终仍是500，最多补5个新长尾，同时等量移除原列表末尾的未保护项。</p>
+  <div class="formula" role="math">P<sub>u</sub> = 主Top-10 ∪ {i ∈ M<sub>u</sub> | n<sub>i</sub> ≤ 5}</div>
+  <div class="formula" role="math">m = min(quota, 新提议数, 可移除数)；F<sub>u</sub> = 按原序保留(M<sub>u</sub> ∖ D<sub>u</sub>)，再追加 A<sub>u</sub> 的前 m 项</div>
+  <p><var>P</var> 是保护集合；<var>D</var> 从主列表尾部挑选不在保护集合里的 <var>m</var> 个广告。两条排序列表没有直接混加分数，也没有新增学习排序器。保留项沿用主通道原顺序，新辅助项放在末尾。</p>
+  {{code:research/tail-recall/taac_retrieval/tail_channel.py:96:129}}
+  <ol>
+    <li><code>used</code> 初始装入全部主广告；只把真正没出现过的新提议加入 <code>novel</code>。</li>
+    <li><code>range(len(original)-1, protect_top-1, -1)</code> 从列表末尾向前找；只有 <code>counts[original[i]] &gt; 5</code> 的位置可删除。</li>
+    <li><code>take = min(...)</code> 防止提议不足或可删除项不足时强行填满配额。quota是上限，不是必须替换的数量。</li>
+    <li>先保留未删除的主候选，再追加同样数量的新候选；<code>applied</code> 记录每个人实际换了几个。</li>
+  </ol>
+  <p class="callout">已有冷尾候选不会被删，所以相应 Recall@500 按构造不下降；前10的身份和顺序也不变，所以每人的 HR@10 与 NDCG@10 不变。这是保护机制的结果，不能解释成新模型学会了更好的冷启动表示。</p>
+
+  <h3>8A.7 把500缩成8个，亲手走一次融合</h3>
+  <p>下面是<strong>人工构造的教学清单</strong>，为方便手算，把主预算缩成8、前缀保护缩成2。它不属于大规模确认实验，也不重新训练模型。</p>
+  <div class="example"><pre><code>主列表 M = [10,20,30,40,50,60,70,80]
+训练事件数 = [80,70,0,3,100,60,20,9]
+前2个保护：10、20
+冷尾保护：30（cold）、40（tail）
+故意带杂项的待处理清单 = [60,90,100,90,110]
+可见历史 = [100]
+资格广告90、100、110的训练事件数 = 1、4、2，训练点击均为0
+过滤资格/主列表重叠/历史/重复后，新提议 A = [90,110]</code></pre></div>
+  <p>这里故意塞入头部广告60、重复90来展示过滤，不能把这份原始待处理清单直接交给正式 <code>fuse_tail()</code>。真实辅助检索只遍历资格池，候选ID互异，并已屏蔽主列表和历史；交给融合函数的是合法新提议。</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>quota</th><th>移除谁</th><th>实际补充数</th><th>最终8个候选</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>无</td><td>0</td><td><code>[10,20,30,40,50,60,70,80]</code></td></tr>
+      <tr><td>1</td><td>80</td><td>1</td><td><code>[10,20,30,40,50,60,70,90]</code></td></tr>
+      <tr><td>2</td><td>80、70</td><td>2</td><td><code>[10,20,30,40,50,60,90,110]</code></td></tr>
+      <tr><td>3</td><td>仍只移除80、70</td><td>2</td><td><code>[10,20,30,40,50,60,90,110]</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>如果真实目标是90，quota=1就补回了它；如果真实目标是80，quota=1反而丢失命中。同样一条融合规则，对不同用户可能带来相反效果。真实目标不参与这些操作，只在做完之后检查命中。</p>
+  {{tail_lab}}
+
+  <h3>8A.8 真实补回案例：辅助第2名，为什么最终是第497名？</h3>
+  {{tail_case}}
+  <p>这条广告在训练里仅有1次事件、0次点击，符合辅助资格。对原主模型seed2026，它在完整主检索中排在500名之外；辅助检索先排除原500和历史后，将它排在新提议第2位。删去5个未保护项后，剩余主候选占前495位，辅助第1项在496位，第2项就在497位。</p>
+  <div class="formula" role="math">融合名次 = 保留的主候选数 + 辅助新提议名次 = 495 + 2 = 497</div>
+  <p>因此这一次 <code>Recall@500</code> 从0变1，但 <code>HR@10</code> 仍为0。原先已经处于 Top-10 的广告也没动。同一个用户还被另外两个seed对应模型补回，算3次模型命中，却只有1名不同用户。不要把模型重复评估当成新增了3个用户。</p>
+
+  <h3>8A.9 实验为什么先开发选型，再锁定做确认？</h3>
+  <p>新确认行为只用一次。本轮先在已看过的旧10,000人开发队列上，复用三个主模型比较4种组合：<code>raw_ip/cosine × quota1/quota5</code>。配额、评分与门槛提前固定，不临时扩网格找最好数字。</p>
+  {{tail_protocol_results}}
+  <p>门槛要求：整体 Recall@500 至少保留主通道的99%；冷启动与有点击长尾不下降；零点击长尾平均严格增加；至少两个模型各自有新增零点击长尾命中。通过后优先选零点击长尾覆盖更高的方案，再比较整体覆盖、小配额和更简单的raw_ip。</p>
+  {{code:research/tail-recall/scripts/run_supplemental_tail.py:203:220}}
+  <p><code>positive</code> 统计三个模型中有几个获得新增目标。它不等于不同新增用户数，因为三个模型评估的是同一批用户。99%也是自定的点估计容忍门槛，不是线上业务价值已经证明成立。</p>
+  {{code:research/tail-recall/scripts/run_supplemental_tail.py:278:298}}
+  <p><code>freeze(confirmation_lock.json, lock)</code> 在打开确认检索之前记录评分方式、配额、三个checkpoint身份及队列摘要。开发没有方案通过就停止；确认结束也不回头换配额。实际锁定的是 <code>raw_ip + quota5</code>。</p>
+  <p>新确认队列10,000人排除了此前已知评估过的31,574个用户RID；但这些用户的训练前缀仍参与了原模型训练。新的是此前没用来选型的留出行为，不能叫训练完全未见的新用户冷启动，也仍不是统一全局时间的生产回放。</p>
+
+  <h3>8A.10 实际结果：有小幅补充，也有明确代价</h3>
+  {{tail_results}}
+  <p>三份既有模型分别新增 <strong>1、3、1</strong> 次零点击长尾命中，丢失其他目标 <strong>15、15、9</strong> 次。确认队列中零点击长尾目标有885人，全部长尾1,291人；三个模型的5次新增命中只涉及<strong>3名不同用户</strong>。每模型平均新增1.67个、丢失13个，不能只展示上涨的一桶。</p>
+  <div class="formula" role="math">整体保留率 = 22.9700% / 23.0833% ≈ 99.509%；整体变化 = −0.1133 个百分点</div>
+  <p>整体通过了预设99%保留门槛，但整体候选覆盖确实下降；这两句话可以同时成立。冷启动8.8071%保持、Top-10保持来自结构保护。辅助补回的是候选池里的广告，还没有把它重新排进最终前十。</p>
+  {{code:research/tail-recall/scripts/run_supplemental_tail.py:33:46}}
+  <p><code>before</code> 与 <code>after</code> 是逐用户目标是否命中的布尔值；<code>~before &amp; after</code> 是新增，<code>before &amp; ~after</code> 是丢失。<code>masks</code> 只在评估结束后按目标的训练统计划分桶，不能反过来用于检索路由。</p>
+
+  <h3>8A.11 为什么3个人还不足以说“稳定解决了长尾”？</h3>
+  <p>少量目标可能受用户抽样和原模型初始化影响。为保留主通道与融合的配对关系，先计算每个模型、每个用户的命中差值，再有放回抽取模型和用户，共重采样2,000次；每次重新算均值，以2.5%和97.5%分位数作为95%区间。</p>
+  {{code:research/tail-recall/scripts/run_supplemental_tail.py:222:245}}
+  <p>零点击长尾差值区间为 <code>[0,+0.5650]</code> 个百分点，全部长尾为 <code>[0,+0.3873]</code> 个百分点；下界触0，不能称为稳定或显著收益。整体差值区间为 <code>[−0.1800,−0.0500]</code> 个百分点，在当前离线抽样设置下覆盖损失明确。三个模型仍共享同一批用户，区间不能代表任意新模型或线上流量。</p>
+  <p>56项测试、GPU小样本预检和独立结果核验均通过。独立核验重新构造了开发12份、确认3份融合结果，检查总预算500、无重复与历史广告、只新增资格长尾、原冷尾和前10保持，并重新计算指标、选型与区间。测试通过说明实现与记录相符，不代表指标一定更好。</p>
+  <p class="callout warn">本轮的准确结论是：<strong>在固定预算下补回了极少量零点击长尾目标，并付出了整体覆盖代价，保留为实验原型。</strong> 不能说解决了冷启动、显著提升了推荐效果，或者已经在线上验证。本章也没有新增训练、生成式模型、独立排序器或辅助Faiss服务。</p>
+
+  <h3>8A.12 面试时，把“你为什么这样做”讲清楚</h3>
+  <p>可以按“发现分桶问题→区分事件频次和点击支持→保留有效主模型→设计共享特征辅助视图→固定候选预算评估互补性→用新留出行为确认并报告代价”的顺序讲。实际贡献是诊断、实现、实验和判断闭环，结果规模与限制也属于你需要理解的内容。</p>
+  <div class="checkpoint"><h3>这一章的自测与面试追问</h3>
+    <details><summary>为什么没有训练点击的广告，也可能有自己的ID Embedding？</summary><p>本项目是否分配独立ID行取决于训练事件中是否出现，曝光或未知事件也算。没有点击不代表没有ID行，但它没有以自身作为点击正目标的监督，仍可能通过历史上下文或负候选得到梯度。</p></details>
+    <details><summary>这算两个模型，还是两个召回通道？</summary><p>这里是两条候选获取路径：共用同一原模型查询和已训练权重，广告侧使用原ID视图与零ID辅助视图。没有训练两个新模型，也不意味着两条通道的候选与目标命中完全独立。</p></details>
+    <details><summary>原始81已经归一化，为什么还比较余弦？</summary><p>81只是融合输入之一，经过投影、属性拼接、线性层与ReLU后的广告向量没有单位范数保证。辅助广告输出归一化会改变排序；此次开发结果仍选择了原始内积。</p></details>
+    <details><summary>为什么要在辅助Top-K之前排除整个主500？</summary><p>辅助的目的在于新增。先排除主列表和历史，再取K，能让前几名提议用于新候选，避免大量重叠候选占满有限名额。</p></details>
+    <details><summary>为什么长尾提高了，整体却下降？</summary><p>500预算固定，新增长尾需要替换原中频、头部候选。本轮平均新增1.67个目标，却丢失13个，因此总体下降。99%容忍门槛只是允许小幅代价，不会把下降变成整体提升。</p></details>
+    <details><summary>冷启动和Top-10不下降，是新表示学得更好的证据吗？</summary><p>不是。它们的候选被规则保护，所以按构造保持。可评估的新增来自零点击长尾；Top-10没有重排，所以不能声称最终十条推荐更好。</p></details>
+    <details><summary>三个模型新增1、3、1，为什么不是新增5个用户？</summary><p>三个模型在同一批人上评估，有用户被多个模型重复补回。实际并集只有3名用户，其中一名被三个模型补回。要同时报告模型命中次数与不同用户规模。</p></details>
+    <details><summary>如果接下来真要服务，哪些工程检查仍需完成？</summary><p>需要构建并保存辅助向量与显式localID映射，测量额外存储和实际请求延迟，验证近似索引损失及模型/索引版本一致性。当前GPU批量精确检索的均摊耗时不能冒充单请求p95。</p></details>
+  </div>
+</section>

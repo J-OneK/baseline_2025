@@ -1,0 +1,42 @@
+[
+  {
+    "seed": 2026,
+    "user_rid": 65646,
+    "item_oid": 20001357393,
+    "train_frequency": 1,
+    "original_rank": 0,
+    "fixed_rank": 496,
+    "learned_rank": 10,
+    "from_auxiliary": true
+  },
+  {
+    "seed": 2026,
+    "user_rid": 134009,
+    "item_oid": 20004004871,
+    "train_frequency": 4,
+    "original_rank": 0,
+    "fixed_rank": 492,
+    "learned_rank": 6,
+    "from_auxiliary": true
+  },
+  {
+    "seed": 2027,
+    "user_rid": 118098,
+    "item_oid": 20004606483,
+    "train_frequency": 0,
+    "original_rank": 14,
+    "fixed_rank": 14,
+    "learned_rank": 4,
+    "from_auxiliary": false
+  },
+  {
+    "seed": 2027,
+    "user_rid": 134009,
+    "item_oid": 20004004871,
+    "train_frequency": 4,
+    "original_rank": 0,
+    "fixed_rank": 492,
+    "learned_rank": 9,
+    "from_auxiliary": true
+  }
+]

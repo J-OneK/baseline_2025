@@ -1,0 +1,44 @@
+{
+  "base": "configs/ranking_study.json",
+  "root": "artifacts/ranking_content_v1",
+  "reference_root": "artifacts/ranking_v1",
+  "seeds": [
+    2026,
+    2027
+  ],
+  "variants": [
+    "mean_mlp",
+    "din_attention"
+  ],
+  "model": {
+    "feature_embedding": 8,
+    "hidden": 32,
+    "max_item_field_cardinality": 200000,
+    "dropout": 0.1
+  },
+  "training": {
+    "epochs": 5,
+    "batch_size": 2048,
+    "lr": 0.001,
+    "weight_decay": 0.00001,
+    "grad_clip": 5
+  },
+  "blend": {
+    "alpha": 0.1,
+    "standardize": "Within each fixed500-item candidate list, zscore recall and CTR logits separately",
+    "zero_variance": "Replace standard deviation below1e-6 by1; constant branch contributes zero"
+  },
+  "protocol": {
+    "registration": "Exploratory follow-up after frozen-retrieval-vector ranking failed; preserve first-stage results",
+    "hypothesis": "Independent raw-content/user/category learning reduces reliance on in-sample learned retrieval features; combine CTR and next-item retrieval scores conservatively",
+    "only_model_input_change": "Fresh trainable small category embeddings plus supplied mm81, no itemID/userID embeddings and no learned retrieval q/item/user embeddings in the classifier",
+    "id_like_field": "No trainable embedding for item fields above200000 categories (121 here); exact historical field-match features retained",
+    "data": "Exactly same logged training/validation events, early statistics, fixed candidates and two-seed frozen recall checkpoints as initial study",
+    "model": "Mean pooling vs DIN-inspired candidate attention; shared predictor and identical paired initialization",
+    "loss": "Unweighted BCE on observed events only; no invented CTR labels for unexposed candidates",
+    "primary": "Fixedalpha0.1 blend; no alpha search; checkpoint by blended end-to-end valNDCG10 thenHR10 then earlier",
+    "diagnostics": "PureCTR ranking and observed-event AUC/LogLoss reported separately; alpha0 original rank is baseline, no learned blending",
+    "scope": "Reused development validation, no independent test or production calibration; main model unchanged",
+    "budget": "Four runs, two architectures by two seeds, five epochs, one fixed blend"
+  }
+}

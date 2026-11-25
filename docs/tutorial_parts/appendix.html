@@ -1,0 +1,64 @@
+<section class="chapter" id="debugging">
+  <div class="chapter-kicker">10 · 把原理变成独立排查能力</div>
+  <h2>遇到一个异常结果，先追哪一段数据</h2>
+  <p class="lead">理解项目以后，你应当能提出可检验的原因：先确定症状属于切分、样本、模型、检索还是统计口径，再找到对应变量。下面的问题都能用当前实现中的具体数组或检查回答。</p>
+  <div class="table-wrap"><table><thead><tr><th>现象</th><th>优先查看</th><th>具体核对</th></tr></thead><tbody>
+    <tr><td>抽样30万人，最后不是30万人</td><td><code>clean_and_split</code>、审计计数</td><td>每人是否有两条合格且时间严格先后的首次出现点击；目标前历史是否足够</td></tr>
+    <tr><td>目标本来在序列里，指标却一直为零</td><td><code>val_pos/test_pos</code> 与输入 <code>items</code></td><td>输入是否严格截断；是否混用RID/local ID；过滤是否删掉目标</td></tr>
+    <tr><td>曝光没有被主loss监督，却仍影响模型</td><td><code>actions</code> 与 <code>target_actions</code></td><td>历史中的曝光广告是有效上下文，点击掩码只决定目标监督位置；内容参与与目标监督是两个维度</td></tr>
+    <tr><td>一个batch看起来有128人，却有更多正样本</td><td><code>mask.sum()</code> 与 <code>row_indices</code></td><td>M统计的是有效监督位置，每人可贡献多次点击；负例要按该位置所属用户排除seen</td></tr>
+    <tr><td>loss下降，验证HR没有同步改善</td><td>采样loss与完整目录排名</td><td>65项相对分类更容易；头部偏置、向量尺度和冷广告泛化均可能影响全库排名，需要对照定位</td></tr>
+    <tr><td>ANN重合率100%，真实点击仍没命中</td><td>精确Top-10与真实target</td><td>近似索引可以完美复现模型的错误排名；先看精确检索有没有目标，再看索引是否丢失</td></tr>
+    <tr><td>Faiss结果看起来全体错位一行</td><td><code>index_id + 1</code></td><td>padding没有入索引；Faiss行0对应local广告1，转换后才能查catalog_oids</td></tr>
+    <tr><td>不同目录的权重和索引混用后报错</td><td>checkpoint SHA、export metadata、index identity</td><td>先确认同一份模型导出；不要通过删掉校验字段掩盖产物不一致</td></tr>
+    <tr><td>训练未见广告有非零向量</td><td>ID lookup、属性、81投影与偏置</td><td>独立ID为零不代表所有共享特征为零；该广告仍可被属性/内容分支编码</td></tr>
+    <tr><td>冷启动分桶结果和官方标记不一样</td><td>训练前缀的 <code>train_counts</code></td><td>本项目按本次抽样训练历史统计；某用户没见过、官方cold_start标记、全局训练未见是不同定义</td></tr>
+  </tbody></table></div>
+  <h3>完整理解的五个验收任务</h3>
+  <ol>
+    <li>给一条含重复广告、未知动作和相同时间戳的序列，独立算出 <code>train_cut/val_cut/test_cut/val_pos/test_pos</code>。</li>
+    <li>给训练前缀和动作，写出 <code>items/kinds/actions/positive/target_actions/seen</code>，指出点击mask命中的输入位置。</li>
+    <li>画出每个模块的输入输出形状，解释广告480维拼接、用户288维拼接、输入101位置与最终32维查询。</li>
+    <li>手算一次InfoNCE及梯度方向，一次HR/NDCG，一次MIPS→L2距离；将每个公式对上具体代码。</li>
+    <li>选择一条实验结论，指出控制变量、选择用的验证集、测试指标归属、跨种子波动，以及不能从中得出的结论。</li>
+  </ol>
+  <h3>配合已有测试阅读</h3>
+  {{code:tests/test_retrieval.py:21:43}}
+  <p><code>write_fixture()</code> 是另一套用于单元测试的紧凑缓存：两个用户、不同字段数量和历史长度。它帮助隔离算法不变量；不要把测试夹具的数字和本教程12用户合成演示或主数据规模混在一起。</p>
+  {{code:tests/test_retrieval.py:58:100}}
+  <pre><code>.project_venv/bin/python -m unittest discover -s tests -v</code></pre>
+  <p>测试可验证已写出的边界约束，不能代替大数据效果实验。新增策略时应先提出假设、控制一个关键变量，再用固定协议测整体和分桶指标。</p>
+  <details><summary>自测：如果把InfoNCE负例从64改成256，哪些结论需要重新验证？</summary><p>计算与内存预算、采样难度、loss的均匀基线ln(K+1)、训练信号和最优epoch都可能变化。模型维数和打分函数本身未必改变，但必须重新训练并做同协议评估；不能把原checkpoint的精度和新训练设置拼成同一个结果。若要归因于损失形式，还需要对照负例预算。</p></details>
+  <details><summary>自测：冷启动目标没有进入精确Top-500，先加排序能直接解决吗？</summary><p>排序只能调整给定候选的顺序，目标未进入候选时无法被排序找回。先诊断召回覆盖；如果目标已进入候选但排名靠后，再判断排序是否有足够空间。当前保护式候选融合只保留原Top-10，因此其候选覆盖变化不能被当成最终Top-10提升。</p></details>
+</section>
+
+<section class="chapter" id="glossary">
+  <div class="chapter-kicker">11 · 随手查阅</div>
+  <h2>变量、公式符号与推荐术语</h2>
+  <div class="table-wrap"><table><thead><tr><th>符号</th><th>本教程含义</th><th>主方案取值或形状</th></tr></thead><tbody>
+    <tr><td>B</td><td>一个batch中的用户序列数</td><td>训练默认128；评估默认256</td></tr>
+    <tr><td>H / L</td><td>保留历史上限 / 含用户token的输入长度</td><td>H=100，L=101；教学例H=10，L=11</td></tr>
+    <tr><td>D</td><td>模型的用户/广告表示维数</td><td>32</td></tr>
+    <tr><td>M（训练公式）</td><td>整批经过点击掩码后留下的监督位置数</td><td>随batch变化，不等于B</td></tr>
+    <tr><td>M（HNSW参数）</td><td>图索引的连接度配置</td><td>主方案32；与监督位置数M无关</td></tr>
+    <tr><td>N</td><td>固定广告目录中非padding广告数</td><td>历史确认2,708,122；合成演示106</td></tr>
+    <tr><td>K</td><td>在Top-K指标里为推荐列表长度；在负采样公式中可代表负例数</td><td>本页用上下文区分：推荐10，主训练负例64</td></tr>
+    <tr><td>q / v / s</td><td>用户查询向量 / 广告向量 / 原始内积分数</td><td>q,v∈ℝ³²，s=qᵀv</td></tr>
+    <tr><td>τ</td><td>InfoNCE温度，先将logits除以它</td><td>1.0</td></tr>
+    <tr><td>R²</td><td>覆盖所有数据库向量范数平方的升维半径平方</td><td>索引构建时从广告向量计算</td></tr>
+    <tr><td>r</td><td>目标的一基排名</td><td>第一名r=1，单目标NDCG=1/log₂(r+1)</td></tr>
+  </tbody></table></div>
+  <dl class="glossary">
+    <dt>Embedding / 稀疏特征</dt><dd>把离散类别编号映射为可学习向量。编号大小不表示类别之间的距离；每个字段拥有自己的查表空间。</dd>
+    <dt>Padding / OOV / 用户token</dt><dd>Padding补齐长度；OOV表示训练词表未知值；用户token承载用户属性。它们可能都在某些数组里写0，但语义由lookup、kinds、padding_idx及其他特征共同决定。</dd>
+    <dt>因果掩码</dt><dd>限制每个输入位置只读取自己和更早的有效输入；与训练目标移位配合，防止当前位置读取它要预测的未来广告。</dd>
+    <dt>Logit / Softmax / 交叉熵</dt><dd>Logit是归一化之前的分数；softmax把一组分数映射为和为1的相对概率；以正例所在位置为标签的交叉熵为−log正例概率。当前标签0指logits第0列，并非padding广告。</dd>
+    <dt>负例与未观察反馈</dt><dd>这里的负例是采样的训练可见广告，并未逐一证明用户讨厌它们。不能把采样负例都解释成用户曝光后明确不点击的广告。</dd>
+    <dt>召回与排序</dt><dd>召回从大目录选一批候选；独立排序模型可以再评估候选。当前主链路用召回模型的内积分数直接输出Top-10。</dd>
+    <dt>精确检索 / ANN</dt><dd>精确检索计算完整目录分数并得到Top-K；近似检索用索引减少搜索开销，可能改变返回结果，因此要对照精确结果测量重合率。</dd>
+    <dt>验证集 / 测试集 / cohort</dt><dd>验证用来选epoch、方案或索引参数；测试用于锁定后评估；cohort是固定的评估用户集合。反复在同一验证队列试策略会增加选择偏差，需要独立确认。</dd>
+    <dt>种子 / 配对对照 / Bootstrap</dt><dd>种子控制初始化、打乱和采样等随机过程；配对对照尽量复用相同用户和条件；bootstrap重采样估计不确定性。用户数大不能消除少量训练种子造成的波动。</dd>
+    <dt>静态目录 / transductive协议</dt><dd>当前目录和静态内容来自公开快照，候选包含训练未见广告。逐用户严格截断历史，并不等价于把所有用户按一个全局时间点切开的生产回测。</dd>
+    <dt>Checkpoint / Buffer / 缓存</dt><dd>Checkpoint保存学习到的状态与配置；非持久buffer里的全量静态特征不进入state_dict；对应数组缓存仍必须可用并正确对齐。</dd>
+  </dl>
+</section>

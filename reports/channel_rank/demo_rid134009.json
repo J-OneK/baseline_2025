@@ -1,0 +1,67 @@
+{
+  "seed": 2026,
+  "user_rid": 134009,
+  "budget": 500,
+  "auxiliary_added": 10,
+  "top10": [
+    {
+      "rank": 1,
+      "oid": 20005829159,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 2,
+      "oid": 20002058135,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 3,
+      "oid": 20002072415,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 4,
+      "oid": 20003047748,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 5,
+      "oid": 20005161727,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 6,
+      "oid": 20004004871,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 7,
+      "oid": 20002253954,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 8,
+      "oid": 20003187180,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 9,
+      "oid": 20000518010,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 10,
+      "oid": 20002166899,
+      "from_auxiliary": false
+    }
+  ],
+  "target_audit": {
+    "oid": 20004004871,
+    "ranks": {
+      "original": null,
+      "augmented_prior": 492,
+      "dcn_v2": 6
+    },
+    "from_auxiliary": true
+  }
+}

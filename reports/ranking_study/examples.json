@@ -1,0 +1,86 @@
+[
+  {
+    "seed": 2026,
+    "type": "gained",
+    "user_row": 2670,
+    "user_rid": 29520,
+    "target_local_id": 25219,
+    "target_oid": 20000037927,
+    "recall_rank": 12,
+    "reranked_rank": 6,
+    "target_training_frequency": 696,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2026,
+    "type": "gained",
+    "user_row": 37233,
+    "user_rid": 398217,
+    "target_local_id": 169256,
+    "target_oid": 20000162780,
+    "recall_rank": 11,
+    "reranked_rank": 10,
+    "target_training_frequency": 370,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2026,
+    "type": "gained",
+    "user_row": 47270,
+    "user_rid": 503868,
+    "target_local_id": 664362,
+    "target_oid": 20002935266,
+    "recall_rank": 11,
+    "reranked_rank": 10,
+    "target_training_frequency": 253,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2026,
+    "type": "lost",
+    "user_row": 87545,
+    "user_rid": 935687,
+    "target_local_id": 360267,
+    "target_oid": 20001253554,
+    "recall_rank": 10,
+    "reranked_rank": 15,
+    "target_training_frequency": 230,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2027,
+    "type": "gained",
+    "user_row": 9810,
+    "user_rid": 106063,
+    "target_local_id": 1371570,
+    "target_oid": 20001522432,
+    "recall_rank": 15,
+    "reranked_rank": 10,
+    "target_training_frequency": 254,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2027,
+    "type": "gained",
+    "user_row": 33792,
+    "user_rid": 361294,
+    "target_local_id": 1194354,
+    "target_oid": 20004151160,
+    "recall_rank": 11,
+    "reranked_rank": 8,
+    "target_training_frequency": 753,
+    "posthoc_example": true
+  },
+  {
+    "seed": 2027,
+    "type": "gained",
+    "user_row": 34165,
+    "user_rid": 365549,
+    "target_local_id": 612697,
+    "target_oid": 20000608705,
+    "recall_rank": 20,
+    "reranked_rank": 9,
+    "target_training_frequency": 468,
+    "posthoc_example": true
+  }
+]

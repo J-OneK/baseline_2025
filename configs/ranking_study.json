@@ -1,0 +1,59 @@
+{
+  "reference_repo": ".",
+  "cache": "artifacts/baseline/data",
+  "root": "artifacts/ranking_v1",
+  "seeds": [
+    2026,
+    2027
+  ],
+  "variants": [
+    "mean_mlp",
+    "din_attention"
+  ],
+  "data": {
+    "seed": 6091,
+    "statistics_fraction": 0.5,
+    "train_events_per_user": 12,
+    "min_history": 5,
+    "click_history": 20
+  },
+  "model": {
+    "hidden": 32,
+    "mlp": [
+      128,
+      64
+    ],
+    "attention": [
+      64,
+      32
+    ],
+    "dropout": 0.1
+  },
+  "training": {
+    "epochs": 5,
+    "batch_size": 2048,
+    "lr": 0.001,
+    "weight_decay": 0.00001,
+    "grad_clip": 5
+  },
+  "retrieval": {
+    "k": 500,
+    "batch_size": 128,
+    "candidate_chunk": 32768
+  },
+  "protocol": {
+    "task": "Observed first-appearance event click classification for training, fixed Top500 retrieval reranking for end-to-end validation",
+    "labels": "action1=observed exposure/nonclick label0; action2=click label1; action3 unknown excluded; no random unexposed item negatives",
+    "statistics": "Only per-user first half of original train prefixes contributes counts; second half yields training events; strict timestamp histories",
+    "training_sampling": "Uniform at most12 eligible events per user, without label balancing or positive oversampling",
+    "point_validation": "For original2000 validation users, first-appearance known events from original val_cut through strictly before test_cut; no test target scored",
+    "point_metric_scope": "AUC/LogLoss on selected observed event cohort, not on unexposed retrieved candidates; not production CTR calibration",
+    "retrieval": "Original validation-selected clickInfoNCE64 checkpoint per seed, frozen; full fixed catalog; exactTop500 with original history filtering; never inject target",
+    "ranker": "Frozen q/user/item features plus 20 prior clicked ads,13 field matches and early statistics; residual score with positive recall skip",
+    "ablation": "mean pool vs candidate-conditioned masked-softmax attention; same tensors/head initialization; DIN-inspired, not full original DIN reproduction",
+    "selection": "Best end-to-end validation NDCG@10 thenHR@10 then earlier epoch; fixedepoch5 also reported; AUC secondary",
+    "test": "Development-only reused validation; no test-target evaluation or main-model replacement",
+    "budget": "Two variants by two seeds, five epochs; no architecture or blend grid",
+    "boundary": "Per-user cutoffs and publicstatic catalog, no shared global-time cutoff; logged exposure selection bias remains"
+  }
+}
