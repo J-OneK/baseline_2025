@@ -10,7 +10,7 @@
 | 面试深挖：64道核心问题及排序补充、参考回答、连续追问、失败案例与证据 | [项目面试深挖文档](PROJECT_INTERVIEW_DEEP_DIVE.md) |
 | InfoNCE负例数16/64/128：三种子对照、配对区间、候选覆盖与成本 | [负样本数量补充实验](negative_count_study.md) |
 | 生成式召回：RQ-VAE、Semantic ID、自回归解码、对照与真实结果 | [生成式探索入口](generative_retrieval.md) |
-| 双通道候选、MLP 与 DCN V2 消融、6,000 人确认 | [排序链路](ranking_extension.md) / [实验证据](../reports/channel_rank/README.md) |
+| 双通道候选、MLP 与 DCN V2 消融、6,000 人确认 | [排序链路](ranking_extension.md) / [实验取舍与证据](../reports/channel_rank/README.md#遇到的问题与选择依据) |
 | 从原始数据到 Top-10 的代码讲解 | [代码导读](code_walkthrough.md) |
 | 哪些指标可以引用、如何复现历史演示 | [版本与证据](release.md) |
 | 主线与探索实验如何分开 | [分支说明](branches.md) |
