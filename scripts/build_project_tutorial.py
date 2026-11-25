@@ -37,7 +37,7 @@ SOURCE_FILES = [
 ]
 NAV = [
     ('00', 'overview', '整体架构与学习地图'),
-    ('入口', 'workflow', 'run_main 与实际执行入口'),
+    ('入口', 'workflow', '完整推荐与召回复现'),
     ('01', 'data', '原始数据与四层编号'),
     ('02', 'prepare', '清洗、切分与缓存'),
     ('03', 'dataset', '样本、移位与负例'),
@@ -46,9 +46,9 @@ NAV = [
     ('06', 'evaluation', '精确评估与指标'),
     ('07', 'retrieval', 'Faiss 与推荐出口'),
     ('08', 'experiments', '实验结果与证据范围'),
-    ('08A', 'tail-recall', '新增：零点击长尾辅助召回'),
+    ('08A', 'tail-recall', '历史对照：零点击长尾'),
     ('08B', 'channel-ranking', '双通道召回与 DCN V2 排序'),
-    ('08C', 'sequence-ranking', '联合排序与逐阶段数据'),
+    ('08C', 'sequence-ranking', 'OneTrans 风格排序与真实数据'),
     ('09', 'demo', '真实执行：12用户完整轨迹'),
     ('10', 'debugging', '排查问题与理解验收'),
     ('11', 'glossary', '符号与术语速查'),
@@ -175,27 +175,6 @@ class Builder:
                       lambda m: self.code(m[1], m[2], m[3]), text)
 
 
-def diagram():
-    boxes = [
-        (28, 34, '原始Parquet', '序列 · 属性 · 内容'),
-        (257, 34, 'prepare / Dataset', '合法历史 → 移位样本'),
-        (486, 34, '共享编码与因果序列', '广告向量 v · 用户状态 q'),
-        (28, 173, 'InfoNCE训练', '点击正例 + 64负例'),
-        (257, 173, '验证选型 / 测试评估', '完整候选 · HR · NDCG'),
-        (486, 173, '导出与Faiss', '历史过滤 → Top-10 OID'),
-    ]
-    content = ['<svg class="route-diagram" viewBox="0 0 720 291" role="img" aria-labelledby="flow-title">',
-               '<title id="flow-title">原始数据、样本、模型、训练、评估、导出索引与推荐的流程图</title>',
-               '<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#93a8c6"/></marker></defs>',
-               '<path d="M224 78 H250 M453 78 H479 M584 119 V150 H126 V166 M224 217 H250 M453 217 H479" fill="none" stroke="#93a8c6" stroke-width="1.5" marker-end="url(#arrow)"/>']
-    for x, y, title, subtitle in boxes:
-        content.append(f'<rect x="{x}" y="{y}" width="196" height="84" rx="9" fill="white" stroke="#d7e0ed"/>'
-                       f'<text x="{x+16}" y="{y+31}" font-size="14" font-weight="600" fill="#203652">{title}</text>'
-                       f'<text x="{x+16}" y="{y+56}" font-size="11" fill="#677c96">{subtitle}</text>')
-    content.append('</svg>')
-    return ''.join(content)
-
-
 def laboratories():
     return {
         'prepare': '''<div class="lab" id="split-lab"><h3>动手：改变切分条件，先预测输出</h3><p>使用同一条十事件合成序列。默认应得到train_cut=5、val_pos=5、test_pos=8。试着给测试点击前一事件同样的时间戳，再观察pos与cut。</p><div class="controls"><label>最少历史 <input id="split-min" type="range" min="0" max="9" step="1" value="5"><output class="value" id="split-min-value">5</output></label><label>序列条件 <select id="split-mode"><option value="normal">原始十事件</option><option value="ties">广告7与测试点击同时间</option><option value="seen">广告6更早已曝光</option></select></label></div><div class="lab-output" id="split-output" aria-live="polite"></div><p class="source-note">浏览器复算clean_and_split的当前逻辑；Python源码与实际输出仍以上面的嵌入快照为准。</p></div>''',
@@ -303,7 +282,7 @@ def main():
     if mismatches:
         raise ValueError('Teaching trace source mismatch; rerun run_tutorial_demo.py: ' + ', '.join(mismatches))
     pieces = [(PARTS / name).read_text() for name in ['overview.html', 'data.html', 'model.html', 'evaluation.html']]
-    body = ''.join(pieces).replace('{{flowdiagram}}', diagram())
+    body = ''.join(pieces)
     for chapter_id, laboratory in laboratories().items():
         pattern = rf'(<section\b[^>]*id="{chapter_id}"[^>]*>.*?)(</section>)'
         body, count = re.subn(pattern, lambda m: m[1] + laboratory + m[2], body, count=1, flags=re.S)
@@ -319,7 +298,7 @@ def main():
     body += sequence_chapter.replace('{{sequence_trace}}', pre(rank_trace))
     body += demo_chapter(demo) + (PARTS / 'appendix.html').read_text()
     body = builder.replace_code(body)
-    if '{{code:' in body or '{{flowdiagram}}' in body or '{{tail_' in body or '{{sequence_trace}}' in body:
+    if '{{code:' in body or '{{tail_' in body or '{{sequence_trace}}' in body:
         raise ValueError('Unresolved template placeholder')
     body += source_chapter(builder)
     for _, chapter_id, _ in NAV:
@@ -349,9 +328,8 @@ def main():
 <div class="tool-row"><button class="small-btn" id="source-toggle">折叠源码</button><button class="small-btn" id="theme-toggle">明 / 暗</button><button class="small-btn" id="print">打印 / PDF</button></div><p>单文件 · 无外部依赖<br>源码基准 {builder.commit[:7]}<br>本地保存阅读进度</p></div></aside>
 <div class="mobile-bar"><button id="menu" aria-label="打开学习目录" aria-expanded="false">☰ 目录</button><span>TAAC2025 · 代码与公式</span><a href="#overview">首页 ↑</a></div>
 <main class="main" id="main-content"><div class="article"><div class="topline"><span>RECOMMENDATION ENGINEERING / LEARNING EDITION</span><span class="version">{builder.commit[:7]} · OFFLINE HTML</span></div>
-<header class="hero"><div class="eyebrow">从数据到模型，再到可验证的推荐结果</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">一份把 TAAC2025 主项目讲透的代码讲义：沿同一个用户追踪完整流程，把每个数组、每条公式和每项实验结论对应起来。08C 章用真实用户展示 Parquet、候选、特征、两个残差和最终名次。</p>
-<div class="hero-tags"><span class="pill">实际源码与行号</span><span class="pill">6组互动实验</span><span class="pill">双通道召回与列表排序</span><span class="pill">12用户真实CPU执行轨迹</span><span class="pill">离线可读 · 可打印</span></div>
-<div class="hero-stats"><div><strong>32维</strong><small>广告与用户共享检索空间</small></div><div><strong>1层 / 1头</strong><small>当前固定主模型</small></div><div><strong>64负例</strong><small>每个有效点击监督位置</small></div><div><strong>270万+</strong><small>历史主实验的完整候选广告</small></div></div></header>
+<header class="hero"><div class="eyebrow">TAAC2025 · 广告召回与联合排序</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">沿真实用户的数据走过 InfoNCE 主召回、历史同组辅助召回、DCN V2 和 OneTrans 风格联合排序，逐步核对数组、模型分数和最后的广告名次。</p>
+<div class="hero-stats"><div><strong>32 维</strong><small>主召回查询与广告向量</small></div><div><strong>500 条</strong><small>合并后的固定候选</small></div><div><strong>15 项</strong><small>DCN V2 的汇总特征</small></div><div><strong>2 个</strong><small>联合模型的候选特征 token</small></div></div></header>
 <noscript><div class="callout">浏览器关闭了JavaScript。正文、源码、公式、手算例子和实际运行结果仍可阅读；互动滑块与本地进度需要启用脚本。</div></noscript>
 {body}<footer class="end-note">构建于 {built} · 原始大规模实验保持原记录，教学演示单独注明。<br>阅读时以本页嵌入的源码快照、来源摘要和标明的评估口径为准。</footer></div></main>
 <div class="live-status" id="status" role="status" aria-live="polite"></div>

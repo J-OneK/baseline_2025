@@ -1,34 +1,85 @@
 <section class="chapter" id="overview">
   <div class="chapter-kicker">00 · 先建立整个系统的地图</div>
   <h2>从一条用户行为，到十条广告推荐</h2>
-  <p class="lead">这个项目解决一个明确的问题：给定用户属性和已经发生的广告行为，生成用户向量，在固定广告目录中取内积分数最高的候选，过滤历史广告，返回十条广告。训练、评估和推荐共享同一套广告编码器与序列编码器。</p>
-  <p class="callout">新增内容可直接跳到 <a href="#tail-recall">08A · 零点击长尾辅助召回</a>：主模型保持原样，研究分支专门补候选，包含实际源码、8候选交互练习和新留出行为确认。它改善的是部分长尾候选覆盖，Top-10按规则保持。</p>
-  <div class="checkpoint"><strong>本教程的学习目标：</strong>你能亲手构造一个样本、对上每个张量的形状、推导一次损失和一次指标、说明向量索引如何保持原始打分含义，并用已有对照实验解释主方案的取舍。</div>
-  {{flowdiagram}}
+  <p class="lead">给定用户属性和已经发生的广告行为，先用 InfoNCE 主召回和历史同组辅助召回找候选，再在固定的 500 条里依次计算原融合分、DCN V2 残差和 OneTrans 风格联合 Transformer 残差。最终按总分输出十条广告。</p>
+
+  <figure class="system-map" aria-labelledby="system-map-title">
+    <figcaption id="system-map-title">当前完整推荐的数据流</figcaption>
+    <a class="system-node" href="#prepare">
+      <strong>原始 Parquet → 清洗与时间切分</strong>
+      <small>可见用户历史、广告属性和 81 号向量进入数组缓存</small>
+    </a>
+    <div class="system-arrow" aria-hidden="true">↓</div>
+    <div class="system-paths" role="group" aria-label="两条候选来源">
+      <a class="system-node" href="#model">
+        <strong>主召回 · InfoNCE-64</strong>
+        <small>因果历史编码得到 <code>[B,32]</code> 查询，精确内积检索并过滤历史，取 Top-500</small>
+      </a>
+      <a class="system-node" href="#channel-ranking">
+        <strong>辅助召回 · 历史同组近邻</strong>
+        <small>用 102/122 属性查组，再按 81 向量相似度提议冷启动与长尾广告</small>
+      </a>
+    </div>
+    <div class="system-arrow" aria-hidden="true">↓</div>
+    <a class="system-node" href="#channel-ranking">
+      <strong>合并去重 · 每个冷尾桶最多补 5 条</strong>
+      <small>等量替换，固定 <code>[B,500]</code> 个候选</small>
+    </a>
+    <div class="system-arrow" aria-hidden="true">↓</div>
+    <div class="system-scores" role="group" aria-label="组成候选总分的三项">
+      <a class="system-node" href="#channel-ranking">
+        <strong>原融合分</strong>
+        <small>0.9 × 召回内积 z 分 + 0.1 × 内容 MLP logit z 分</small>
+      </a>
+      <span class="system-plus" aria-hidden="true">+</span>
+      <a class="system-node" href="#channel-ranking">
+        <strong>DCN V2 残差</strong>
+        <small>用每条候选的 15 项特征学习交叉与打分修正</small>
+      </a>
+      <span class="system-plus" aria-hidden="true">+</span>
+      <a class="system-node" href="#sequence-ranking">
+        <strong>OneTrans 风格联合残差</strong>
+        <small>两组候选 token 读取最近 40 条已知行为</small>
+      </a>
+    </div>
+    <div class="system-arrow" aria-hidden="true">↓</div>
+    <a class="system-node system-output" href="#sequence-ranking">
+      <strong>总分排序 → Top-10 广告 OID</strong>
+      <small>真实目标的路径为主召回漏掉，补入后排 494 → DCN V2 排 11 → 联合排序排 8</small>
+    </a>
+  </figure>
+  <p class="source-note">完整推荐从精确 Top-500 出发。<a href="#retrieval">Faiss 检索复现</a>有单独入口，测量内积近似检索和历史过滤。</p>
+
+  <h3>学习地图</h3>
   <div class="pipeline">
-    <a href="#data"><span class="step-no">01 / DATA</span><strong>看清输入</strong><small>行为、属性、81向量和四种广告编号</small></a>
-    <a href="#prepare"><span class="step-no">02 / PREPARE</span><strong>确定可见历史</strong><small>首次出现点击、严格时间截断、缓存</small></a>
-    <a href="#dataset"><span class="step-no">03 / SAMPLE</span><strong>构造一批样本</strong><small>U token、移位目标、动作监督位置</small></a>
-    <a href="#model"><span class="step-no">04 / ENCODE</span><strong>学习32维表示</strong><small>广告/用户编码、因果自注意力</small></a>
-    <a href="#training"><span class="step-no">05 / OPTIMIZE</span><strong>区分正负例</strong><small>点击掩码、64负例、InfoNCE、Adam</small></a>
-    <a href="#evaluation"><span class="step-no">06 / EVALUATE</span><strong>回到完整候选库</strong><small>精确Top-K、HR、NDCG和冷尾分桶</small></a>
-    <a href="#retrieval"><span class="step-no">07 / RETRIEVE</span><strong>导出并加速检索</strong><small>Faiss、MIPS→L2、历史过滤和OID</small></a>
-    <a href="#experiments"><span class="step-no">08 / EVIDENCE</span><strong>解释已有实验</strong><small>控制变量、三种子、局限与后续探索</small></a>
-    <a href="#tail-recall"><span class="step-no">08A / AUXILIARY</span><strong>新增长尾辅助通道</strong><small>同一查询、另一候选视图、固定预算融合</small></a>
-    <a href="#demo"><span class="step-no">09 / TRACE</span><strong>对照实际执行结果</strong><small>12个合成用户完整跑过当前Python代码</small></a>
+    <a href="#data"><span class="step-no">01 / DATA</span><strong>看清原始输入</strong><small>行为、属性、81 向量和广告编号</small></a>
+    <a href="#prepare"><span class="step-no">02 / PREPARE</span><strong>确定可见历史</strong><small>首次出现点击、严格时间边界、缓存</small></a>
+    <a href="#dataset"><span class="step-no">03 / SAMPLE</span><strong>构造召回训练样本</strong><small>用户 token、移位目标、动作监督位置</small></a>
+    <a href="#model"><span class="step-no">04 / ENCODE</span><strong>生成 32 维向量</strong><small>广告编码、历史序列、因果自注意力</small></a>
+    <a href="#training"><span class="step-no">05 / OPTIMIZE</span><strong>理解 InfoNCE-64</strong><small>点击掩码、64 负例、训练过程</small></a>
+    <a href="#channel-ranking"><span class="step-no">08B / DCN V2</span><strong>合并候选并计算基础分</strong><small>双通道、15 个特征、交叉层与列表损失</small></a>
+    <a href="#sequence-ranking"><span class="step-no">08C / ONETRANS</span><strong>逐条读历史并重排</strong><small>历史与候选 token、联合残差、真实 Top-10 轨迹</small></a>
+    <a href="#evaluation"><span class="step-no">06 / EVALUATE</span><strong>手算指标与分桶</strong><small>精确 Top-K、HR、NDCG 与冷尾覆盖</small></a>
+    <a href="#experiments"><span class="step-no">08 / EVIDENCE</span><strong>复查三轮实验</strong><small>召回测试、DCN V2 确认、联合排序确认</small></a>
+    <a href="#retrieval"><span class="step-no">07 / FAISS</span><strong>复现召回索引</strong><small>MIPS→L2、历史过滤、近似检索计时</small></a>
+    <a href="#tail-recall"><span class="step-no">08A / HISTORY</span><strong>回看零点击长尾研究</strong><small>ID 置零与固定候选预算的早期对照</small></a>
+    <a href="#demo"><span class="step-no">09 / TRACE</span><strong>重放小规模召回</strong><small>12 名合成用户在 CPU 上跑召回及索引</small></a>
   </div>
-  <p>从基础排序读到实际数据。<a href="#channel-ranking">08B · 双通道与 DCN V2</a> · <a href="#sequence-ranking">08C · 联合排序和数据链路</a></p>
-  <h3>训练与推荐的共同核心</h3>
-  <div class="formula" role="math"><p>广告向量：v<sub>i</sub> = ItemEncoder(广告ID, 匿名属性, 81号内容向量)</p><p>用户查询：q<sub>u,t</sub> = SequenceEncoder(用户属性, 截至 t 可见的广告历史)</p><p>打分：s(u,t,i) = q<sub>u,t</sub><sup>T</sup>v<sub>i</sub></p></div>
-  <p>训练让真实点击目标在采样候选中的分数相对提高。验证时检查同一打分函数在完整目录里是否找得到目标。推荐时用已经训练好的参数编码当前历史，再通过持久化索引查找广告。召回演示直接按内积分输出。完整推荐采用两通道合并的 500 条候选，再叠加 DCN V2 与联合 Transformer 的分数。</p>
-  <h3>三个层次的例子，各自回答不同问题</h3>
-  <div class="table-wrap"><table><thead><tr><th>例子</th><th>本教程如何使用</th><th>可以得出什么</th></tr></thead><tbody>
-    <tr><td>原始数据真实记录</td><td>解释Parquet列、整数/列表/空值、OID/RID</td><td>数据实际长什么样</td></tr>
-    <tr><td>手算的合成序列与二维向量</td><td>贯穿切片、移位、掩码、损失与指标推导</td><td>数学与代码逻辑如何对应；不是实际模型效果</td></tr>
-    <tr><td>实际执行的12用户CPU演示</td><td>调用当前真实模块，保存张量、训练轨迹、索引与推荐</td><td>代码链路能运行、真实中间数值可以复核；不是大数据效果实验</td></tr>
-    <tr><td>原主项目历史确认实验</td><td>读取已保存的三种子报告和Faiss测量</td><td>指定公开数据协议与机器条件下的实测结果</td></tr>
+
+  <h3>召回与排序各自学什么？</h3>
+  <div class="formula" role="math">
+    <p>召回内积 s<sub>retrieval</sub>(u,i) = q<sub>u</sub><sup>T</sup>v<sub>i</sub></p>
+    <p>最终分 s<sub>final</sub> = 0.9·z(召回内积) + 0.1·z(内容 MLP logit) + DCN V2 残差 + 联合残差</p>
+  </div>
+  <p>召回训练让每个真实点击在 64 个采样负例中得分更高。排序训练使用实际合并的 500 条候选，按留出点击所在列做列表交叉熵。DCN V2 学汇总特征的组合，联合模型读取逐次曝光与点击并学习额外的分数修正。</p>
+
+  <h3>选一个例子跟着走</h3>
+  <div class="table-wrap"><table><thead><tr><th>例子</th><th>适合核对的内容</th></tr></thead><tbody>
+    <tr><td><a href="#sequence-ranking">真实用户 RID 311428</a></td><td>从 Parquet、ID 映射、两路候选、15 项特征到 token 形状与最终打分</td></tr>
+    <tr><td><a href="#dataset">手算的合成序列</a></td><td>切片、移位、掩码与损失的计算</td></tr>
+    <tr><td><a href="#demo">12 名合成用户的 CPU 执行</a></td><td>召回训练、向量导出、索引和推荐的实际代码轨迹</td></tr>
+    <tr><td><a href="#experiments">真实数据的确认实验</a></td><td>同候选对照、指标区间、模型和队列的归属</td></tr>
   </tbody></table></div>
-  <p>主流程以生成时的主分支快照为准；新增08A章单独标明研究分支提交d0b7374。附录保存两类源码及SHA256。浏览器里的滑块用JavaScript重算相同的小公式，真正的Python源码、CPU演示和研究确认结果分别保留，便于你对照。</p>
   <h3>怎么使用这份教程</h3>
   <ol><li>第一遍沿目录读完每章的目标、例子与代码解释，先连上整条数据流。</li><li>第二遍展开对应源码，逐个变量对照形状；在互动区域改变条件，先预测再观察结果。</li><li>第三遍独立完成每章自测，用自己的话解释为什么这样实现，再对照折叠答案。</li></ol>
   <p>章节末尾可以标记“已理解”，进度保存在当前浏览器本地。源码可统一折叠，支持复制、关键词查找和打印。CSS、脚本、公式、示例数据与核心源码均嵌入本文件，离线阅读不依赖CDN。</p>
@@ -36,9 +87,20 @@
 
 <section class="chapter" id="workflow">
   <div class="chapter-kicker">入口 · 你正在IDE里打开的文件</div>
-  <h2>run_main.py：六个阶段怎样接起来</h2>
-  <p class="lead"><code>scripts/run_main.py</code> 是流程编排器：决定每个阶段调用哪个Python模块、传入什么参数、输出放哪里，并检查已有产物是否属于同一配置。真正的模型和算法位于 <code>taac_retrieval/</code>。</p>
-  <h3>先把配置读成一份实验约定</h3>
+  <h2>先跑完整推荐，再按需复现训练与索引</h2>
+  <p class="lead">本地有原目录、向量与锁定权重时，主入口会重算两个通道的候选，接上 DCN V2 和联合排序，直接输出十个 OID。</p>
+  <pre><code>.project_venv/bin/python scripts/recommend_sequence_rank.py \
+  --device cpu --seed 2026 --rid 311428 --show-target --trace</code></pre>
+  <p><code>--trace</code> 打印召回查询、候选、静态特征和 token 形状。<code>--show-target</code> 在打分后打印真实目标名次，便于核对 <a href="#sequence-ranking">第 494 → 11 → 8 的实际案例</a>。</p>
+  <div class="table-wrap"><table><thead><tr><th>用途</th><th>对应入口</th></tr></thead><tbody>
+    <tr><td>完整推荐与中间数据</td><td><code>scripts/recommend_sequence_rank.py</code>，使用两路召回、DCN V2 与联合残差</td></tr>
+    <tr><td>单独复查基础排序</td><td><code>scripts/recommend_channel_rank.py</code>，查看加联合残差前的 DCN V2</td></tr>
+    <tr><td>重跑排序实验</td><td><code>scripts/run_channel_rank.py</code> 和 <code>scripts/run_sequence_rank.py</code>，先用开发验证锁定再确认</td></tr>
+    <tr><td>单独复现主召回与 Faiss</td><td><code>scripts/run_main.py</code>，用固定配置编排数据、训练、索引和召回演示</td></tr>
+  </tbody></table></div>
+  <p class="source-note">已有产物位置与重跑步骤见 <a href="ranking_extension.md">排序入口说明</a>。</p>
+  <h3>主召回的六个阶段</h3>
+  <p><code>scripts/run_main.py</code> 按配置选择模块、参数与输出位置，并检查已有召回和索引产物的身份。</p>
   {{code:configs/main.json:1:*}}
   <div class="table-wrap"><table><thead><tr><th>配置</th><th>实际含义</th></tr></thead><tbody>
     <tr><td><code>preparation.max_users=300000</code></td><td>均匀抽样上限；经过合法点击和历史筛选后，历史主数据保留280,985用户</td></tr>
@@ -66,7 +128,7 @@
   {{code:scripts/run_main.py:134:207}}
   <p>注意训练命令中固定传入 <code>skip_test=True</code>；每轮训练只用验证指标选epoch。显式的evaluate阶段再加载固定checkpoint评估测试。索引也先在验证查询上检查门槛并锁定参数，随后才做测试对比。</p>
   {{code:scripts/run_main.py:234:*}}
-  <p><code>--stage all</code> 按固定顺序串行调用六个阶段。训练/索引是离线工作，不会在每一次推荐请求里重复执行。</p>
+  <p><code>--stage all</code> 按固定顺序串行调用六个召回与索引阶段。训练/索引是离线工作，不会在每一次推荐请求里重复执行。</p>
   <h3>现在就能核对的命令</h3>
   <pre><code>cd /home/jyk/project/baseline_2025
 .project_venv/bin/python scripts/run_main.py --stage all --device cpu --dry-run

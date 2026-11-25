@@ -1,7 +1,7 @@
 <section class="chapter" id="evaluation" aria-labelledby="evaluation-title">
   <div class="pill">阶段 06 · 验证与测试</div>
   <h2 id="evaluation-title">模型学会了什么？用完整候选库回答</h2>
-  <p class="lead">这一章把模型输出的 32 维用户向量变成广告排名，再把排名变成指标。学习目标：手算 HR / NDCG，说明训练负采样与完整候选评估的区别，并解释时间切分、历史过滤和分桶分别控制了什么。</p>
+  <p class="lead">本章从 32 维查询算出候选，再把召回或排序后的名次变成指标。先手算 HR 和 NDCG，再用同一份候选比较两个排序器。</p>
 
   <h3>6.1 同一个打分函数，两个不同的计算预算</h3>
   <p>模型训练与评估都使用用户向量和广告向量的原始内积。对用户 <var>u</var> 的当前历史，序列编码器产生查询向量 <var>q</var><sub>u</sub>；广告编码器产生候选广告向量 <var>v</var><sub>i</sub>。分数越大，广告越靠前：</p>
@@ -10,7 +10,8 @@
     <thead><tr><th>环节</th><th>实际比较什么</th><th>目的</th></tr></thead>
     <tbody>
       <tr><td>点击 InfoNCE-64 训练</td><td>每个有效监督位置：1 个点击正例 + 64 个采样负例</td><td>用可承受的开销学习区分正负例</td></tr>
-      <tr><td>主报告的精确离线评估</td><td>同一用户向量与固定目录中 2,708,122 个广告比较，过滤已见广告后取前 10</td><td>衡量大候选库中的实际排序位置</td></tr>
+      <tr><td>历史主召回精确评估</td><td>同一用户向量与固定目录中 2,708,122 个广告比较，过滤已见广告后取前 10</td><td>衡量全目录内积召回能否找对目标</td></tr>
+      <tr><td>完整推荐的排序确认</td><td>另一个 1,538,730 条目录上精确取 Top-500，合并两路仍为 500 条</td><td>固定候选比较原融合、DCN V2 或联合排序，并保留目标未召回用户作为分母</td></tr>
       <tr><td>Faiss 近似检索评估</td><td>同一向量与索引检索，比较近似结果和精确结果，并报告真实目标命中</td><td>衡量检索损失和速度的取舍</td></tr>
     </tbody>
   </table></div>
@@ -201,7 +202,7 @@
   <h2 id="experiments-title">读懂真实实验，而不是只记一个提升百分比</h2>
   <p class="lead">学习目标：说明基线到主方案改变了哪些因素，区分开发验证、独立确认与后续探索；把每个数字绑定到具体模型、队列、种子和测量范围。</p>
 
-  <h3>8.1 主方案来自怎样的选择过程？</h3>
+  <h3>8.1 主召回如何选定 InfoNCE-64？</h3>
   <p>开发阶段先在较小数据缓存上比较监督、损失、负例数量和动作输入的组合，只根据平均验证 NDCG@10、再 HR@10 锁定 <code>click_infonce64</code>。随后扩大到 280,985 个有效用户，构造排除此前已查看测试用户的 10,000 人新队列，用三个种子确认基线与选定方案。</p>
   <div class="table-wrap"><table><thead><tr><th>开发方案</th><th>监督位置</th><th>负例 / 监督位置</th><th>损失 / 输入变化</th><th>两种子开发验证 NDCG@10 均值</th></tr></thead><tbody>
     <tr><td>baseline</td><td>曝光 + 点击</td><td>1</td><td>BCE</td><td>0.008415</td></tr>
@@ -242,15 +243,26 @@
     <tr><td><code>research/depth</code></td><td>共享初始参数的 1 / 2 / 4 层实验；最佳验证 NDCG 均值 0.015775 / 0.016316 / 0.016498</td><td>四层相对一层差值区间跨 0；固定第 5 轮时四层更低；没有替换一层模型和索引</td></tr>
   </tbody></table></div>
   <p>冷启动互补通道的例子尤其适合练习如何描述取舍：固定 500 个候选时，全体 Recall@500 从 <code>23.0600%</code> 降为 <code>22.4167%</code>，冷启动从 <code>8.3966%</code> 升为 <code>9.2564%</code>，长尾从 <code>0.7290%</code> 升为 <code>0.9301%</code>。这些是<strong>验证候选覆盖</strong>，并且规则保护了原前十，因此没有实现最终 Top-10 提升。</p>
-  <p>未排序的两路 Top-500 并集最多含 1,000 个广告；它的覆盖率不能被写成固定 500 候选的 Recall@500。若以后接排序，排序器只能重排已有候选；未进入候选的目标不会被排序网络凭空找回。</p>
+  <p>对两路候选先核对预算再比较覆盖。当前完整推荐中，固定的 500 条合并候选供两个排序阶段打分。目标在候选内时，可以用最终名次判断排序有没有帮它进前十。<a href="#sequence-ranking">看真实数据与名次变化</a>。</p>
   <p class="source-note">原始分支报告：<a href="https://github.com/J-OneK/baseline_2025/blob/research/supervision/reports/infonce_supervision/README.md">监督范围对照</a> · <a href="https://github.com/J-OneK/baseline_2025/blob/research/cold-start/reports/cold_start/README.md">冷启动与长尾探索</a> · <a href="https://github.com/J-OneK/baseline_2025/blob/research/depth/reports/depth_study/README.md">深度对照</a>。这些链接是补充来源；本页所需内容已内嵌，离线阅读不依赖它们。</p>
 
-  <h3>8.5 如何从文件复查每一个主要数字？</h3>
+  <h3>8.5 当前排序的收益来自哪轮对照？</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>独立确认集</th><th>固定候选内的对照</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
+    <tbody>
+      <tr><td>6,000 人</td><td>原融合 → DCN V2</td><td>2.233% → 2.917%</td><td>0.01225 → 0.01602</td></tr>
+      <tr><td>10,000 人</td><td>DCN V2 → 加联合 Transformer 残差</td><td>2.660% → 2.825%</td><td>0.013950 → 0.014800</td></tr>
+    </tbody>
+  </table></div>
+  <p>两轮都用两个种子，但使用不同留出用户。联合排序的 NDCG@10 差值 95% 配对区间为 +0.000069～+0.001694，HR@10 差值区间跨零。单次请求的真实分数见<a href="#sequence-ranking">联合排序案例</a>，模型打分与索引查询的耗时分别在<a href="release.md">版本说明</a>中记录。</p>
+
+  <h3>8.6 如何从文件复查每一个主要数字？</h3>
   <div class="table-wrap"><table><thead><tr><th>问题</th><th>仓库中的证据</th><th>应核对的字段</th></tr></thead><tbody>
-    <tr><td>主方案如何锁定？</td><td><code>reports/objective_study/model_selection.json</code></td><td><code>selected_variant</code>、<code>confirmation_settings</code>、验证排名与历史摘要</td></tr>
+    <tr><td>主召回如何锁定？</td><td><code>reports/objective_study/model_selection.json</code></td><td><code>selected_variant</code>、<code>confirmation_settings</code>、验证排名与历史摘要</td></tr>
     <tr><td>三种子测试是否一致？</td><td><code>reports/objective_study/metrics.json</code></td><td><code>aggregates</code>、<code>runs</code>、<code>deltas</code>、<code>confirmation_seeds</code></td></tr>
     <tr><td>为什么改索引几何？</td><td><code>ann_initial_failure.json</code>、<code>ann_amendment.json</code></td><td>原始失败、验证驱动的变换登记、98% 门槛没有被降低</td></tr>
     <tr><td>Faiss 测量属于谁？</td><td><code>metrics.json</code> 的 <code>ann</code> 字段；本地 <code>artifacts/objective_study/ann/benchmark.json</code></td><td>seed=2026、512 查询、几何、efSearch、线程、延迟范围</td></tr>
+    <tr><td>联合排序如何锁定与确认？</td><td><a href="../reports/sequence_rank/development.json">development.json</a> 与 <a href="../reports/sequence_rank/confirmation.json">confirmation.json</a></td><td>开发选择、锁定轮次和系数、确认用户数及配对差值</td></tr>
     <tr><td>旧源码 SHA 为什么不同？</td><td><code>code_manifest.json</code> 与 <code>docs/release.md</code></td><td>历史实测源码与后续入口重构的时间归属；没有冒充重新训练</td></tr>
   </tbody></table></div>
   <p>主报告的原始数据位置、缓存、权重和索引留在本地 <code>artifacts/</code>。Git 中主要保留代码、配置与小型历史报告；大文件不随 HTML 或仓库代码复制。历史 JSON 中出现旧目录名，是当时的记录，不等于当前默认命令仍按天数组织。</p>
@@ -259,6 +271,6 @@
     <details><summary>能把基线到主方案的 46.19% 都称为 InfoNCE 的纯损失收益吗？</summary><p>不能。基线到主方案同时改变曝光监督、负例数量和损失。固定点击监督及 64 负例预算的 click BCE-64 对照，才更直接帮助分析损失形式。</p></details>
     <details><summary>三种子 NDCG=0.015391 与单模型 NDCG=0.014665 哪个应该写在演示旁边？</summary><p>演示 seed=2026 checkpoint 时，应写单模型指标；主实验比较表可以写三种子均值，并明确统计方式。它们都是有效数字，但归属不同。</p></details>
     <details><summary>四层最佳验证均值领先，为什么主分支仍固定一层？</summary><p>深度实验是复用验证集的开发结果，差值区间跨 0，最后一轮与最佳 checkpoint 结果还存在差异。没有独立测试和对应索引链路确认，因此保持证据完整的一层主版本。</p></details>
-    <details><summary>冷启动候选覆盖变好，但原 Top-10 完全相同，意味着什么？</summary><p>意味着给未来排序提供了不同候选空间，同时可能牺牲整体候选覆盖；当前最终 Top-10 指标没有因此提升，不能把候选覆盖改善包装成已经实现的推荐质量提升。</p></details>
+    <details><summary>冷启动候选覆盖变好，但原 Top-10 完全相同，意味着什么？</summary><p>说明那一轮的旧排序把新增候选留在了榜尾。候选覆盖要和最后十条的效果分别报告。后续固定同一候选集，才可以检验 DCN V2 或联合残差的实际排序收益。</p></details>
   </div>
 </section>
