@@ -1,0 +1,99 @@
+<section class="chapter" id="retrieval" aria-labelledby="retrieval-title">
+  <div class="pill">11 · 专题：独立的向量检索链路</div>
+  <h2 id="retrieval-title">把模型变成可复用的 Faiss 检索链路</h2>
+  <p class="lead">完整推荐演示使用精确 Top-500。本专题单独复现主召回的 Faiss 直接 Top-10，讲向量导出、MIPS→L2、历史过滤、重合率和延迟。</p>
+
+  <h3>11.1 离线算广告向量，请求时算用户向量</h3>
+  <p>广告向量只依赖广告本身的 ID、属性和 81 向量，因此同一个 checkpoint 下可离线批量计算并放进索引。用户向量依赖当前历史，在推荐时通过序列编码器计算。两侧最终在同一个 32 维空间里以内积匹配。</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>导出文件</th><th>实际内容</th><th>后续用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>item_vectors.npy</code></td><td>float32，[N+1,32]，含 padding 行 0</td><td>构建 FlatIP 和 HNSW 索引</td></tr>
+      <tr><td><code>val_queries.npz</code></td><td>验证用户向量、可见历史、目标、用户行号</td><td>选择索引参数</td></tr>
+      <tr><td><code>test_queries.npz</code></td><td>固定测试队列的相同字段</td><td>参数锁定后做索引测试比较</td></tr>
+      <tr><td><code>metadata.json</code></td><td>checkpoint SHA、缓存配置签名、队列 SHA、维度、候选数量、ID 偏移</td><td>记录向量来源并拒绝明显的产物混用</td></tr>
+    </tbody>
+  </table></div>
+  {{code:taac_retrieval/export.py:22:55}}
+  <p>导出测试文件会计算并保存其中的目标字段，基准脚本则先用验证查询选择索引参数，锁定后才打开测试比较。需要区分“文件中已经保存了目标”与“使用目标来选择参数”；当前索引选择指标是与精确 Top-10 的重合率和延迟。</p>
+  <p><code>open_memmap</code> 让大广告矩阵可以分批写入磁盘；<code>flush()</code> 刷新缓冲区。导出本身不更新权重。checkpoint 的 SHA-256 对整个权重文件计算，相同文件才产生相同摘要。</p>
+
+  <h3>11.2 原始内积与余弦相似度</h3>
+  <div class="formula" role="math">q<sup>T</sup>v = ‖q‖ · ‖v‖ · cos θ &nbsp;;&nbsp; cosine(q,v) = q<sup>T</sup>v / (‖q‖‖v‖)</div>
+  <p>训练优化的是原始内积分数，向量长度也是模型学到的信号。直接把所有广告归一化为单位向量，会移除广告范数对分数的影响，可能改变排名。</p>
+  <div class="example">
+    <p>教学例：<code>q=(1,0)</code>，广告甲 <code>x₁=(1,0)</code>，广告乙 <code>x₂=(3,1)</code>。</p>
+    <div class="table-wrap"><table><thead><tr><th>广告</th><th>原始内积</th><th>余弦</th></tr></thead><tbody><tr><td>甲</td><td>1</td><td>1</td></tr><tr><td>乙</td><td>3</td><td>3/√10 ≈ 0.9487</td></tr></tbody></table></div>
+    <p>内积优先乙，余弦优先甲。因此当前代码没有进行单位归一化。若要改成余弦，需要把它作为新的建模/检索实验验证，而不能静默替换。</p>
+  </div>
+
+  <h3>11.3 为内积排序构造一个等价的欧氏距离问题</h3>
+  <p>MIPS 是 Maximum Inner Product Search，即最大内积检索。历史直接使用 raw-IP HNSW 的验证召回没有达到 98% 门槛，因此采用一个<strong>保持精确排名</strong>的非对称变换。先选定覆盖全部广告范数的半径平方：</p>
+  <div class="formula" role="math">R² = max<sub>i</sub> ‖v<sub>i</sub>‖²</div>
+  <p>广告向量增加一维，用户查询也增加一维，但构造方式不同：</p>
+  <div class="formula" role="math">v′<sub>i</sub> = [v<sub>i</sub>, √(R² − ‖v<sub>i</sub>‖²)] &nbsp;;&nbsp; q′ = [q, 0]</div>
+  <p>展开两者的平方欧氏距离：</p>
+  <div class="formula" role="math">‖q′−v′<sub>i</sub>‖² = ‖q−v<sub>i</sub>‖² + R² − ‖v<sub>i</sub>‖²<br>= ‖q‖² + R² − 2q<sup>T</sup>v<sub>i</sub></div>
+  <p>对一次固定查询，<code>‖q‖²+R²</code> 是与广告无关的常数。因此距离越小，原始内积越大。模型仍输出 32 维向量，HNSW 内部索引维度是 <strong>33</strong>。</p>
+  {{code:taac_retrieval/ann.py:6:26}}
+  <p><code>radius_squared</code> 必须不小于任一广告向量的范数平方；<code>maximum(...,0)</code> 处理舍入误差，不能靠它掩盖明显不合格的半径。Faiss 的 L2 搜索返回平方距离，包装类把它还原为原始内积分数：</p>
+  <div class="formula" role="math">score = (‖q‖² + R² − distance²) / 2</div>
+  <div class="example">
+    <p>手算 <code>q=(1,0)</code>，<code>R²=10</code>：</p>
+    <div class="table-wrap"><table><thead><tr><th>广告原向量</th><th>广告升维向量</th><th>与 q′=(1,0,0) 的平方距离</th><th>还原内积</th></tr></thead><tbody><tr><td>(1,0)</td><td>(1,0,3)</td><td>9</td><td>(1+10−9)/2=1</td></tr><tr><td>(3,1)</td><td>(3,1,0)</td><td>5</td><td>(1+10−5)/2=3</td></tr><tr><td>(0,2)</td><td>(0,2,√6)</td><td>11</td><td>(1+10−11)/2=0</td></tr></tbody></table></div>
+  </div>
+  <p class="callout">变换保证的是精确距离排名与精确内积排名等价。HNSW 仍然是近似搜索，不能由这条代数恒等式推出它必定找回 100% 的精确结果。实际近似质量要测量。</p>
+
+  <h3>11.4 HNSW 的三个参数，以及验证门槛</h3>
+  <p>HNSW 把广告向量组织成多层邻接图。上层提供较远距离的跳转，搜索再逐层深入，在底层维护候选集合。它以额外图结构内存和建索引成本，换取查询时少访问许多向量。</p>
+  <div class="table-wrap"><table><thead><tr><th>参数</th><th>当前设置</th><th>直觉</th></tr></thead><tbody>
+    <tr><td><code>M</code></td><td>32</td><td>控制图连接规模；通常越大，内存和构建开销越高。这里的 M 与训练有效监督位置数 M 无关</td></tr>
+    <tr><td><code>efConstruction</code></td><td>100</td><td>构图时的候选搜索宽度，影响图质量与构建成本</td></tr>
+    <tr><td><code>efSearch</code></td><td>2048</td><td>查询时的搜索宽度；通常越宽越慢，但更有机会找到精确近邻</td></tr>
+  </tbody></table></div>
+  {{code:taac_retrieval/benchmark_ann.py:23:46}}
+  <p>历史基准使用验证查询比较多个 <code>efSearch</code>，选择<strong>ANNRecall@10 至少 0.98 的配置中，验证 p95 延迟最低者</strong>。验证选择后写回并保存索引，所以推荐时读取的是锁定搜索参数的索引。当前主配置只保留选定的 <code>2048</code>；历史参数扫描保存在报告中。</p>
+  {{code:taac_retrieval/ann.py:58:66}}
+  <div class="formula" role="math">ANNRecall@K = (1 / U) ∑<sub>u=1…U</sub> |ANN<sub>u,K</sub> ∩ Exact<sub>u,K</sub>| / K</div>
+  <p>这个公式的“答案”是同一个模型的精确推荐 ID 集合。若两份 Top-10 重合 9 项，ANNRecall=90%；但真实点击可能在两份列表里都没有出现，此时两者 HR@10 都是 0。ANNRecall 与点击 Recall 衡量不同的问题。</p>
+
+  <h3>11.5 Faiss 行号、历史过滤与多取候选</h3>
+  <p>索引构建时从 <code>item_vectors[1]</code> 开始，跳过补齐行。Faiss 自动分配从 0 开始的行号，因此完整编号链是：</p>
+  <div class="formula">Faiss row 0 → local ID 1 → catalog_oids[1] → 最终广告 OID</div>
+  {{code:taac_retrieval/ann.py:29:55}}
+  <p><code>filter_results()</code> 依次把 Faiss 行号加 1，删除负行号、当前用户已见广告和重复广告，按原检索顺序保留前 K。它不训练新的分数函数，也不使用真实目标来调整列表。</p>
+  <p>直接查询十个候选，可能被历史过滤删掉若干个。因此 <code>search_filtered()</code> 请求：</p>
+  <div class="formula">fetch = min(N, K + 当前 batch 中最大的非零历史事件数)</div>
+  <p>例如主样例测试历史 <code>[1,2,3,4,5,6,6,7]</code> 有 8 个非零位置，尽管只有 7 个不同广告，代码仍按 8 计数；请求 Top-10 时会多取到 18 个，以留出过滤空间。重复历史会造成保守地多取一些候选。</p>
+  <p class="callout warn">这里实际只检索一次，没有“候选不足就自动循环扩大搜索”或热门广告兜底。过滤后不足 K 个会抛出异常。理解当前保护范围，才能在扩展服务时知道还缺什么。</p>
+
+  <h3>11.6 从现有 checkpoint 到一次推荐输出</h3>
+  {{code:taac_retrieval/recommend.py:20:59}}
+  <ol>
+    <li><code>load_model()</code> 比较 checkpoint 的缓存配置签名与当前缓存配置，恢复保存的评估队列，按配置重建网络并严格加载权重。</li>
+    <li>计算查询模型的 checkpoint 文件 SHA，与广告向量导出的 checkpoint SHA 比较；再与索引身份记录比较，防止普通误操作造成两侧模型版本混用。</li>
+    <li>读取持久化 HNSW；若它使用 <code>mips_l2</code>，套上还原原始内积分数的包装类；检查候选数量和逻辑维度。</li>
+    <li>按指定验证或测试队列位置取一个用户，编码其合法历史，检索并过滤广告。</li>
+    <li>把 local ID 转成 OID，返回广告标识、内积分数及请求的分段耗时。</li>
+  </ol>
+  {{code:taac_retrieval/evaluate_checkpoint.py:16:27}}
+  <p>这些检查是产物来源的一致性保护，不能解释为“所有文件内容都逐字节认证”。当前加载器没有对每个 <code>.npy</code> 数组或 <code>hnsw.faiss</code> 二进制文件单独计算并核对完整哈希；源码中的 <code>source_signature</code> 基于数据文件路径、大小和修改时间等元信息。只有被显式摘要的对象才有相应的内容哈希检查。</p>
+  <p><code>offline_target_oid</code> 仅用于这个离线演示的事后核对，不参与查询向量计算或推荐排序。当前入口按固定队列位置选用户，不是面向任意线上用户的长期运行 API。</p>
+
+  <h3>11.7 真实延迟怎么读？</h3>
+  <div class="table-wrap"><table><thead><tr><th>历史测试基准</th><th>结果</th><th>测量条件</th></tr></thead><tbody>
+    <tr><td>FlatIP p95</td><td>40.196454 ms</td><td rowspan="3">512 个固定测试查询，预热、单线程 CPU，每个查询重复 3 轮；测量索引搜索与 Python 历史过滤，排除编码、加载、启动、网络</td></tr>
+    <tr><td>MIPS→L2 HNSW p95</td><td>4.144272 ms</td></tr>
+    <tr><td>p95 比值</td><td>约 9.70 倍</td></tr>
+    <tr><td>测试 ANNRecall@10</td><td>0.9880859375 ≈ 98.81%</td><td>同一个 seed=2026 模型的近似与精确 Top-10 比较</td></tr>
+  </tbody></table></div>
+  {{code:taac_retrieval/benchmark_ann.py:49:76}}
+  <p><code>recommend.py</code> 额外打印单次预热请求中的编码与传输、索引与过滤、两者合计耗时。单次请求不是 p95；上面的历史 p95 也不是完整线上服务 SLA。8 线程批量 QPS 是单独负载，不应拿 <code>1000/p95</code> 直接当成它。持久化索引文件约 1.094 GB，也不等于进程峰值内存。</p>
+
+  <div class="checkpoint"><h3>这一章的自测</h3>
+    <details><summary>32 维模型为什么会保存一个 33 维索引？</summary><p>广告增加 √(R²−‖v‖²) 一维，查询增加 0 一维，把最大内积转换为最小平方欧氏距离。包装类对外报告的逻辑维度仍为 32。</p></details>
+    <details><summary>如果查询网络换成新训练模型，旧索引能继续用吗？</summary><p>同一个维度不保证向量空间一致。应使用新 checkpoint 重导出广告向量并重建索引；当前 SHA 检查会拒绝普通的模型身份混用。</p></details>
+    <details><summary>Faiss 返回 0，可以直接当作 padding 丢掉吗？</summary><p>不能。索引跳过了向量表 padding 行；Faiss 的 0 对应 local ID=1。负返回行号才是无效项，之后还要做历史与重复过滤。</p></details>
+    <details><summary>98.81% ANNRecall 能说明 98.81% 的用户点击被找到了吗？</summary><p>不能。它说明近似列表与同模型精确列表高度重合。真实目标命中由 HR/Recall/NDCG 单独衡量。</p></details>
+  </div>
+</section>

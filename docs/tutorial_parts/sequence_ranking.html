@@ -1,6 +1,6 @@
 <section class="chapter" id="sequence-ranking">
-  <div class="chapter-kicker">08C · 联合排序与真实数据链路</div>
-  <h2>模型每一步拿到的是什么数据？</h2>
+  <div class="chapter-kicker">08 · 排序阶段：OneTrans 风格联合排序</div>
+  <h2>让候选读逐条历史，再修正 DCN V2 的名次</h2>
   <p class="lead">下面追踪实际用户 RID 311428、seed 2026。目标广告 RID 为 4400700，缓存 local ID 为 1415788，业务 OID 为 20004114747。它的训练事件数是 0。两路召回合并后，DCN V2 将它排在第 11，联合排序提到第 8。</p>
   <h3>从原始记录到一组真实候选</h3>
   <p>检索请求可见 10 次行为。倒数第二次原始行为是 <code>{"item_id":3206824,"action_type":1,"timestamp":1731673950}</code>。按本地目录重编号后，广告 local ID 为 1031838，缓存动作码为 2。该次点击与目标共享 <code>102=3535</code>、<code>122=25920</code>，两者 81 号向量的余弦为 0.993804。</p>
@@ -22,7 +22,7 @@
   {{code:taac_retrieval/sequence_ranker.py:47:64}}
   {{code:taac_retrieval/sequence_ranker.py:94:115}}
   <div class="formula" role="math"><p>原融合 −1.664137 + DCN V2 残差 3.285589 ≈ 1.621453，排第 11</p><p>再加联合残差 0.192702 ≈ 1.814155，排第 8</p></div>
-  <p>为什么还做轻量注意力对照？因为我们先要知道逐条历史本身能否提供信息，然后再问同层联合交互有没有额外价值。两种新模型都用同一份 500 条与原 DCN 没有直接读取的候选内容。10,000 人确认集上 NDCG@10 由 0.013950 到 0.014800，HR@10 由 2.660% 到 2.825%。NDCG 差值的配对区间高于零，HR 差值区间跨零。</p>
+  <p>DCN V2 看到的是静态汇总特征，比如“与点击最像的分数”。联合排序还看到是哪一次点击、它和哪些曝光一起构成了最近历史。它在同一份 500 条上给 DCN V2 的分数再加一项，广告的入池状态不会变。<a href="#evaluation">下一章用这个用户手算 Recall、HR 和 NDCG</a>。</p>
   <pre><code>python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace</code></pre>
   <details><summary>展开实际 CLI 输出</summary>{{sequence_trace}}</details>
   <p><a href="data_flow.md">原始 Parquet、缓存和训练数据详解</a> · <a href="../reports/sequence_rank/README.md">比较、分桶与计时</a></p>

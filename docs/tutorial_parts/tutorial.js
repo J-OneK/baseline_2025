@@ -65,6 +65,7 @@
       $(`.toc a[href="#${item.id}"]`).hidden = !match;
       if (match) found++;
     });
+    for (const group of $$('.toc-group')) group.hidden = !$('a:not([hidden])', group);
     $('#search-status').textContent = q ? `${found} 个章节包含此关键词` : '搜索内容、函数名或公式 · Ctrl / ⌘ K';
   });
   document.addEventListener('keydown', event => {
@@ -181,7 +182,7 @@
     const overlap=Math.min(k,Number($('#metric-overlap').value));$('#metric-overlap').value=overlap;$('#metric-overlap-value').textContent=overlap;
     const exact=Array.from({length:k},(_,i)=>i+1),approx=exact.slice(0,overlap).concat(Array.from({length:k-overlap},(_,i)=>1001+i));
     const hit=rank<=k?1:0,ndcg=hit?1/Math.log2(rank+1):0,annHit=approx.includes(rank)?1:0;
-    $('#metric-output').innerHTML=`<p>目标广告 ID=${rank}。精确列表：[${exact}]；近似列表：[${approx}]。</p><div class="cards"><div class="card"><strong>${hit}</strong><small>精确检索 HR@${k} / 单目标 Recall@${k}</small></div><div class="card"><strong>${fmt(ndcg,6)}</strong><small>精确检索 NDCG@${k}</small></div><div class="card"><strong>${fmt(overlap/k*100,1)}%</strong><small>ANN 与精确列表重合率</small></div></div><p>Precision@${k}=${fmt(hit/k,4)}；近似列表对真实目标的 HR@${k}=${annHit}。重合率高与真实目标命中是两件需要分别测量的事；当前主项目固定 K=10。</p>`;
+    $('#metric-output').innerHTML=`<p>目标广告 ID=${rank}。精确列表：[${exact}]；近似列表：[${approx}]。</p><div class="cards"><div class="card"><strong>${hit}</strong><small>精确检索 HR@${k} / 单目标 Recall@${k}</small></div><div class="card"><strong>${fmt(ndcg,6)}</strong><small>精确检索 NDCG@${k}</small></div><div class="card"><strong>${fmt(overlap/k*100,1)}%</strong><small>ANN 与精确列表重合率</small></div></div><p>Precision@${k}=${fmt(hit/k,4)}；近似列表对真实目标的 HR@${k}=${annHit}。重合率高与真实目标命中是两件需要分别测量的事；这条独立 Faiss 复现的输出固定 K=10。</p>`;
     $('#metric-output').dataset.ndcg=ndcg;$('#metric-output').dataset.hit=hit;
   };
   ['#metric-rank','#metric-k','#metric-overlap'].forEach(s=>$(s).addEventListener('input',renderMetric));renderMetric();

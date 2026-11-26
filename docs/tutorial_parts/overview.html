@@ -11,17 +11,17 @@
     </a>
     <div class="system-arrow" aria-hidden="true">↓</div>
     <div class="system-paths" role="group" aria-label="两条候选来源">
-      <a class="system-node" href="#model">
+      <a class="system-node" href="#candidate-recall">
         <strong>主召回 · InfoNCE-64</strong>
         <small>因果历史编码得到 <code>[B,32]</code> 查询，精确内积检索并过滤历史，取 Top-500</small>
       </a>
-      <a class="system-node" href="#channel-ranking">
+      <a class="system-node" href="#candidate-recall">
         <strong>辅助召回 · 历史同组近邻</strong>
         <small>用 102/122 属性查组，再按 81 向量相似度提议冷启动与长尾广告</small>
       </a>
     </div>
     <div class="system-arrow" aria-hidden="true">↓</div>
-    <a class="system-node" href="#channel-ranking">
+    <a class="system-node" href="#candidate-recall">
       <strong>合并去重 · 每个冷尾桶最多补 5 条</strong>
       <small>等量替换，固定 <code>[B,500]</code> 个候选</small>
     </a>
@@ -50,21 +50,13 @@
   </figure>
   <p class="source-note">完整推荐从精确 Top-500 出发。<a href="#retrieval">Faiss 检索复现</a>有单独入口，测量内积近似检索和历史过滤。</p>
 
-  <h3>学习地图</h3>
-  <div class="pipeline">
-    <a href="#data"><span class="step-no">01 / DATA</span><strong>看清原始输入</strong><small>行为、属性、81 向量和广告编号</small></a>
-    <a href="#prepare"><span class="step-no">02 / PREPARE</span><strong>确定可见历史</strong><small>首次出现点击、严格时间边界、缓存</small></a>
-    <a href="#dataset"><span class="step-no">03 / SAMPLE</span><strong>构造召回训练样本</strong><small>用户 token、移位目标、动作监督位置</small></a>
-    <a href="#model"><span class="step-no">04 / ENCODE</span><strong>生成 32 维向量</strong><small>广告编码、历史序列、因果自注意力</small></a>
-    <a href="#training"><span class="step-no">05 / OPTIMIZE</span><strong>理解 InfoNCE-64</strong><small>点击掩码、64 负例、训练过程</small></a>
-    <a href="#channel-ranking"><span class="step-no">08B / DCN V2</span><strong>合并候选并计算基础分</strong><small>双通道、15 个特征、交叉层与列表损失</small></a>
-    <a href="#sequence-ranking"><span class="step-no">08C / ONETRANS</span><strong>逐条读历史并重排</strong><small>历史与候选 token、联合残差、真实 Top-10 轨迹</small></a>
-    <a href="#evaluation"><span class="step-no">06 / EVALUATE</span><strong>手算指标与分桶</strong><small>精确 Top-K、HR、NDCG 与冷尾覆盖</small></a>
-    <a href="#experiments"><span class="step-no">08 / EVIDENCE</span><strong>复查三轮实验</strong><small>召回测试、DCN V2 确认、联合排序确认</small></a>
-    <a href="#retrieval"><span class="step-no">07 / FAISS</span><strong>复现召回索引</strong><small>MIPS→L2、历史过滤、近似检索计时</small></a>
-    <a href="#tail-recall"><span class="step-no">08A / HISTORY</span><strong>回看零点击长尾研究</strong><small>ID 置零与固定候选预算的早期对照</small></a>
-    <a href="#demo"><span class="step-no">09 / TRACE</span><strong>重放小规模召回</strong><small>12 名合成用户在 CPU 上跑召回及索引</small></a>
-  </div>
+  <h3>学习地图：先搭链路，再看数字</h3>
+  <ol class="learning-route">
+    <li><strong>01–05 · 数据和召回训练</strong><p><a href="#data">原始数据</a> → <a href="#prepare">切分与缓存</a> → <a href="#dataset">样本和负例</a> → <a href="#model">因果编码</a> → <a href="#training">InfoNCE 训练</a>。弄懂 32 维查询和广告向量是怎么学出来的。</p></li>
+    <li><strong>06–08 · 从候选到输出</strong><p><a href="#candidate-recall">两路召回与合并</a> → <a href="#channel-ranking">DCN V2</a> → <a href="#sequence-ranking">OneTrans 风格联合排序</a>。跟真实用户看一条广告如何被补进候选、再排进前十。</p></li>
+    <li><strong>09–10 · 怎么测，测出了什么</strong><p><a href="#evaluation">Recall、HR、NDCG</a> → <a href="#experiments">实验结果与证据范围</a>。先区分候选覆盖和最终排名，再看对照结果。</p></li>
+  </ol>
+  <p class="source-note">读完主线后，可选读 <a href="#retrieval">Faiss 独立检索</a>、<a href="#tail-recall">零点击长尾历史对照</a>，或 <a href="#demo">复跑 12 名合成用户</a>。</p>
 
   <h3>召回与排序各自学什么？</h3>
   <div class="formula" role="math">

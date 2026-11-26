@@ -1,27 +1,58 @@
 <section class="chapter" id="evaluation" aria-labelledby="evaluation-title">
-  <div class="pill">阶段 06 · 验证与测试</div>
-  <h2 id="evaluation-title">模型学会了什么？用完整候选库回答</h2>
-  <p class="lead">本章从 32 维查询算出候选，再把召回或排序后的名次变成指标。先手算 HR 和 NDCG，再用同一份候选比较两个排序器。</p>
-
-  <h3>6.1 同一个打分函数，两个不同的计算预算</h3>
-  <p>模型训练与评估都使用用户向量和广告向量的原始内积。对用户 <var>u</var> 的当前历史，序列编码器产生查询向量 <var>q</var><sub>u</sub>；广告编码器产生候选广告向量 <var>v</var><sub>i</sub>。分数越大，广告越靠前：</p>
-  <div class="formula" role="math" aria-label="用户广告分数等于查询向量与广告向量的内积">s(u, i) = q<sub>u</sub><sup>T</sup>v<sub>i</sub> = ∑<sub>d=1…32</sub> q<sub>u,d</sub>v<sub>i,d</sub></div>
+  <div class="chapter-kicker">09 · 评估口径</div>
+  <h2 id="evaluation-title">召回看有没有捞到，排序看有没有排上去</h2>
+  <p class="lead">指标名称没有规定只能在哪一层使用。先确认测的是哪一张列表、截断到第几条，以及这张列表是否就是当时的最终输出。</p>
+  <h3>9.1 三张列表，各自回答什么？</h3>
   <div class="table-wrap"><table>
-    <thead><tr><th>环节</th><th>实际比较什么</th><th>目的</th></tr></thead>
+    <thead><tr><th>实际评估的输出</th><th>优先看什么</th><th>指标回答的问题</th></tr></thead>
     <tbody>
-      <tr><td>点击 InfoNCE-64 训练</td><td>每个有效监督位置：1 个点击正例 + 64 个采样负例</td><td>用可承受的开销学习区分正负例</td></tr>
-      <tr><td>历史主召回精确评估</td><td>同一用户向量与固定目录中 2,708,122 个广告比较，过滤已见广告后取前 10</td><td>衡量全目录内积召回能否找对目标</td></tr>
-      <tr><td>完整推荐的排序确认</td><td>另一个 1,538,730 条目录上精确取 Top-500，合并两路仍为 500 条</td><td>固定候选比较原融合、DCN V2 或联合排序，并保留目标未召回用户作为分母</td></tr>
-      <tr><td>Faiss 近似检索评估</td><td>同一向量与索引检索，比较近似结果和精确结果，并报告真实目标命中</td><td>衡量检索损失和速度的取舍</td></tr>
+      <tr><td>当前的两路召回 → 500 条</td><td>Recall@500；用 Recall@100 等做诊断</td><td>留出点击有没有进入候选池？冷启动、长尾、整体是否都覆盖得更好？</td></tr>
+      <tr><td>当前的固定 500 条 → 最终十条</td><td>HR@10、NDCG@10</td><td>目标有没有进最终十条？进了以后排第几？</td></tr>
+      <tr><td>历史的主召回单跑 → 直接返回十条</td><td>HR@10、NDCG@10</td><td>当时没有独立排序器，直接评价内积排出的十条。这个 HR@10 数值就是该列表的 Recall@10。</td></tr>
     </tbody>
   </table></div>
-  <p class="callout">训练时从 65 个选项里区分正例，与评估时从约 270 万个广告里找中点击，是不同难度的问题。训练 loss 下降，并不自动保证完整候选库的 HR@10 上升。</p>
+  <p>在历史链路里，召回内积已经给全目录的合法广告排了序，NDCG 可以评价这个顺序。现在有了下游排序，对召回而言，前 500 条里有没有目标更关键。只要候选集合不变，重排不会改 Recall@500；会改的是前十成员和先后顺序。</p>
+  <p>NDCG 也可以用于观察召回列表的顺序。例如只把前 100 条交给下游时，Recall@100 有更直接的意义。Faiss 与精确 Top-K 的<strong>列表重合率</strong>比较的是两个系统输出是否一致，是另一项指标，参见 <a href="#retrieval">Faiss 专题</a>。</p>
 
-  <h3>6.2 评估的完整调用链</h3>
+  <h3>9.2 同一个真实用户，四步分别得几分？</h3>
+  <p>这是前面 <a href="#sequence-ranking">RID 311428、seed 2026</a> 的实际路径。表中的 0、1 是单用户贡献，多位用户时再取平均。</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>查看哪份列表</th><th>留出点击位置</th><th>Recall@500</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
+    <tbody>
+      <tr><td>主召回</td><td>不在列表里</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>双路合并后按原融合分排列</td><td>第 494 名</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>同一批候选 + DCN V2</td><td>第 11 名</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>同一批候选 + 联合排序</td><td>第 8 名</td><td>1</td><td>1</td><td>1/log₂(9) ≈ 0.3155</td></tr>
+    </tbody>
+  </table></div>
+  <p class="callout">合并把 Recall@500 从 0 变成 1；联合排序把 HR@10 从 0 变成 1。两件事分别对应两个环节。第 11 名已经很接近前十，但两个 @10 指标仍然给 0。</p>
+
+  <h3>9.3 单目标时，为什么 HR 和 Recall 在同一个 K 上相等？</h3>
+  <p>令 <var>r</var><sub>u</sub> 为目标广告的一基排名，即第一名的 <var>r</var>=1，目标未返回时当作 <var>r</var>=∞。当前协议每个用户只有一个目标点击，定义指示函数 𝟙[条件]：成立时为 1，否则为 0。</p>
+  <div class="formula" role="math">HR@K = (1 / U) ∑<sub>u=1…U</sub> 𝟙[r<sub>u</sub> ≤ K]</div>
+  <p>HR 是“多少用户的目标进入了前 K”。标准 Recall 是“找回的相关项数 ÷ 全部相关项数”；这里每人恰好一个相关目标，所以单目标 Recall@K 与 HR@K 数值相同。Precision@K 的分母是推荐列表长度 K：一次命中时 Precision@10=1/10，并不等于 HR@10。</p>
+  <div class="formula" role="math">DCG@K = ∑<sub>j=1…K</sub> rel<sub>j</sub> / log<sub>2</sub>(j+1) &nbsp;;&nbsp; NDCG@K = DCG@K / IDCG@K</div>
+  <p>这里使用二元相关性：真实目标位置 <code>rel=1</code>，其他位置为 0。理想排序把唯一目标放在第一名，因此 <code>IDCG=1/log₂(2)=1</code>，公式化简为：</p>
+  <div class="formula" role="math">NDCG@K = (1 / U) ∑<sub>u=1…U</sub> g<sub>K</sub>(r<sub>u</sub>)，其中命中时 g<sub>K</sub>(r)=1 / log<sub>2</sub>(r+1)，未命中时为 0</div>
+  {{code:taac_retrieval/metrics.py:10:18}}
+  <div class="table-wrap"><table>
+    <thead><tr><th>用户</th><th>目标位置</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
+    <tbody><tr><td>甲</td><td>第 3 名</td><td>1</td><td>1/log₂(4)=0.5</td></tr><tr><td>乙</td><td>第 11 名</td><td>0</td><td>0</td></tr><tr><td>两用户平均</td><td>—</td><td>0.5</td><td>0.25</td></tr></tbody>
+  </table></div>
+  <p><code>matched = predictions == targets[:, None]</code> 将目标 ID 广播到推荐列表每一列；<code>any(axis=1)</code> 得到逐用户命中；位置折扣则通过列下标加 2 转成 <code>log₂(rank+1)</code>。先保留逐用户结果，后续才能做配对比较和分桶。</p>
+
+  <h3>9.4 怎样公平地比较两种排序？</h3>
+  <p>让两种排序器处理<strong>每个用户相同的 500 条</strong>，都在同一个留出点击上算 HR@10 和 NDCG@10。项目的最终指标以整个评估队列为分母。目标不在 500 条里的用户仍计入，两个排序器在这些用户上都记 0。只看召回成功用户时，可以另外报告条件命中率：P(进前十 | 进入候选)，它不能拿来代替全队列 HR@10。</p>
+  <p><code>coverage_summary()</code> 先找每个目标的名次，再针对 10、100 和 500 分别判断命中并计算位置折扣。召回或排序诊断都可以用它。分桶依据目标广告在全体用户训练前缀里的事件次数：冷启动 0 次、长尾 1～5 次、中频 6～50 次、头部超过 50 次。它包含曝光、点击与未知事件。</p>
+  {{code:taac_retrieval/coverage.py:54:85}}
+  <div class="formula" role="math">全队列 HR@10 = Recall@500 × P(进前十 | 进入候选)</div>
+  <p>这个关系要求同一批用户、每人一个目标，并且最终 Top-10 只在这份 Top-500 里取。先补覆盖还是先改排序，可以用这两个量定位。</p>
+
+  <h3>9.5 历史主召回评估的代码入口</h3>
   <p><code>evaluate()</code> 先把全部广告编码为一个向量矩阵，再按用户 batch 编码历史，调用精确内积检索，最后累计逐用户预测。<code>model.eval()</code> 关闭训练式 dropout，<code>@torch.inference_mode()</code> 关闭反向传播所需的自动求导记录。</p>
   {{code:taac_retrieval/metrics.py:63:87}}
   <div class="table-wrap"><table>
-    <thead><tr><th>变量</th><th>默认主模型的形状</th><th>说明</th></tr></thead>
+    <thead><tr><th>变量</th><th>历史大目录评估的形状</th><th>说明</th></tr></thead>
     <tbody>
       <tr><td><code>vectors</code></td><td><code>[2_708_123, 32]</code></td><td>包括 local ID=0 的补齐行；真正候选为 1…N</td></tr>
       <tr><td><code>queries</code></td><td><code>[B, 32]</code></td><td>B 个用户各有一个最后位置状态</td></tr>
@@ -31,246 +62,11 @@
   </table></div>
   <p>评估还有一个直接检查：如果目标广告已经出现在当前用户的输入历史中，就抛出异常。这与 <code>clean_and_split()</code> 的首次出现点击留出规则配合，避免“历史过滤会删掉答案”的矛盾。</p>
 
-  <h3>6.3 为什么分块搜索仍然是精确 Top-K？</h3>
-  <p>如果一次建立 <code>[256, 2_708_122]</code> 的 float32 分数矩阵，仅分数就约为 2.58 GiB。当前实现每次处理 32,768 个广告，单块分数约 32 MiB。广告向量本身、模型与其他中间张量仍需要额外内存。</p>
-  {{code:taac_retrieval/metrics.py:40:60}}
-  <ol>
-    <li><code>start=1</code>：跳过 padding 行 0。</li>
-    <li><code>queries @ item_vectors[start:end].T</code>：计算当前广告块与所有查询的内积分数。</li>
-    <li>把当前历史中出现过的广告分数改为负无穷。它们仍在公共目录里，但当前用户不会再次收到它们。</li>
-    <li>取这个块的 Top-K，与此前维护的全局 Top-K 合并，再选 K 项。</li>
-    <li>全部广告块遍历完后，检查是否确实有 K 个有限分数的合法候选。</li>
-  </ol>
-  <div class="formula" role="math">TopK(A ∪ B) = TopK(TopK(A) ∪ TopK(B))</div>
-  <p>这个等式可以用反证理解：某个广告如果在自己所在的块中已排在第 K 名之后，那么同一个块内至少 K 个广告分数不低于它，它就不可能挤进全局前 K。分块省下分数矩阵的峰值空间，但仍计算所有合法候选的分数。对边界同分广告，具体 ID 的先后可能取决于 Top-K 的同分处理；分数最优性仍成立。</p>
-
-  <h3>6.4 用贯穿样例手算一次排名</h3>
-  <p>前文主样例的验证历史为广告 <code>[1, 2, 3, 4, 5]</code>，目标为广告 <code>6</code>。为了手算，下面把向量维度临时简化为 2，并假设其余候选的分数更低。这些是<strong>人工设置的教学向量</strong>，不是已训练 checkpoint 的真实输出。</p>
-  <div class="example">
-    <p>查询向量 <code>q=(1,0)</code>。过滤历史广告 1…5 后，排名的前几项为：</p>
-    <div class="table-wrap"><table>
-      <thead><tr><th>名次</th><th>广告</th><th>教学广告向量</th><th>内积</th><th>是否为目标</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>7</td><td>(2, 0)</td><td>2.0</td><td>否</td></tr>
-        <tr><td>2</td><td>8</td><td>(1.5, 0)</td><td>1.5</td><td>否</td></tr>
-        <tr><td>3</td><td>6</td><td>(1, 0)</td><td>1.0</td><td>是</td></tr>
-        <tr><td>4</td><td>9</td><td>(0, 1)</td><td>0.0</td><td>否</td></tr>
-      </tbody>
-    </table></div>
-    <p>目标第 3 名：<code>HR@10=1</code>，<code>NDCG@10=0.5</code>。如果目标排在第 11 名，两项 @10 指标都为 0。</p>
-  </div>
-
-  <h3>6.5 HR、Recall、Precision 和 NDCG 的公式</h3>
-  <p>令 <var>r</var><sub>u</sub> 为目标广告的一基排名，即第一名的 <var>r</var>=1。当前协议每个用户只有一个目标点击，定义指示函数 𝟙[条件]：成立时为 1，否则为 0。</p>
-  <div class="formula" role="math">HR@K = (1 / U) ∑<sub>u=1…U</sub> 𝟙[r<sub>u</sub> ≤ K]</div>
-  <p>HR 是“多少用户的目标进入了前 K”。标准 Recall 是“找回的相关项数 ÷ 全部相关项数”；这里每人恰好一个相关目标，所以单目标 Recall@K 与 HR@K 数值相同。Precision@K 的分母是推荐列表长度 K：一次命中时 Precision@10=1/10，并不等于 HR@10。</p>
-  <div class="formula" role="math">DCG@K = ∑<sub>j=1…K</sub> rel<sub>j</sub> / log<sub>2</sub>(j+1) &nbsp;;&nbsp; NDCG@K = DCG@K / IDCG@K</div>
-  <p>这里使用二元相关性：真实目标位置 <code>rel=1</code>，其他位置为 0。理想排序把唯一目标放在第一名，因此 <code>IDCG=1/log₂(2)=1</code>，公式化简为：</p>
-  <div class="formula" role="math">NDCG@K = (1 / U) ∑<sub>u=1…U</sub> 𝟙[r<sub>u</sub> ≤ K] / log<sub>2</sub>(r<sub>u</sub>+1)</div>
-  {{code:taac_retrieval/metrics.py:10:18}}
-  <div class="table-wrap"><table>
-    <thead><tr><th>用户</th><th>目标位置</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
-    <tbody><tr><td>甲</td><td>第 3 名</td><td>1</td><td>1/log₂(4)=0.5</td></tr><tr><td>乙</td><td>第 11 名</td><td>0</td><td>0</td></tr><tr><td>两用户平均</td><td>—</td><td>0.5</td><td>0.25</td></tr></tbody>
-  </table></div>
-  <p><code>matched = predictions == targets[:, None]</code> 将目标 ID 广播到推荐列表每一列；<code>any(axis=1)</code> 得到逐用户命中；位置折扣则通过列下标加 2 转成 <code>log₂(rank+1)</code>。先保留逐用户结果，后续才能做配对比较和分桶。</p>
-
-  <h3>6.6 为什么必须同时看冷启动与长尾？</h3>
-  <p>训练频次统计来自<strong>所有用户训练前缀中的广告事件</strong>，曝光、点击和未知行为都计入。它不是点击次数，也不是当前一个用户见过几次。下面的分组根据<strong>评估目标广告</strong>的全局训练频次划分。</p>
-  <div class="table-wrap"><table>
-    <thead><tr><th>分桶</th><th>目标广告的训练事件频次</th><th>历史测试用户数</th><th>主模型三种子平均 HR@10</th></tr></thead>
-    <tbody>
-      <tr><td>cold_0</td><td>0</td><td>785</td><td>0.0425%</td></tr>
-      <tr><td>tail_1_5</td><td>1…5</td><td>1,413</td><td>0%</td></tr>
-      <tr><td>mid_6_50</td><td>6…50</td><td>2,984</td><td>0.1787%</td></tr>
-      <tr><td>head_gt50</td><td>&gt;50</td><td>4,818</td><td>6.0537%</td></tr>
-    </tbody>
-  </table></div>
-  <p>总体命中明显依赖头部广告。冷启动广告没有训练得到的独立 ID embedding，但共享属性与 81 向量仍能生成表示；“能编码”与“能排到前十”需要分别验证。分桶实现见 <code>objective_report.group_analysis()</code>，通用多 K 覆盖诊断见 <code>coverage.py</code>。</p>
-  {{code:taac_retrieval/objective_report.py:93:113}}
-  <p class="callout warn">这些人数属于历史<strong>测试集</strong>。验证集的冷启动人数为 659，长尾为 1,326；不能把测试集人数写到验证实验表里。数据划分按每个用户的时间进行；候选目录来自所选公开序列的完整静态快照，属于 transductive 设置，不是所有用户共享同一个全局时间截止的生产回测。</p>
-
   <div class="checkpoint"><h3>这一章的自测</h3>
-    <details><summary>训练中只采 64 个负例，为什么评估还要算全部候选？</summary><p>采样损失提供高效学习信号，但目标在采样集合内排第一，不代表在整个目录内也靠前。主报告用固定全候选库，使不同模型的评估难度一致。</p></details>
+    <details><summary>固定候选后，DCN V2 让目标从第 11 名升到第 8 名，Recall@500 会变吗？</summary><p>不会。目标一直在这 500 条里，变的是 Top-10 命中和位置折扣。若排序后 Recall@500 有变化，要先检查是不是比较了不同的候选集合。</p></details>
     <details><summary>目标排第 3 名时，为什么 NDCG 是 0.5？</summary><p>唯一相关项的理想 DCG 为 1；实际折扣为 1/log₂(3+1)=1/2。若 K 小于 3 则目标被截断，NDCG@K 为 0。</p></details>
-    <details><summary>分块搜索漏算了块之间的交互吗？</summary><p>每个用户—广告分数是独立的内积。块内保留前 K、块间再合并前 K，足以得到所有分数的全局 Top-K；并不需要候选彼此之间的分数。</p></details>
     <details><summary>当前用户从没见过某广告，就能把它归为 cold_0 吗？</summary><p>不能。cold_0 要求它在所有用户的训练前缀中出现次数为零；当前用户未见只是历史过滤的条件。</p></details>
   </div>
-</section>
 
-<section class="chapter" id="retrieval" aria-labelledby="retrieval-title">
-  <div class="pill">阶段 07 · 向量导出与推荐</div>
-  <h2 id="retrieval-title">把模型变成可复用的 Faiss 检索链路</h2>
-  <p class="lead">学习目标：解释用户与广告两侧向量如何保持一致；推导 MIPS→L2 变换；追踪 Faiss 行号到广告 OID；区分近似检索质量、点击命中和请求耗时。</p>
-
-  <h3>7.1 离线算广告向量，请求时算用户向量</h3>
-  <p>广告向量只依赖广告本身的 ID、属性和 81 向量，因此同一个 checkpoint 下可离线批量计算并放进索引。用户向量依赖当前历史，在推荐时通过序列编码器计算。两侧最终在同一个 32 维空间里以内积匹配。</p>
-  <div class="table-wrap"><table>
-    <thead><tr><th>导出文件</th><th>实际内容</th><th>后续用途</th></tr></thead>
-    <tbody>
-      <tr><td><code>item_vectors.npy</code></td><td>float32，[N+1,32]，含 padding 行 0</td><td>构建 FlatIP 和 HNSW 索引</td></tr>
-      <tr><td><code>val_queries.npz</code></td><td>验证用户向量、可见历史、目标、用户行号</td><td>选择索引参数</td></tr>
-      <tr><td><code>test_queries.npz</code></td><td>固定测试队列的相同字段</td><td>参数锁定后做索引测试比较</td></tr>
-      <tr><td><code>metadata.json</code></td><td>checkpoint SHA、缓存配置签名、队列 SHA、维度、候选数量、ID 偏移</td><td>记录向量来源并拒绝明显的产物混用</td></tr>
-    </tbody>
-  </table></div>
-  {{code:taac_retrieval/export.py:22:55}}
-  <p>导出测试文件会计算并保存其中的目标字段，基准脚本则先用验证查询选择索引参数，锁定后才打开测试比较。需要区分“文件中已经保存了目标”与“使用目标来选择参数”；当前索引选择指标是与精确 Top-10 的重合率和延迟。</p>
-  <p><code>open_memmap</code> 让大广告矩阵可以分批写入磁盘；<code>flush()</code> 刷新缓冲区。导出本身不更新权重。checkpoint 的 SHA-256 对整个权重文件计算，相同文件才产生相同摘要。</p>
-
-  <h3>7.2 原始内积与余弦相似度</h3>
-  <div class="formula" role="math">q<sup>T</sup>v = ‖q‖ · ‖v‖ · cos θ &nbsp;;&nbsp; cosine(q,v) = q<sup>T</sup>v / (‖q‖‖v‖)</div>
-  <p>训练优化的是原始内积分数，向量长度也是模型学到的信号。直接把所有广告归一化为单位向量，会移除广告范数对分数的影响，可能改变排名。</p>
-  <div class="example">
-    <p>教学例：<code>q=(1,0)</code>，广告甲 <code>x₁=(1,0)</code>，广告乙 <code>x₂=(3,1)</code>。</p>
-    <div class="table-wrap"><table><thead><tr><th>广告</th><th>原始内积</th><th>余弦</th></tr></thead><tbody><tr><td>甲</td><td>1</td><td>1</td></tr><tr><td>乙</td><td>3</td><td>3/√10 ≈ 0.9487</td></tr></tbody></table></div>
-    <p>内积优先乙，余弦优先甲。因此当前代码没有进行单位归一化。若要改成余弦，需要把它作为新的建模/检索实验验证，而不能静默替换。</p>
-  </div>
-
-  <h3>7.3 为内积排序构造一个等价的欧氏距离问题</h3>
-  <p>MIPS 是 Maximum Inner Product Search，即最大内积检索。历史直接使用 raw-IP HNSW 的验证召回没有达到 98% 门槛，因此采用一个<strong>保持精确排名</strong>的非对称变换。先选定覆盖全部广告范数的半径平方：</p>
-  <div class="formula" role="math">R² = max<sub>i</sub> ‖v<sub>i</sub>‖²</div>
-  <p>广告向量增加一维，用户查询也增加一维，但构造方式不同：</p>
-  <div class="formula" role="math">v′<sub>i</sub> = [v<sub>i</sub>, √(R² − ‖v<sub>i</sub>‖²)] &nbsp;;&nbsp; q′ = [q, 0]</div>
-  <p>展开两者的平方欧氏距离：</p>
-  <div class="formula" role="math">‖q′−v′<sub>i</sub>‖² = ‖q−v<sub>i</sub>‖² + R² − ‖v<sub>i</sub>‖²<br>= ‖q‖² + R² − 2q<sup>T</sup>v<sub>i</sub></div>
-  <p>对一次固定查询，<code>‖q‖²+R²</code> 是与广告无关的常数。因此距离越小，原始内积越大。模型仍输出 32 维向量，HNSW 内部索引维度是 <strong>33</strong>。</p>
-  {{code:taac_retrieval/ann.py:6:26}}
-  <p><code>radius_squared</code> 必须不小于任一广告向量的范数平方；<code>maximum(...,0)</code> 处理舍入误差，不能靠它掩盖明显不合格的半径。Faiss 的 L2 搜索返回平方距离，包装类把它还原为原始内积分数：</p>
-  <div class="formula" role="math">score = (‖q‖² + R² − distance²) / 2</div>
-  <div class="example">
-    <p>手算 <code>q=(1,0)</code>，<code>R²=10</code>：</p>
-    <div class="table-wrap"><table><thead><tr><th>广告原向量</th><th>广告升维向量</th><th>与 q′=(1,0,0) 的平方距离</th><th>还原内积</th></tr></thead><tbody><tr><td>(1,0)</td><td>(1,0,3)</td><td>9</td><td>(1+10−9)/2=1</td></tr><tr><td>(3,1)</td><td>(3,1,0)</td><td>5</td><td>(1+10−5)/2=3</td></tr><tr><td>(0,2)</td><td>(0,2,√6)</td><td>11</td><td>(1+10−11)/2=0</td></tr></tbody></table></div>
-  </div>
-  <p class="callout">变换保证的是精确距离排名与精确内积排名等价。HNSW 仍然是近似搜索，不能由这条代数恒等式推出它必定找回 100% 的精确结果。实际近似质量要测量。</p>
-
-  <h3>7.4 HNSW 的三个参数，以及验证门槛</h3>
-  <p>HNSW 把广告向量组织成多层邻接图。上层提供较远距离的跳转，搜索再逐层深入，在底层维护候选集合。它以额外图结构内存和建索引成本，换取查询时少访问许多向量。</p>
-  <div class="table-wrap"><table><thead><tr><th>参数</th><th>当前设置</th><th>直觉</th></tr></thead><tbody>
-    <tr><td><code>M</code></td><td>32</td><td>控制图连接规模；通常越大，内存和构建开销越高。这里的 M 与训练有效监督位置数 M 无关</td></tr>
-    <tr><td><code>efConstruction</code></td><td>100</td><td>构图时的候选搜索宽度，影响图质量与构建成本</td></tr>
-    <tr><td><code>efSearch</code></td><td>2048</td><td>查询时的搜索宽度；通常越宽越慢，但更有机会找到精确近邻</td></tr>
-  </tbody></table></div>
-  {{code:taac_retrieval/benchmark_ann.py:23:46}}
-  <p>历史基准使用验证查询比较多个 <code>efSearch</code>，选择<strong>ANNRecall@10 至少 0.98 的配置中，验证 p95 延迟最低者</strong>。验证选择后写回并保存索引，所以推荐时读取的是锁定搜索参数的索引。当前主配置只保留选定的 <code>2048</code>；历史参数扫描保存在报告中。</p>
-  {{code:taac_retrieval/ann.py:58:66}}
-  <div class="formula" role="math">ANNRecall@K = (1 / U) ∑<sub>u=1…U</sub> |ANN<sub>u,K</sub> ∩ Exact<sub>u,K</sub>| / K</div>
-  <p>这个公式的“答案”是同一个模型的精确推荐 ID 集合。若两份 Top-10 重合 9 项，ANNRecall=90%；但真实点击可能在两份列表里都没有出现，此时两者 HR@10 都是 0。ANNRecall 与点击 Recall 衡量不同的问题。</p>
-
-  <h3>7.5 Faiss 行号、历史过滤与多取候选</h3>
-  <p>索引构建时从 <code>item_vectors[1]</code> 开始，跳过补齐行。Faiss 自动分配从 0 开始的行号，因此完整编号链是：</p>
-  <div class="formula">Faiss row 0 → local ID 1 → catalog_oids[1] → 最终广告 OID</div>
-  {{code:taac_retrieval/ann.py:29:55}}
-  <p><code>filter_results()</code> 依次把 Faiss 行号加 1，删除负行号、当前用户已见广告和重复广告，按原检索顺序保留前 K。它不训练新的分数函数，也不使用真实目标来调整列表。</p>
-  <p>直接查询十个候选，可能被历史过滤删掉若干个。因此 <code>search_filtered()</code> 请求：</p>
-  <div class="formula">fetch = min(N, K + 当前 batch 中最大的非零历史事件数)</div>
-  <p>例如主样例测试历史 <code>[1,2,3,4,5,6,6,7]</code> 有 8 个非零位置，尽管只有 7 个不同广告，代码仍按 8 计数；请求 Top-10 时会多取到 18 个，以留出过滤空间。重复历史会造成保守地多取一些候选。</p>
-  <p class="callout warn">这里实际只检索一次，没有“候选不足就自动循环扩大搜索”或热门广告兜底。过滤后不足 K 个会抛出异常。理解当前保护范围，才能在扩展服务时知道还缺什么。</p>
-
-  <h3>7.6 从现有 checkpoint 到一次推荐输出</h3>
-  {{code:taac_retrieval/recommend.py:20:59}}
-  <ol>
-    <li><code>load_model()</code> 比较 checkpoint 的缓存配置签名与当前缓存配置，恢复保存的评估队列，按配置重建网络并严格加载权重。</li>
-    <li>计算查询模型的 checkpoint 文件 SHA，与广告向量导出的 checkpoint SHA 比较；再与索引身份记录比较，防止普通误操作造成两侧模型版本混用。</li>
-    <li>读取持久化 HNSW；若它使用 <code>mips_l2</code>，套上还原原始内积分数的包装类；检查候选数量和逻辑维度。</li>
-    <li>按指定验证或测试队列位置取一个用户，编码其合法历史，检索并过滤广告。</li>
-    <li>把 local ID 转成 OID，返回广告标识、内积分数及请求的分段耗时。</li>
-  </ol>
-  {{code:taac_retrieval/evaluate_checkpoint.py:16:27}}
-  <p>这些检查是产物来源的一致性保护，不能解释为“所有文件内容都逐字节认证”。当前加载器没有对每个 <code>.npy</code> 数组或 <code>hnsw.faiss</code> 二进制文件单独计算并核对完整哈希；源码中的 <code>source_signature</code> 基于数据文件路径、大小和修改时间等元信息。只有被显式摘要的对象才有相应的内容哈希检查。</p>
-  <p><code>offline_target_oid</code> 仅用于这个离线演示的事后核对，不参与查询向量计算或推荐排序。当前入口按固定队列位置选用户，不是面向任意线上用户的长期运行 API。</p>
-
-  <h3>7.7 真实延迟怎么读？</h3>
-  <div class="table-wrap"><table><thead><tr><th>历史测试基准</th><th>结果</th><th>测量条件</th></tr></thead><tbody>
-    <tr><td>FlatIP p95</td><td>40.196454 ms</td><td rowspan="3">512 个固定测试查询，预热、单线程 CPU，每个查询重复 3 轮；测量索引搜索与 Python 历史过滤，排除编码、加载、启动、网络</td></tr>
-    <tr><td>MIPS→L2 HNSW p95</td><td>4.144272 ms</td></tr>
-    <tr><td>p95 比值</td><td>约 9.70 倍</td></tr>
-    <tr><td>测试 ANNRecall@10</td><td>0.9880859375 ≈ 98.81%</td><td>同一个 seed=2026 模型的近似与精确 Top-10 比较</td></tr>
-  </tbody></table></div>
-  {{code:taac_retrieval/benchmark_ann.py:49:76}}
-  <p><code>recommend.py</code> 额外打印单次预热请求中的编码与传输、索引与过滤、两者合计耗时。单次请求不是 p95；上面的历史 p95 也不是完整线上服务 SLA。8 线程批量 QPS 是单独负载，不应拿 <code>1000/p95</code> 直接当成它。持久化索引文件约 1.094 GB，也不等于进程峰值内存。</p>
-
-  <div class="checkpoint"><h3>这一章的自测</h3>
-    <details><summary>32 维模型为什么会保存一个 33 维索引？</summary><p>广告增加 √(R²−‖v‖²) 一维，查询增加 0 一维，把最大内积转换为最小平方欧氏距离。包装类对外报告的逻辑维度仍为 32。</p></details>
-    <details><summary>如果查询网络换成新训练模型，旧索引能继续用吗？</summary><p>同一个维度不保证向量空间一致。应使用新 checkpoint 重导出广告向量并重建索引；当前 SHA 检查会拒绝普通的模型身份混用。</p></details>
-    <details><summary>Faiss 返回 0，可以直接当作 padding 丢掉吗？</summary><p>不能。索引跳过了向量表 padding 行；Faiss 的 0 对应 local ID=1。负返回行号才是无效项，之后还要做历史与重复过滤。</p></details>
-    <details><summary>98.81% ANNRecall 能说明 98.81% 的用户点击被找到了吗？</summary><p>不能。它说明近似列表与同模型精确列表高度重合。真实目标命中由 HR/Recall/NDCG 单独衡量。</p></details>
-  </div>
-</section>
-
-<section class="chapter" id="experiments" aria-labelledby="experiments-title">
-  <div class="pill">阶段 08 · 用证据理解取舍</div>
-  <h2 id="experiments-title">读懂真实实验，而不是只记一个提升百分比</h2>
-  <p class="lead">学习目标：说明基线到主方案改变了哪些因素，区分开发验证、独立确认与后续探索；把每个数字绑定到具体模型、队列、种子和测量范围。</p>
-
-  <h3>8.1 主召回如何选定 InfoNCE-64？</h3>
-  <p>开发阶段先在较小数据缓存上比较监督、损失、负例数量和动作输入的组合，只根据平均验证 NDCG@10、再 HR@10 锁定 <code>click_infonce64</code>。随后扩大到 280,985 个有效用户，构造排除此前已查看测试用户的 10,000 人新队列，用三个种子确认基线与选定方案。</p>
-  <div class="table-wrap"><table><thead><tr><th>开发方案</th><th>监督位置</th><th>负例 / 监督位置</th><th>损失 / 输入变化</th><th>两种子开发验证 NDCG@10 均值</th></tr></thead><tbody>
-    <tr><td>baseline</td><td>曝光 + 点击</td><td>1</td><td>BCE</td><td>0.008415</td></tr>
-    <tr><td>weighted_bce</td><td>点击权重 1、曝光权重 0.1</td><td>1</td><td>加权 BCE</td><td>0.008266</td></tr>
-    <tr><td>click_bce</td><td>仅点击</td><td>1</td><td>BCE</td><td>0.004434</td></tr>
-    <tr><td>click_bce64</td><td>仅点击</td><td>64</td><td>BCE，负例 loss 求平均</td><td>0.005126</td></tr>
-    <tr><td>click_infonce64</td><td>仅点击</td><td>64</td><td>InfoNCE</td><td>0.011616</td></tr>
-    <tr><td>click_infonce64_actions</td><td>仅点击</td><td>64</td><td>InfoNCE + 历史动作 embedding</td><td>0.009726</td></tr>
-  </tbody></table></div>
-  <p>这一张开发表与后面的扩大规模测试表使用不同候选规模和评估队列，不能横向当成同一测试集。原始基线到主方案同时改变了监督范围、负例预算和损失形式；它们不是只改了一个 loss。<code>click_bce64</code> 与 <code>click_infonce64</code> 才是固定点击监督和 64 负例预算的损失对照。即使每位置负例预算相同，监督位置数变化也会改变每轮计算量。</p>
-  <p>对应配置定义与模型选择实现：</p>
-  {{code:taac_retrieval/study.py:14:21}}
-  {{code:taac_retrieval/study.py:79:118}}
-
-  <h3>8.2 主测试结果：三种子均值与单模型分开</h3>
-  <div class="table-wrap"><table><thead><tr><th>历史扩大规模测试</th><th>HR@10</th><th>NDCG@10</th><th>指标归属</th></tr></thead><tbody>
-    <tr><td>训练频次热门广告</td><td>0.7600%</td><td>0.004229609</td><td>同一测试队列的频次排序对照</td></tr>
-    <tr><td>原始目标 BCE</td><td>2.1133%</td><td>0.010528168</td><td>seed 2026 / 2027 / 2028 均值</td></tr>
-    <tr><td>选定点击 InfoNCE-64</td><td>2.9733%</td><td>0.015391480</td><td>相同三种子均值</td></tr>
-    <tr><td>演示使用的点击 InfoNCE-64</td><td>2.8400%</td><td>0.014664656</td><td>仅 seed=2026，验证选出的 epoch=4</td></tr>
-  </tbody></table></div>
-  <div class="formula" role="math">绝对 NDCG 差 = 0.015391480 − 0.010528168 = 0.004863313<br>相对变化 = 0.004863313 / 0.010528168 ≈ 46.19%</div>
-  <p>HR 的变化是 <code>2.9733% − 2.1133% = 0.86 个百分点</code>，相对变化约 <code>40.69%</code>。百分点、相对百分比和原始比例不是同一个单位。</p>
-  <p>以上结果来自仓库保存的历史报告，HTML 教程的制作没有重新训练这六个模型。单 seed 演示权重有自己的指标；不能把三 seed 平均分、四层网络验证分和一层索引速度拼成一个“最佳模型”的表现。</p>
-
-  <h3>8.3 为什么保存逐用户预测和多个种子？</h3>
-  <p>同一用户对两种模型的评估难度相似，所以比较时应配对。令 <var>d</var><sub>s,u</sub> 为种子 <var>s</var>、用户 <var>u</var> 上“选定方案指标减去基线指标”，先平均得到观察差值，再通过有放回重采样估计不确定性：</p>
-  <div class="formula" role="math">Δ = (1 / (S·U)) ∑<sub>s=1…S</sub> ∑<sub>u=1…U</sub> d<sub>s,u</sub></div>
-  {{code:taac_retrieval/objective_report.py:17:29}}
-  <p><code>paired_user_95pct</code> 在当前种子集合下重采样用户；<code>paired_seed_and_user_95pct</code> 同时重采样当前三个种子和用户。两种模型始终使用同一抽样下标，保留配对关系。历史主测试的 NDCG 绝对差在“用户 + 种子”方式下的 95% 区间为 <code>[0.002960731, 0.006803916]</code>。</p>
-  <p class="callout">这描述了当前数据与当前三个训练种子的证据不确定性。三个种子不能代表所有初始化；bootstrap 也不会制造新的独立数据集。看过测试之后再提出的新策略，即使再次在这批测试用户上测量，也属于后续研究，不能称为全新的独立确认。</p>
-  <p>报告还核对六次确认训练的完整五轮预算、checkpoint 是否按验证选取、逐用户目标与行号是否一致、共同初值 SHA 是否匹配、训练是否跳过测试。这样的记录让“同口径比较”可以从产物中复查。</p>
-
-  <h3>8.4 后续分支回答了什么问题？</h3>
-  <div class="table-wrap"><table><thead><tr><th>分支</th><th>实验问题与观察</th><th>当前证据边界</th></tr></thead><tbody>
-    <tr><td><code>research/supervision</code></td><td>固定 InfoNCE-64，全部有效事件监督 vs 仅点击。最佳验证 NDCG 均值：0.015133 vs 0.015775；补充测试均值方向相反</td><td>相关区间跨 0；补充测试队列此前已查看。没有确认稳定优劣，保持原主方案</td></tr>
-    <tr><td><code>research/cold-start</code></td><td>ID 随机遮蔽率 30% / 70% 未通过预定冷/尾保护门槛；保护式 mask70 互补通道、固定 500 候选、配额 25 时冷/尾覆盖有改善</td><td>重复使用验证队列；互补通道是验证驱动后续探索；原 Top-10 保持不变，尚无独立测试确认</td></tr>
-    <tr><td><code>research/depth</code></td><td>共享初始参数的 1 / 2 / 4 层实验；最佳验证 NDCG 均值 0.015775 / 0.016316 / 0.016498</td><td>四层相对一层差值区间跨 0；固定第 5 轮时四层更低；没有替换一层模型和索引</td></tr>
-  </tbody></table></div>
-  <p>冷启动互补通道的例子尤其适合练习如何描述取舍：固定 500 个候选时，全体 Recall@500 从 <code>23.0600%</code> 降为 <code>22.4167%</code>，冷启动从 <code>8.3966%</code> 升为 <code>9.2564%</code>，长尾从 <code>0.7290%</code> 升为 <code>0.9301%</code>。这些是<strong>验证候选覆盖</strong>，并且规则保护了原前十，因此没有实现最终 Top-10 提升。</p>
-  <p>对两路候选先核对预算再比较覆盖。当前完整推荐中，固定的 500 条合并候选供两个排序阶段打分。目标在候选内时，可以用最终名次判断排序有没有帮它进前十。<a href="#sequence-ranking">看真实数据与名次变化</a>。</p>
-  <p class="source-note">原始分支报告：<a href="https://github.com/J-OneK/baseline_2025/blob/research/supervision/reports/infonce_supervision/README.md">监督范围对照</a> · <a href="https://github.com/J-OneK/baseline_2025/blob/research/cold-start/reports/cold_start/README.md">冷启动与长尾探索</a> · <a href="https://github.com/J-OneK/baseline_2025/blob/research/depth/reports/depth_study/README.md">深度对照</a>。这些链接是补充来源；本页所需内容已内嵌，离线阅读不依赖它们。</p>
-
-  <h3>8.5 当前排序的收益来自哪轮对照？</h3>
-  <div class="table-wrap"><table>
-    <thead><tr><th>独立确认集</th><th>固定候选内的对照</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
-    <tbody>
-      <tr><td>6,000 人</td><td>原融合 → DCN V2</td><td>2.233% → 2.917%</td><td>0.01225 → 0.01602</td></tr>
-      <tr><td>10,000 人</td><td>DCN V2 → 加联合 Transformer 残差</td><td>2.660% → 2.825%</td><td>0.013950 → 0.014800</td></tr>
-    </tbody>
-  </table></div>
-  <p>两轮都用两个种子，但使用不同留出用户。联合排序的 NDCG@10 差值 95% 配对区间为 +0.000069～+0.001694，HR@10 差值区间跨零。单次请求的真实分数见<a href="#sequence-ranking">联合排序案例</a>，模型打分与索引查询的耗时分别在<a href="release.md">版本说明</a>中记录。</p>
-
-  <h3>8.6 如何从文件复查每一个主要数字？</h3>
-  <div class="table-wrap"><table><thead><tr><th>问题</th><th>仓库中的证据</th><th>应核对的字段</th></tr></thead><tbody>
-    <tr><td>主召回如何锁定？</td><td><code>reports/objective_study/model_selection.json</code></td><td><code>selected_variant</code>、<code>confirmation_settings</code>、验证排名与历史摘要</td></tr>
-    <tr><td>三种子测试是否一致？</td><td><code>reports/objective_study/metrics.json</code></td><td><code>aggregates</code>、<code>runs</code>、<code>deltas</code>、<code>confirmation_seeds</code></td></tr>
-    <tr><td>为什么改索引几何？</td><td><code>ann_initial_failure.json</code>、<code>ann_amendment.json</code></td><td>原始失败、验证驱动的变换登记、98% 门槛没有被降低</td></tr>
-    <tr><td>Faiss 测量属于谁？</td><td><code>metrics.json</code> 的 <code>ann</code> 字段；本地 <code>artifacts/objective_study/ann/benchmark.json</code></td><td>seed=2026、512 查询、几何、efSearch、线程、延迟范围</td></tr>
-    <tr><td>联合排序如何锁定与确认？</td><td><a href="../reports/sequence_rank/development.json">development.json</a> 与 <a href="../reports/sequence_rank/confirmation.json">confirmation.json</a></td><td>开发选择、锁定轮次和系数、确认用户数及配对差值</td></tr>
-    <tr><td>旧源码 SHA 为什么不同？</td><td><code>code_manifest.json</code> 与 <code>docs/release.md</code></td><td>历史实测源码与后续入口重构的时间归属；没有冒充重新训练</td></tr>
-  </tbody></table></div>
-  <p>主报告的原始数据位置、缓存、权重和索引留在本地 <code>artifacts/</code>。Git 中主要保留代码、配置与小型历史报告；大文件不随 HTML 或仓库代码复制。历史 JSON 中出现旧目录名，是当时的记录，不等于当前默认命令仍按天数组织。</p>
-
-  <div class="checkpoint"><h3>这一章的自测</h3>
-    <details><summary>能把基线到主方案的 46.19% 都称为 InfoNCE 的纯损失收益吗？</summary><p>不能。基线到主方案同时改变曝光监督、负例数量和损失。固定点击监督及 64 负例预算的 click BCE-64 对照，才更直接帮助分析损失形式。</p></details>
-    <details><summary>三种子 NDCG=0.015391 与单模型 NDCG=0.014665 哪个应该写在演示旁边？</summary><p>演示 seed=2026 checkpoint 时，应写单模型指标；主实验比较表可以写三种子均值，并明确统计方式。它们都是有效数字，但归属不同。</p></details>
-    <details><summary>四层最佳验证均值领先，为什么主分支仍固定一层？</summary><p>深度实验是复用验证集的开发结果，差值区间跨 0，最后一轮与最佳 checkpoint 结果还存在差异。没有独立测试和对应索引链路确认，因此保持证据完整的一层主版本。</p></details>
-    <details><summary>冷启动候选覆盖变好，但原 Top-10 完全相同，意味着什么？</summary><p>说明那一轮的旧排序把新增候选留在了榜尾。候选覆盖要和最后十条的效果分别报告。后续固定同一候选集，才可以检验 DCN V2 或联合残差的实际排序收益。</p></details>
-  </div>
+  <p>下一章用这套评估口径读真实对照。<a href="#experiments">去看实验结果 →</a></p>
 </section>

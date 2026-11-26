@@ -35,25 +35,35 @@ SOURCE_FILES = [
     'scripts/recommend_sequence_rank.py', 'taac_retrieval/sequence_ranker.py',
     'scripts/build_channel_features.py', 'scripts/run_sequence_rank.py', 'configs/sequence_rank.json',
 ]
-NAV = [
-    ('00', 'overview', '整体架构与学习地图'),
-    ('入口', 'workflow', '完整推荐与召回复现'),
-    ('01', 'data', '原始数据与四层编号'),
-    ('02', 'prepare', '清洗、切分与缓存'),
-    ('03', 'dataset', '样本、移位与负例'),
-    ('04', 'model', '模型、注意力与张量'),
-    ('05', 'training', 'InfoNCE 与训练过程'),
-    ('06', 'evaluation', '精确评估与指标'),
-    ('07', 'retrieval', 'Faiss 与推荐出口'),
-    ('08', 'experiments', '实验结果与证据范围'),
-    ('08A', 'tail-recall', '历史对照：零点击长尾'),
-    ('08B', 'channel-ranking', '双通道召回与 DCN V2 排序'),
-    ('08C', 'sequence-ranking', 'OneTrans 风格排序与真实数据'),
-    ('09', 'demo', '真实执行：12用户完整轨迹'),
-    ('10', 'debugging', '排查问题与理解验收'),
-    ('11', 'glossary', '符号与术语速查'),
-    ('12', 'sources', '嵌入源码与来源摘要'),
+NAV_GROUPS = [
+    ('项目地图', [
+        ('00', 'overview', '整体架构与学习地图'),
+        ('入口', 'workflow', '完整推荐与召回复现'),
+    ]),
+    ('沿数据走完整链路', [
+        ('01', 'data', '原始数据与四层编号'),
+        ('02', 'prepare', '清洗、切分与缓存'),
+        ('03', 'dataset', '样本、移位与负例'),
+        ('04', 'model', '模型、注意力与张量'),
+        ('05', 'training', 'InfoNCE 与训练过程'),
+        ('06', 'candidate-recall', '主召回、辅助召回与候选合并'),
+        ('07', 'channel-ranking', 'DCN V2 排序'),
+        ('08', 'sequence-ranking', 'OneTrans 风格联合排序'),
+    ]),
+    ('评估与实验', [
+        ('09', 'evaluation', 'Recall、HR 与 NDCG 怎么看'),
+        ('10', 'experiments', '实验结果与证据范围'),
+    ]),
+    ('专题、复跑与查阅', [
+        ('11', 'retrieval', 'Faiss 与近似检索'),
+        ('12', 'tail-recall', '历史对照：零点击长尾'),
+        ('13', 'demo', '12 名合成用户的召回复跑'),
+        ('14', 'debugging', '排查问题与理解验收'),
+        ('15', 'glossary', '符号与术语速查'),
+        ('16', 'sources', '嵌入源码与来源摘要'),
+    ]),
 ]
+NAV = [chapter for _, chapters in NAV_GROUPS for chapter in chapters]
 
 try:
     from pygments import highlight
@@ -180,8 +190,8 @@ def laboratories():
         'prepare': '''<div class="lab" id="split-lab"><h3>动手：改变切分条件，先预测输出</h3><p>使用同一条十事件合成序列。默认应得到train_cut=5、val_pos=5、test_pos=8。试着给测试点击前一事件同样的时间戳，再观察pos与cut。</p><div class="controls"><label>最少历史 <input id="split-min" type="range" min="0" max="9" step="1" value="5"><output class="value" id="split-min-value">5</output></label><label>序列条件 <select id="split-mode"><option value="normal">原始十事件</option><option value="ties">广告7与测试点击同时间</option><option value="seen">广告6更早已曝光</option></select></label></div><div class="lab-output" id="split-output" aria-live="polite"></div><p class="source-note">浏览器复算clean_and_split的当前逻辑；Python源码与实际输出仍以上面的嵌入快照为准。</p></div>''',
         'model': '''<div class="lab" id="attention-lab"><h3>动手：看见一个位置真正允许读取哪些输入</h3><p>蓝色1表示允许，灰色点表示禁止。选择训练位置7：它读取广告1及更早输入，预测的广告2位于后面的输入位置8，必须被屏蔽。</p><div class="controls"><label>样本 <select id="attention-split"><option value="train">训练</option><option value="val">验证</option><option value="test">测试</option></select></label><label>Query位置 <input type="range" id="attention-query" min="0" max="10" value="7"><output class="value" id="attention-query-value">7</output></label></div><div class="tokens" id="attention-tokens"></div><div class="lab-output" id="attention-output" aria-live="polite"></div></div>''',
         'training': '''<div class="lab" id="loss-lab"><h3>动手：把InfoNCE从公式变成数字</h3><p>固定所有负例分数相同，改变正例、负例、负例数量和温度。先预测：正例分数提高时，损失和正例梯度分别怎么变？</p><div class="controls"><label>正例s⁺ <input type="range" id="loss-positive" min="-2" max="8" step=".1" value="2"><output class="value" id="loss-positive-value">2</output></label><label>负例s⁻ <input type="range" id="loss-negative" min="-2" max="5" step=".1" value="0"><output class="value" id="loss-negative-value">0</output></label><label>负例数 <select id="loss-k"><option>1</option><option>4</option><option>16</option><option selected>64</option></select></label><label>τ <input type="range" id="loss-tau" min=".2" max="2" step=".1" value="1"><output class="value" id="loss-tau-value">1</output></label></div><div class="lab-output" id="loss-output" aria-live="polite"></div></div>''',
-        'evaluation': '''<div class="lab" id="metric-lab"><h3>动手：目标排名与ANN重合率，各自改变什么？</h3><p>这里用广告ID等于精确排名的人工列表。把目标排到第11名，再把ANN重合拉满，观察HR是否会因此变好。</p><div class="controls"><label>目标精确排名 <input type="number" id="metric-rank" min="1" max="100" value="3"></label><label>K <input type="range" id="metric-k" min="1" max="10" value="10"><output class="value" id="metric-k-value">10</output></label><label>重合项数 <input type="range" id="metric-overlap" min="0" max="10" value="9"><output class="value" id="metric-overlap-value">9</output></label></div><div class="lab-output" id="metric-output" aria-live="polite"></div></div>''',
-        'retrieval': '''<div class="lab" id="mips-lab"><h3>动手：验证升维距离始终还原同一个内积分数</h3><p>教学数据库固定为A=(1,1)、B=(3,0)、C=(0,1)，R²=10。这里用2→3维便于手算；真实模型32→33维。</p><div class="controls"><label>q₁ <input type="number" id="mips-qx" min="-10" max="10" step=".1" value="1"></label><label>q₂ <input type="number" id="mips-qy" min="-10" max="10" step=".1" value="0"></label></div><div class="lab-output" id="mips-output" aria-live="polite"></div></div>''',
+        'retrieval': ('''<div class="lab" id="mips-lab"><h3>动手：验证升维距离始终还原同一个内积分数</h3><p>教学数据库固定为A=(1,1)、B=(3,0)、C=(0,1)，R²=10。这里用2→3维便于手算；真实模型32→33维。</p><div class="controls"><label>q₁ <input type="number" id="mips-qx" min="-10" max="10" step=".1" value="1"></label><label>q₂ <input type="number" id="mips-qy" min="-10" max="10" step=".1" value="0"></label></div><div class="lab-output" id="mips-output" aria-live="polite"></div></div>'''
+                      '''<div class="lab" id="metric-lab"><h3>动手：目标排名与ANN重合率，各自改变什么？</h3><p>这里用广告ID等于精确排名的人工列表。把目标排到第11名，再把ANN重合拉满，观察HR是否会因此变好。</p><div class="controls"><label>目标精确排名 <input type="number" id="metric-rank" min="1" max="100" value="3"></label><label>K <input type="range" id="metric-k" min="1" max="10" value="10"><output class="value" id="metric-k-value">10</output></label><label>重合项数 <input type="range" id="metric-overlap" min="0" max="10" value="9"><output class="value" id="metric-overlap-value">9</output></label></div><div class="lab-output" id="metric-output" aria-live="polite"></div></div>'''),
     }
 
 
@@ -201,34 +211,34 @@ def demo_chapter(demo):
     rank_rows = [[str(i + 1), str(oid_to_local[int(item['item_oid'])]),
                  str(item['item_oid']), f"{item['score']:.6f}"]
                 for i, item in enumerate(demo['recommendation']['recommendations'])]
-    return '''<section class="chapter" id="demo"><div class="chapter-kicker">09 · 真实执行轨迹</div>
+    return '''<section class="chapter" id="demo"><div class="chapter-kicker">13 · 合成用户的召回复跑</div>
       <h2>把同一个用户送进真实代码，直到拿回十个OID</h2>
       <p class="lead">下面不是把公式填上想象的数字：本轮已经生成合成Parquet，实际调用当前prepare、cohorts、train、evaluate_checkpoint、export、benchmark_ann和recommend。所有中间数值来自该次CPU运行，完整记录嵌入本页。</p>
       <div class="callout warn"><strong>用途与尺度：</strong>这是一条用于学习和验证接线的小型合成链路，不能作为TencentGR-1M的效果结果。主架构、点击监督、64负例和五轮训练保留；用户数、历史长度、batch、参考抽样种子和索引预算按教学尺度调整。</div>''' + f'''
       <div class="cards"><div class="card"><strong>{metadata['users']}</strong><small>合成用户；五轮CPU训练</small></div><div class="card"><strong>{metadata['catalog_items']}</strong><small>非padding候选；向量矩阵107×32</small></div><div class="card"><strong>{demo['training']['best_epoch']}</strong><small>验证选择的最佳epoch，不强行取第5轮</small></div></div>
-      <h3>9.1 生成与真实模块同格式的原始输入</h3>
+      <h3>13.1 生成与真实模块同格式的原始输入</h3>
       <p>主角用户RID=1使用前文十事件；另外11个用户提供可用负例。第2个用户的训练前缀包含广告6和8，使主角的留出目标在全局属于warm。原始广告OID人为设为20,000,000,000+RID，只为清楚显示映射；这不是公开真实广告的业务编码规则。</p>
       <p>本次有效训练事件共 {metadata['training_events']} 条，全局训练可见广告 {metadata['train_seen_items']} 个。主角的广告7和9未在全局训练前缀出现，因此ID lookup为0；广告6和8通过背景用户获得独立训练ID。</p>''' + table(['local ID', '训练出现次数', 'ID Embedding行号', 'OID'], [
           [str(i), str(t['first_train_counts'][i]), str(t['item_id_lookup_first10'][i]), str(t['first_catalog_oids'][i])]
           for i in range(1, 10)]) + '''
-      <h3>9.2 冻结队列，再核对同一个用户的三种样本</h3>''' + f'''
+      <h3>13.2 冻结队列，再核对同一个用户的三种样本</h3>''' + f'''
       <p>先用参考抽样seed=2027准备6用户/2评估用户，再用主抽样seed=2026准备12用户，最后以seed=3107冻结6人的新队列。排除此前2名评估用户，重合数为 {demo['cohort']['overlap_with_previous_test_users']}；这复用了主项目的排除机制，但规模和参考抽样种子不同。主角处于新队列第 {t['cohort_position']} 个位置。</p>''' + table(['模式', '完整items，长度11', 'positive或target'], sample_rows) + '''
       <details><summary>展开实际切分结果和完整样本字段</summary>''' + pre(dict(split=demo['clean_and_split'], samples=t['samples'])) + '''</details>
-      <h3>9.3 五轮真实训练，用验证指标选checkpoint</h3>''' + table(['epoch', '平均训练loss', '验证HR@10', '验证NDCG@10', '监督位置数'], training_rows) + f'''
+      <h3>13.3 五轮真实训练，用验证指标选checkpoint</h3>''' + table(['epoch', '平均训练loss', '验证HR@10', '验证NDCG@10', '监督位置数'], training_rows) + f'''
       <p>该次验证最佳epoch为 {demo['training']['best_epoch']}。表里的训练loss是各批有效监督位置加权后的均值；后面单独追踪主角的一个位置，loss当然可以不同。示例没有为了制造命中而继续调模型或挑一个看起来更好的用户。</p>
-      <h3>9.4 固定该checkpoint，展开一个监督位置的真实数值</h3>''' + table(['张量', '实际形状'], shape_rows) + f'''
+      <h3>13.4 固定该checkpoint，展开一个监督位置的真实数值</h3>''' + table(['张量', '实际形状'], shape_rows) + f'''
       <p>主角唯一有效点击监督在数组位置 {t['supervised_positions'][0]}，对应“读广告1，预测点击广告2”。选出的state为[1,32]，64个采样负例为[1,64]。</p>
       <div class="formula"><p>实际s⁺ = {t['positive_scores'][0]:.9f}</p><p>实际p⁺ = {t['positive_softmax_probability'][0]:.9f}</p><p>实际L = −ln(p⁺) = {t['loss']:.9f}</p><small>负例分数并不相同，完整64项和负例ID在下面的折叠记录中。</small></div>
       <p>这次孤立的数值/梯度追踪将模型置于eval，关闭dropout以便复算，再执行一次反向传播；它不做optimizer.step，也不修改保存的checkpoint。下表是未裁剪的该次梯度；真正的五轮训练使用model.train、启用dropout，并在更新参数之前执行全局梯度范数裁剪。</p>''' + table(['参数', '实际梯度范数'], grad_rows) + '''
       <details><summary>展开正例、全部64负例分数/ID、softmax概率和梯度</summary>''' + pre({key:t[key] for key in ['supervised_positions', 'negative_ids', 'positive_scores', 'negative_scores', 'positive_softmax_probability', 'loss', 'gradient_norms']}) + '''</details>
-      <h3>9.5 用真实用户向量，对完整106候选打分</h3>''' + f'''
+      <h3>13.5 用真实用户向量，对完整106候选打分</h3>''' + f'''
       <p>验证历史是[1,2,3,4,5]，验证目标local ID=6。实际用户查询q有32维；过滤历史后，该目标分数为 <strong>{t['target_score']:.6f}</strong>，严格大于该分数的广告数量加一给出的排名为 <strong>{t['target_rank']}</strong>。</p>
       <div class="callout"><strong>这个样例的真实结果：</strong>目标没有进入精确Top-10，主角的HR@10=0、NDCG@10=0。索引准确复现模型排名也不能让一个原本排在前十之外的目标自动命中。教程保留这个结果，方便你检查模型能力与检索近似误差的区别。</div>
       <details><summary>展开真实32维查询与目标广告向量</summary>''' + pre({key:t[key] for key in ['query_vector', 'candidate_target_vector', 'target_score', 'target_rank']}) + '''</details>
-      <h3>9.6 导出、建立索引、验证门槛，真正返回十条推荐</h3>''' + f'''
+      <h3>13.6 导出、建立索引、验证门槛，真正返回十条推荐</h3>''' + f'''
       <p>本次小索引使用M=16，测试efSearch候选[64,128,2048]，以验证ANN重合率≥98%且p95最小选择预算。该次选出efSearch={demo['index']['selected']['efSearch']}，验证重合率={demo['index']['selected']['ANNRecall@10']:.2%}。小索引的时间、预算选择与大规模主索引不是同一结果，不用于宣称加速倍数。</p>''' + table(['名次', 'local ID', '最终OID', '推荐原始内积分数'], rank_rows) + '''
       <p class="source-note">上表顺序和分数来自recommend实际返回值。对应精确结果的local ID也保存在完整trace中；若今后改参数使ANN重合率不再100%，两种列表应分别查看，不能假设它们始终一致。</p>
-      <h3>9.7 自己重新跑一遍</h3>
+      <h3>13.7 自己重新跑一遍</h3>
       <pre><code>cd /home/jyk/project/baseline_2025
 .project_venv/bin/python scripts/run_tutorial_demo.py \
   --root artifacts/tutorial_demo_replay_01
@@ -249,10 +259,10 @@ def source_chapter(builder):
          f'<code>{builder.hashes[path][:16]}</code>', str(len(builder.sources[path].splitlines()))]
         for path in builder.sources])
     files = ''.join(builder.code(path, 1, '*', full=True) for path in builder.sources)
-    return ('<section class="chapter" id="sources"><div class="chapter-kicker">12 · 可以离线核对的来源</div>'
+    return ('<section class="chapter" id="sources"><div class="chapter-kicker">16 · 可以离线核对的来源</div>'
             '<h2>核心源码、真实实验文件与构建说明</h2>'
             f'<p>Git 构建基准 <code>{builder.commit}</code>。正文片段从构建时的文件自动截取。每份嵌入源码以本页的文件摘要为准。</p>'
-            f'<p>新增08A章单独使用<code>{esc(builder.research["branch"])}</code>的固定提交<code>{builder.research["commit"]}</code>。带<code>research/tail-recall/</code>前缀的文件来自本教程保存的研究快照，构建时核对每个文件SHA256；它们没有替换主分支实现，不能把研究指标与主模型历史成绩混为同一次实验。</p>'
+            f'<p>零点击长尾历史专题单独使用<code>{esc(builder.research["branch"])}</code>的固定提交<code>{builder.research["commit"]}</code>。带<code>research/tail-recall/</code>前缀的文件来自本教程保存的研究快照，构建时核对每个文件SHA256；它们没有替换主分支实现，不能把研究指标与主模型历史成绩混为同一次实验。</p>'
             '<p>要定位正文某段代码，可点击“完整源码”；它会自动展开对应文件并跳到该行。真正运行代码仍需Python环境和相应的数据/产物，本页面本身可完全离线阅读。</p>'
             + manifest + '<details><summary>展开完整来源摘要</summary>' + pre(builder.hashes) + '</details>'
             '<h3>主要证据文件</h3><ul>'
@@ -281,26 +291,29 @@ def main():
                   if hashlib.sha256((REPO / path).read_bytes()).hexdigest() != digest]
     if mismatches:
         raise ValueError('Teaching trace source mismatch; rerun run_tutorial_demo.py: ' + ', '.join(mismatches))
-    pieces = [(PARTS / name).read_text() for name in ['overview.html', 'data.html', 'model.html', 'evaluation.html']]
-    body = ''.join(pieces)
+    tail_chapter = (PARTS / 'tail_recall.html').read_text()
+    for key, value in builder.tail_tables().items():
+        tail_chapter = tail_chapter.replace('{{' + key + '}}', value)
+    tail_chapter = tail_chapter.replace('{{tail_lab}}', (PARTS / 'tail_lab.html').read_text())
+    rank_trace = json.loads((REPO / 'reports/sequence_rank/demo_rid311428.json').read_text())
+    sequence_chapter = (PARTS / 'sequence_ranking.html').read_text().replace('{{sequence_trace}}', pre(rank_trace))
+    main_parts = ('overview.html', 'data.html', 'model.html', 'candidate_recall.html', 'channel_ranking.html')
+    evidence_parts = ('evaluation.html', 'experiments.html', 'faiss.html')
+    body = (''.join((PARTS / name).read_text() for name in main_parts) + sequence_chapter
+            + ''.join((PARTS / name).read_text() for name in evidence_parts) + tail_chapter
+            + demo_chapter(demo) + (PARTS / 'appendix.html').read_text())
     for chapter_id, laboratory in laboratories().items():
         pattern = rf'(<section\b[^>]*id="{chapter_id}"[^>]*>.*?)(</section>)'
         body, count = re.subn(pattern, lambda m: m[1] + laboratory + m[2], body, count=1, flags=re.S)
         if count != 1:
             raise ValueError(f'Missing laboratory chapter {chapter_id}')
-    tail_chapter = (PARTS / 'tail_recall.html').read_text()
-    for key, value in builder.tail_tables().items():
-        tail_chapter = tail_chapter.replace('{{' + key + '}}', value)
-    tail_chapter = tail_chapter.replace('{{tail_lab}}', (PARTS / 'tail_lab.html').read_text())
-    body += tail_chapter + (PARTS / 'channel_ranking.html').read_text()
-    rank_trace = json.loads((REPO / 'reports/sequence_rank/demo_rid311428.json').read_text())
-    sequence_chapter = (PARTS / 'sequence_ranking.html').read_text()
-    body += sequence_chapter.replace('{{sequence_trace}}', pre(rank_trace))
-    body += demo_chapter(demo) + (PARTS / 'appendix.html').read_text()
     body = builder.replace_code(body)
     if '{{code:' in body or '{{tail_' in body or '{{sequence_trace}}' in body:
         raise ValueError('Unresolved template placeholder')
     body += source_chapter(builder)
+    ordered_ids = re.findall(r'<section class="chapter" id="([^"]+)"', body)
+    if ordered_ids != [chapter_id for _, chapter_id, _ in NAV]:
+        raise ValueError(f'Chapter order differs from the navigation: {ordered_ids}')
     for _, chapter_id, _ in NAV:
         footer = (f'<div class="chapter-footer"><button type="button" class="mark-complete" aria-pressed="false">标记本章已理解</button>'
                   '<span>能独立回答本章问题后，再标记完成。</span></div>')
@@ -314,7 +327,11 @@ def main():
                            snippets=builder.snippets, research=dict(snapshot=builder.research,
                            metrics=builder.tail_metrics, examples=builder.tail_examples,
                            verification=builder.tail_verification)), ensure_ascii=False).replace('<', '\\u003c')
-    toc = ''.join(f'<a href="#{key}"><span>{no}</span><span>{label}</span></a>' for no, key, label in NAV)
+    toc = ''.join(
+        f'<div class="toc-group" role="group" aria-label="{esc(title)}"><div class="toc-label">{esc(title)}</div>'
+        + ''.join(f'<a href="#{key}"><span>{no}</span><span>{esc(label)}</span></a>' for no, key, label in chapters)
+        + '</div>' for title, chapters in NAV_GROUPS
+    )
     built = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M %Z')
     document = f'''<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

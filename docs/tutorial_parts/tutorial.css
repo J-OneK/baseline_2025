@@ -21,3 +21,8 @@ body.dark{--bg:#0f1826;--paper:#172436;--ink:#e3eaf3;--muted:#a5b4c8;--line:#304
 @media(max-width:640px){.system-map{padding:12px}.system-scores{grid-template-columns:1fr;gap:2px}}
 @media(max-width:390px){.system-paths{grid-template-columns:1fr}}
 @media print{.system-map{break-inside:avoid}.system-paths{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.toc-group + .toc-group{margin-top:12px}
+.toc-label{padding:0 8px 3px;color:var(--muted);font-size:11px;font-weight:650}
+.chapter .learning-route{display:grid;gap:8px;padding:0;list-style:none}
+.learning-route li{margin:0;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
+.learning-route p{margin:3px 0 0;font-size:14px}
