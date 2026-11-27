@@ -4,7 +4,7 @@
 
 | 分支 | 内容 | 结论的边界 |
 |---|---|---|
-| `main` | 一层点击 InfoNCE-64、精确评估与 MIPS→L2 Faiss，完整推荐采用历史查组、DCN V2 与联合 Transformer 残差 | 召回测试、DCN V2 确认与联合排序确认分别报告 |
+| `main` | 一层点击 InfoNCE-64、精确评估与 MIPS→L2 Faiss，完整推荐采用历史查组、纯 DCN V2 与联合 Transformer 残差 | 召回测试、DCN V2 确认与联合排序确认分别报告 |
 | `research/channel-aware-ranking` | 列表排序的原始冻结实验与完整研究历史 | 6,000 人确认，使用验证点击 |
 | `research/onetrans-ranking` | 固定 Top-500 上比较历史注意力与 OneTrans 风格排序 | 10,000 人确认，报告 [收益与耗时](../reports/sequence_rank/README.md) |
 | `research/tail-recall` | 零点击长尾 ID 置零通道 | 另一种历史候选补充方法 |
@@ -33,4 +33,4 @@ git worktree add ../baseline_2025_depth research/depth
 
 ## 主方案的指标归属
 
-召回准确率来自三种子测试，索引测量固定 seed=2026。DCN V2 与内容融合的比较使用 6,000 人，联合 Transformer 与 DCN V2 的比较使用另一批 10,000 人。两轮均为两种子留出验证确认。各自的数据规模与候选预算见[版本说明](release.md)。
+召回准确率来自三种子测试，索引测量固定 seed=2026。早期 DCN V2 和内容融合的比较使用 6,000 人。当前纯 DCN 与联合 Transformer 四组消融使用同一批 10,000 人留出用户和两个种子，不与早期指标串起来算收益。各自的数据规模与候选预算见[版本说明](release.md)。

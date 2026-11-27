@@ -34,6 +34,7 @@ SOURCE_FILES = [
     'taac_retrieval/channel_features.py', 'taac_retrieval/group_recall.py',
     'scripts/recommend_sequence_rank.py', 'taac_retrieval/sequence_ranker.py',
     'scripts/build_channel_features.py', 'scripts/run_sequence_rank.py', 'configs/sequence_rank.json',
+    'scripts/ablate_channel_prior.py', 'scripts/ablate_sequence_rank.py', 'configs/ranking_release.json',
 ]
 NAV_GROUPS = [
     ('项目地图', [
@@ -295,8 +296,13 @@ def main():
     for key, value in builder.tail_tables().items():
         tail_chapter = tail_chapter.replace('{{' + key + '}}', value)
     tail_chapter = tail_chapter.replace('{{tail_lab}}', (PARTS / 'tail_lab.html').read_text())
-    rank_trace = json.loads((REPO / 'reports/sequence_rank/demo_rid311428.json').read_text())
-    sequence_chapter = (PARTS / 'sequence_ranking.html').read_text().replace('{{sequence_trace}}', pre(rank_trace))
+    rank_report = REPO / 'reports/sequence_base_ablation'
+    sequence_chapter = (PARTS / 'sequence_ranking.html').read_text()
+    for name, rid in (('sequence_trace', 311428), ('sequence_gain_trace', 957879)):
+        trace = json.loads((rank_report / f'demo_rid{rid}.json').read_text())
+        if trace['ranking_base'] != 'dcn_only' or trace['user_rid'] != rid:
+            raise ValueError(f'Trace does not describe the current release: {rid}')
+        sequence_chapter = sequence_chapter.replace('{{' + name + '}}', pre(trace))
     main_parts = ('overview.html', 'data.html', 'model.html', 'candidate_recall.html', 'channel_ranking.html')
     evidence_parts = ('evaluation.html', 'experiments.html', 'faiss.html')
     body = (''.join((PARTS / name).read_text() for name in main_parts) + sequence_chapter
@@ -308,7 +314,7 @@ def main():
         if count != 1:
             raise ValueError(f'Missing laboratory chapter {chapter_id}')
     body = builder.replace_code(body)
-    if '{{code:' in body or '{{tail_' in body or '{{sequence_trace}}' in body:
+    if '{{code:' in body or '{{tail_' in body or '{{sequence_' in body:
         raise ValueError('Unresolved template placeholder')
     body += source_chapter(builder)
     ordered_ids = re.findall(r'<section class="chapter" id="([^"]+)"', body)
@@ -345,7 +351,7 @@ def main():
 <div class="tool-row"><button class="small-btn" id="source-toggle">折叠源码</button><button class="small-btn" id="theme-toggle">明 / 暗</button><button class="small-btn" id="print">打印 / PDF</button></div><p>单文件 · 无外部依赖<br>源码基准 {builder.commit[:7]}<br>本地保存阅读进度</p></div></aside>
 <div class="mobile-bar"><button id="menu" aria-label="打开学习目录" aria-expanded="false">☰ 目录</button><span>TAAC2025 · 代码与公式</span><a href="#overview">首页 ↑</a></div>
 <main class="main" id="main-content"><div class="article"><div class="topline"><span>RECOMMENDATION ENGINEERING / LEARNING EDITION</span><span class="version">{builder.commit[:7]} · OFFLINE HTML</span></div>
-<header class="hero"><div class="eyebrow">TAAC2025 · 广告召回与联合排序</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">沿真实用户的数据走过 InfoNCE 主召回、历史同组辅助召回、DCN V2 和 OneTrans 风格联合排序，逐步核对数组、模型分数和最后的广告名次。</p>
+<header class="hero"><div class="eyebrow">TAAC2025 · 广告召回与联合排序</div><h1>从一条行为，<br>到十条推荐。</h1><p class="subtitle">沿真实用户的数据走过 InfoNCE 主召回、历史同组辅助召回、纯 DCN V2 和 OneTrans 风格联合排序，逐步核对数组、模型分数和最后的广告名次。</p>
 <div class="hero-stats"><div><strong>32 维</strong><small>主召回查询与广告向量</small></div><div><strong>500 条</strong><small>合并后的固定候选</small></div><div><strong>15 项</strong><small>DCN V2 的汇总特征</small></div><div><strong>2 个</strong><small>联合模型的候选特征 token</small></div></div></header>
 <noscript><div class="callout">浏览器关闭了JavaScript。正文、源码、公式、手算例子和实际运行结果仍可阅读；互动滑块与本地进度需要启用脚本。</div></noscript>
 {body}<footer class="end-note">构建于 {built} · 原始大规模实验保持原记录，教学演示单独注明。<br>阅读时以本页嵌入的源码快照、来源摘要和标明的评估口径为准。</footer></div></main>

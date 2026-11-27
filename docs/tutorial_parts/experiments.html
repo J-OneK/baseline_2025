@@ -70,16 +70,19 @@
   </table></div>
   <p>生成式重排只读取旧 MLP Top-100，许多冷尾目标进不了这一步。生成属性组找到了部分历史未出现的组，之后仍需要从组内挑到真实目标。两轮生成实验在各自固定预算内都没有带来最终 HR@10 提升。DeepFM 的因子分解也能学二阶交互，本轮的已测架构对照是通道 MLP 与通道 DCN V2。</p>
 
-  <h3>10.6 固定候选后，最终排序改善了多少？</h3>
+  <h3>10.6 为什么最终选择纯 DCN 加联合排序？</h3>
+  <p>早期 6,000 人实验证实训练融合式 DCN 能改善旧融合；当前发布只用同一份 10,000 人候选比较下面四组。两种基础分上的联合模型分别重训，5,000 人开发集选轮次和系数。10,000 人沿用归档留出验证点击，与排序训练和开发名单不重叠。</p>
   <div class="table-wrap"><table>
-    <thead><tr><th>独立确认集</th><th>固定候选内的对照</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
+    <thead><tr><th>同一 10,000 人、两个种子</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
     <tbody>
-      <tr><td>6,000 人</td><td>原融合 → DCN V2</td><td>2.233% → 2.917%</td><td>0.01225 → 0.01602</td></tr>
-      <tr><td>10,000 人</td><td>DCN V2 → 加联合 Transformer 残差</td><td>2.660% → 2.825%</td><td>0.013950 → 0.014800</td></tr>
+      <tr><td>原融合 + DCN V2</td><td>2.715%</td><td>0.014622</td></tr>
+      <tr><td>原融合 + DCN V2 + 联合排序</td><td>2.890%</td><td>0.015648</td></tr>
+      <tr><td>纯 DCN V2</td><td>2.725%</td><td>0.014490</td></tr>
+      <tr><td><strong>纯 DCN V2 + 联合排序（默认）</strong></td><td><strong>2.890%</strong></td><td><strong>0.015674</strong></td></tr>
     </tbody>
   </table></div>
-  <p>在 6,000 人确认集上，仅加候选、保持旧融合时 HR@10 仍为 2.233%。两轮排序确认都用两个种子，但使用不同留出用户。DCN V2 的确认比较锁定的整套排序方案，交叉层与 MLP 的直接对比来自开发集。</p>
-  <p>联合排序相对 DCN V2 的 NDCG@10 差值 95% 配对区间为 +0.000069～+0.001694，HR@10 差值区间跨零。轻量历史注意力也使用候选的 81 向量和逐条历史；联合排序相对该对照的 NDCG 差值区间仍跨零，因此不能把全部收益归给联合交互结构。单次请求的真实分数见<a href="#sequence-ranking">联合排序案例</a>，模型打分与索引查询的耗时分别在<a href="release.md">版本说明</a>中记录。</p>
+  <p>同一基础分上比较是否加联合模型：纯 DCN 的 NDCG 相对提高约 8.2%，差值 95% 配对区间为 +0.000387～+0.001932，HR 差区间跨零。两种完整链路比较是否固定加旧融合分：差值区间都跨零，所以采用纯 DCN。两项旧分仍是模型输入，500 条候选不变。整体改善主要来自头部。RTX 2080 Ti 已准备候选的模型打分 p95 约 0.34 → 2.86 ms，和 Faiss 检索是不同口径。</p>
+  <p><a href="../reports/sequence_base_ablation/README.md">完整消融与计时</a> · <a href="../reports/sequence_rank/README.md">早期联合模型与轻量历史注意力</a></p>
 
   <h3>10.7 为什么保存逐用户预测和多个种子？</h3>
   <p>同一用户对两种模型的评估难度相似，所以比较时应配对。令 <var>d</var><sub>s,u</sub> 为种子 <var>s</var>、用户 <var>u</var> 上“选定方案指标减去基线指标”，先平均得到观察差值，再通过有放回重采样估计不确定性：</p>
@@ -105,7 +108,7 @@
     <tr><td>三种子测试是否一致？</td><td><code>reports/objective_study/metrics.json</code></td><td><code>aggregates</code>、<code>runs</code>、<code>deltas</code>、<code>confirmation_seeds</code></td></tr>
     <tr><td>为什么改索引几何？</td><td><code>ann_initial_failure.json</code>、<code>ann_amendment.json</code></td><td>原始失败、验证驱动的变换登记、98% 门槛没有被降低</td></tr>
     <tr><td>Faiss 测量属于谁？</td><td><code>metrics.json</code> 的 <code>ann</code> 字段；本地 <code>artifacts/objective_study/ann/benchmark.json</code></td><td>seed=2026、512 查询、几何、efSearch、线程、延迟范围</td></tr>
-    <tr><td>联合排序如何锁定与确认？</td><td><a href="../reports/sequence_rank/development.json">development.json</a> 与 <a href="../reports/sequence_rank/confirmation.json">confirmation.json</a></td><td>开发选择、锁定轮次和系数、确认用户数及配对差值</td></tr>
+    <tr><td>联合排序如何锁定与确认？</td><td><a href="../reports/sequence_base_ablation/results.json">results.json</a> 与 <a href="../configs/ranking_release.json">ranking_release.json</a></td><td>开发选择、锁定轮次和系数、确认用户数及配对差值</td></tr>
     <tr><td>旧源码 SHA 为什么不同？</td><td><code>code_manifest.json</code> 与 <code>docs/release.md</code></td><td>历史实测源码与后续入口重构的时间归属；没有冒充重新训练</td></tr>
   </tbody></table></div>
   <p>主报告的原始数据位置、缓存、权重和索引留在本地 <code>artifacts/</code>。Git 中主要保留代码、配置与小型历史报告；大文件不随 HTML 或仓库代码复制。历史 JSON 中出现旧目录名，是当时的记录，不等于当前默认命令仍按天数组织。</p>

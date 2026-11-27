@@ -1,0 +1,34 @@
+{
+  "base_config": "configs/channel_rank.json",
+  "sequence_config": "configs/sequence_rank.json",
+  "base_score": "dcn_only",
+  "dcn": {
+    "epoch": 11,
+    "checkpoints": {
+      "2026": {
+        "checkpoint": "artifacts/channel_prior_ablation_v1/checkpoints/dcn_only/2026/epoch11.pt",
+        "sha256": "57d75f637bd99edb61b09d08c080dc097f964b6c479f6cae49dc74b336f00cc8"
+      },
+      "2027": {
+        "checkpoint": "artifacts/channel_prior_ablation_v1/checkpoints/dcn_only/2027/epoch11.pt",
+        "sha256": "726902c04a92eae5cbf6e4b3fb8f0f8913d75ad52bf1ba3e7241d39e6b93f0fa"
+      }
+    }
+  },
+  "joint": {
+    "variant": "joint_transformer",
+    "epoch": 5,
+    "scale": 1.0,
+    "checkpoints": {
+      "2026": {
+        "path": "artifacts/sequence_base_ablation_v1/checkpoints/dcn_only/2026/epoch5.pt",
+        "sha256": "76ee5aa88a058c74af09af7bcb61c64d77081f9a1ec1a8553c01e75f33e761e1"
+      },
+      "2027": {
+        "path": "artifacts/sequence_base_ablation_v1/checkpoints/dcn_only/2027/epoch5.pt",
+        "sha256": "18a5c718e21dfabd53e67f08a32f6ceabaa876ab60f4ffd1b423a9dcdc1d8a6a"
+      }
+    }
+  },
+  "confirmation_rows_sha256": "7b4d3d1c79f759be63290e025aa1083d2c71eaa888e2d22e05b6163574f385b9"
+}

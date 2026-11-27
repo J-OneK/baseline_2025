@@ -1,6 +1,8 @@
 # 在同一批候选上训练通道感知排序
 
-此处记录 DCN V2 基础排序的独立实验。当前完整推荐沿用这份基础分，再计算候选感知联合残差。 [后续联合排序](../sequence_rank/README.md)
+此处记录历史「原融合 + DCN V2」基础排序的独立实验。该模型可用 `--legacy` 复查；当前主分支使用[纯 DCN V2 + 联合排序](../sequence_base_ablation/README.md)。
+
+后续还固定同一批候选和 15 维特征，重训了直接打分的 DCN V2，单独检验输出上是否需要显式加回原融合分。 [融合分消融](../channel_prior_ablation/README.md)
 
 ## 问题与实验设计
 

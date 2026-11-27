@@ -4,23 +4,23 @@
 
 A recommendation retrieval project built on the TAAC 2025 SASRec-style baseline and the public TencentGR-1M data. The main branch contains a complete path from Parquet preparation to exact evaluation, vector export, persisted Faiss indexes, and a local Top-10 recommendation demo.
 
-The retriever uses one causal Transformer block, 32-dimensional representations, click-only supervision, and sampled InfoNCE with 64 negatives. The full path adds grouped content candidates for cold and tail ads. It reranks the fixed 500 candidates with a channel-aware DCN V2 base score and a OneTrans-style residual that reads individual history events.
+The retriever uses one causal Transformer block, 32-dimensional representations, click-only supervision, and sampled InfoNCE with 64 negatives. The full path adds grouped content candidates for cold and tail ads. It reranks the fixed 500 candidates with a channel-aware DCN V2 score plus a OneTrans-style residual that reads individual history events.
 
 ```text
 Public Parquet → per-user chronological holdouts → arrays
   ├─ click InfoNCE-64 → exact Top-500
   └─ historical attribute and content matches → cold/tail proposals
                        ↓
-Merge 500 candidates → 15 features → DCN V2 base score
+Merge 500 candidates → 15 features → direct DCN V2 score
                        ↓
 Behavior tokens + two tokens per candidate → joint Transformer residual
                        ↓
-Sort combined scores → Top-10 ad OIDs
+Sort DCN V2 score + joint residual → Top-10 ad OIDs
 ```
 
 ## Confirmed ranking results
 
-On the same Top-500 lists from 10,000 held-out validation users, the joint ranker increased **NDCG@10 from 0.013950 to 0.014800** across two seeds. The paired 95% interval for the difference was +0.000069 to +0.001694. **HR@10 increased from 2.660% to 2.825%** with an interval spanning zero. The earlier DCN V2 comparison used a separate 6,000-user cohort. [Ranking protocol and results](reports/sequence_rank/README.md)
+On the same Top-500 lists from 10,000 held-out validation users, adding the joint ranker to direct DCN V2 increased **NDCG@10 from 0.014490 to 0.015674 (+8.2%)** across two seeds. The paired 95% interval for the difference was +0.000387 to +0.001932. **HR@10 went from 2.725% to 2.890%**, with an interval spanning zero. Both full pipelines scored 2.890% HR@10; we selected the simpler direct DCN base. The retriever and content MLP scores remain input features; the fixed blend still protects candidate membership during merging. [Four-way ablation and timing](reports/sequence_base_ablation/README.md)
 
 With the ranking artifacts available, run the full path and inspect a real example:
 
@@ -28,7 +28,7 @@ With the ranking artifacts available, run the full path and inspect a real examp
 python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace
 ```
 
-Grouped content recall recovered the cold ad. The DCN V2 base placed it 11th and the joint ranker moved it to 8th. [Raw data, tensor shapes, and score trace](docs/data_flow.md)
+Grouped content recall recovered the cold ad, which both final rankers placed third. Use `--rid 957879` for an example where the joint ranker moves the target from 14th to 8th. [Raw data, tensor shapes, and score traces](docs/data_flow.md) · [Local artifacts and release configuration](docs/ranking_extension.md)
 
 ## Historical retrieval and index results
 

@@ -1,7 +1,7 @@
 <section class="chapter" id="sequence-ranking">
   <div class="chapter-kicker">08 · 排序阶段：OneTrans 风格联合排序</div>
   <h2>让候选读逐条历史，再修正 DCN V2 的名次</h2>
-  <p class="lead">下面追踪实际用户 RID 311428、seed 2026。目标广告 RID 为 4400700，缓存 local ID 为 1415788，业务 OID 为 20004114747。它的训练事件数是 0。两路召回合并后，DCN V2 将它排在第 11，联合排序提到第 8。</p>
+  <p class="lead">下面追踪实际用户 RID 311428、seed 2026。目标广告 RID 为 4400700，缓存 local ID 为 1415788，业务 OID 为 20004114747。它的训练事件数是 0。主召回漏掉它，辅助通道把它补入；纯 DCN 和联合排序都排第 3。另一个用户 RID 957879 则能看到第 14 到第 8 的变化。</p>
   <h3>从原始记录到一组真实候选</h3>
   <p>检索请求可见 10 次行为。倒数第二次原始行为是 <code>{"item_id":3206824,"action_type":1,"timestamp":1731673950}</code>。按本地目录重编号后，广告 local ID 为 1031838，缓存动作码为 2。该次点击与目标共享 <code>102=3535</code>、<code>122=25920</code>，两者 81 号向量的余弦为 0.993804。</p>
   <div class="table-wrap"><table>
@@ -10,7 +10,7 @@
       <tr><td>切分和召回输入</td><td><code>[1,101]</code></td><td>历史 10 条，加入用户 token 再左补齐。留出点击用于打分后的审计。</td></tr>
       <tr><td>编码用户</td><td><code>[1,32]</code></td><td>取最后有效状态作为查询，前四维为 [-1.193134,-0.142864,-0.411329,0.656099]。</td></tr>
       <tr><td>主召回和辅助提议</td><td><code>[1,500]</code> 和 <code>[1,2,80]</code></td><td>精确内积先找五百条。冷启动和长尾各有最多八十条提议。</td></tr>
-      <tr><td>等量合并</td><td><code>[1,500]</code></td><td>每桶最多补五条，剔除重复。目标进入列 499，原融合分排序后为第 494 名。</td></tr>
+      <tr><td>等量合并</td><td><code>[1,500]</code></td><td>每桶最多补五条，剔除重复。目标进入列 499，仅供参照的原融合分排序后为第 494 名。</td></tr>
       <tr><td>静态候选</td><td><code>[1,500,15]</code></td><td>包括 z 分、训练频次、来源和匹配。目标的标准化召回分是 −1.889562。</td></tr>
       <tr><td>逐条历史</td><td><code>[1,40,32]</code> → <code>[1,40,24]</code></td><td>单位化内容向量加动作、位置、时间投影。10 个真实历史位置和 30 个填充。</td></tr>
       <tr><td>候选特征 token</td><td><code>[1,500,2,24]</code></td><td>每条候选有内容及基础特征 token，以及通道与匹配 token。</td></tr>
@@ -21,9 +21,12 @@
   <p>各候选用自己的 token 作为查询。注意力将同一用户的有效历史和本候选内可见的 token 放在同一归一化里。两层之后，把候选的两个 token 拼接成一个打分输入，输出一项残差。各候选在推断时独立打分，在训练的整表交叉熵里竞争。</p>
   {{code:taac_retrieval/sequence_ranker.py:47:64}}
   {{code:taac_retrieval/sequence_ranker.py:94:115}}
-  <div class="formula" role="math"><p>原融合 −1.664137 + DCN V2 残差 3.285589 ≈ 1.621453，排第 11</p><p>再加联合残差 0.192702 ≈ 1.814155，排第 8</p></div>
-  <p>DCN V2 看到的是静态汇总特征，比如“与点击最像的分数”。联合排序还看到是哪一次点击、它和哪些曝光一起构成了最近历史。它在同一份 500 条上给 DCN V2 的分数再加一项，广告的入池状态不会变。<a href="#evaluation">下一章用这个用户手算 Recall、HR 和 NDCG</a>。</p>
+  {{code:scripts/recommend_channel_rank.py:91:104}}
+  <div class="formula" role="math"><p>RID 311428：纯 DCN 2.287390 + 联合残差 (−0.041378) ≈ 2.246011，仍排第 3</p><p>RID 957879：纯 DCN 2.350007（第 14）+ 联合残差 0.078511 ≈ 2.428518（第 8）</p></div>
+  <p>这两个例子回答不同问题。第一个说明召回有没有把目标捞进来；第二个目标已由主召回找到，说明联合排序能怎样改变前十。模型对 500 个分数都可以加减，名次取决于它们的相对顺序。</p>
+  <p>DCN V2 看到的是静态汇总特征，比如“与点击最像的分数”。联合排序还看到是哪一次点击、它和哪些曝光一起构成了最近历史。它在同一份 500 条上给 DCN V2 的分数再加一项，广告的入池状态不会变。<a href="#evaluation">下一章用这两个用户手算 Recall、HR 和 NDCG</a>。</p>
   <pre><code>python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace</code></pre>
-  <details><summary>展开实际 CLI 输出</summary>{{sequence_trace}}</details>
-  <p><a href="data_flow.md">原始 Parquet、缓存和训练数据详解</a> · <a href="../reports/sequence_rank/README.md">比较、分桶与计时</a></p>
+  <details><summary>展开 RID 311428 实际 CLI 输出</summary>{{sequence_trace}}</details>
+  <details><summary>展开 RID 957879 实际 CLI 输出</summary>{{sequence_gain_trace}}</details>
+  <p><a href="data_flow.md">原始 Parquet、缓存和训练数据详解</a> · <a href="../reports/sequence_base_ablation/README.md">比较、分桶与计时</a></p>
 </section>

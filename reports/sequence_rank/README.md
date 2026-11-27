@@ -2,6 +2,8 @@
 
 现有 DCN V2 用最近历史算出最大余弦、匹配动作、时间差等 15 个数值特征。本轮把点击与曝光逐条交给排序器，检验候选能否根据自身内容读取不同的历史，以及把行为和特征放在同一注意力里是否有额外收益。实验沿用两路召回、固定的 500 条合并候选和留出的下一点击目标。
 
+后续还在同一批 10,000 人候选上，分别以融合 DCN、纯 DCN 为基础分重训联合模型。 [两种基础分上的加入/移除对照](../sequence_base_ablation/README.md)
+
 ## 模型与对照
 
 ```text
@@ -67,17 +69,17 @@
 
 这是新实验的模型打分计时。之前的 Faiss 搜索、历史过滤和运行入口另有测量口径。完整候选提取、特征构建到出结果的计时需要单独测量。
 
-联合模型已作为主分支完整推荐的最终打分阶段。它在同一批候选上改善了 NDCG，HR 的增量和冷尾收益仍有较大不确定性。主分支同时提供轻量配置，并分别保存打分计时。 [主分支入口](../../docs/ranking_extension.md) · [数据链路](../../docs/data_flow.md)
+这里记录较早的「原融合 + DCN」基础分与联合模型。当前入口默认用[纯 DCN 上重训的联合模型](../sequence_base_ablation/README.md)；早期融合版加 `--legacy` 复查，轻量对照使用 `--variant history_attention`。
 
 ## 本机复现
 
 已有权重和目录时可重算单用户链路：
 
 ```bash
-python scripts/recommend_sequence_rank.py --device cpu --seed 2026 --rid 311428 --show-target --trace
+python scripts/recommend_sequence_rank.py --legacy --device cpu --seed 2026 --rid 311428 --show-target --trace
 ```
 
-[生成的真实 trace](demo_rid311428.json) 与[逐阶段解释](../../docs/data_flow.md)记录了该条广告从补入候选到第 8 名的过程。
+[这次历史版本的 trace](demo_rid311428.json)记录了目标从补入候选到第 8 名。当前模型的不同排名见[新版数据链路](../../docs/data_flow.md)。
 
 从仓库根目录运行，使用项目 Python 环境和已有的 `artifacts/baseline`、`artifacts/channel_rank_v1`、`artifacts/ranking_v1`、`artifacts/ranking_content_v1`、`artifacts/group_recall_v1`、`artifacts/ranking_confirmation_v1` 本地资产。登记使用已核对的历史排除队列。现有完整实验产物位于 `artifacts/sequence_rank_v1`。重跑时复制配置到新文件，并给 `output` 指定新目录。
 

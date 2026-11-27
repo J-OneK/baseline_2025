@@ -14,18 +14,19 @@
   <p>在历史链路里，召回内积已经给全目录的合法广告排了序，NDCG 可以评价这个顺序。现在有了下游排序，对召回而言，前 500 条里有没有目标更关键。只要候选集合不变，重排不会改 Recall@500；会改的是前十成员和先后顺序。</p>
   <p>NDCG 也可以用于观察召回列表的顺序。例如只把前 100 条交给下游时，Recall@100 有更直接的意义。Faiss 与精确 Top-K 的<strong>列表重合率</strong>比较的是两个系统输出是否一致，是另一项指标，参见 <a href="#retrieval">Faiss 专题</a>。</p>
 
-  <h3>9.2 同一个真实用户，四步分别得几分？</h3>
-  <p>这是前面 <a href="#sequence-ranking">RID 311428、seed 2026</a> 的实际路径。表中的 0、1 是单用户贡献，多位用户时再取平均。</p>
+  <h3>9.2 用两个真实用户区分覆盖与重排</h3>
+  <p>这两条是前面<a href="#sequence-ranking">当前主链路的实际轨迹</a>。表中是单用户贡献，多位用户时再取平均。</p>
   <div class="table-wrap"><table>
-    <thead><tr><th>查看哪份列表</th><th>留出点击位置</th><th>Recall@500</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
+    <thead><tr><th>用户与列表</th><th>留出点击位置</th><th>Recall@500</th><th>HR@10</th><th>NDCG@10</th></tr></thead>
     <tbody>
-      <tr><td>主召回</td><td>不在列表里</td><td>0</td><td>0</td><td>0</td></tr>
-      <tr><td>双路合并后按原融合分排列</td><td>第 494 名</td><td>1</td><td>0</td><td>0</td></tr>
-      <tr><td>同一批候选 + DCN V2</td><td>第 11 名</td><td>1</td><td>0</td><td>0</td></tr>
-      <tr><td>同一批候选 + 联合排序</td><td>第 8 名</td><td>1</td><td>1</td><td>1/log₂(9) ≈ 0.3155</td></tr>
+      <tr><td>311428 · 主召回</td><td>没入池</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>311428 · 补入后（旧融合参考）</td><td>第 494 名</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>311428 · 纯 DCN / 加联合排序</td><td>均第 3 名</td><td>1</td><td>1</td><td>0.5</td></tr>
+      <tr><td>957879 · 纯 DCN</td><td>第 14 名</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>957879 · 加联合排序</td><td>第 8 名</td><td>1</td><td>1</td><td>1/log₂(9) ≈ 0.3155</td></tr>
     </tbody>
   </table></div>
-  <p class="callout">合并把 Recall@500 从 0 变成 1；联合排序把 HR@10 从 0 变成 1。两件事分别对应两个环节。第 11 名已经很接近前十，但两个 @10 指标仍然给 0。</p>
+  <p class="callout">第一个例子看辅助回填：Recall@500 从 0 变成 1。第二个例子看重排：加入联合模型后 HR@10 从 0 变成 1，而候选没变，Recall@500 保持 1。</p>
 
   <h3>9.3 单目标时，为什么 HR 和 Recall 在同一个 K 上相等？</h3>
   <p>令 <var>r</var><sub>u</sub> 为目标广告的一基排名，即第一名的 <var>r</var>=1，目标未返回时当作 <var>r</var>=∞。当前协议每个用户只有一个目标点击，定义指示函数 𝟙[条件]：成立时为 1，否则为 0。</p>
@@ -63,7 +64,7 @@
   <p>评估还有一个直接检查：如果目标广告已经出现在当前用户的输入历史中，就抛出异常。这与 <code>clean_and_split()</code> 的首次出现点击留出规则配合，避免“历史过滤会删掉答案”的矛盾。</p>
 
   <div class="checkpoint"><h3>这一章的自测</h3>
-    <details><summary>固定候选后，DCN V2 让目标从第 11 名升到第 8 名，Recall@500 会变吗？</summary><p>不会。目标一直在这 500 条里，变的是 Top-10 命中和位置折扣。若排序后 Recall@500 有变化，要先检查是不是比较了不同的候选集合。</p></details>
+    <details><summary>固定候选后，联合模型让目标从第 14 名升到第 8 名，Recall@500 会变吗？</summary><p>不会。目标一直在这 500 条里，变的是 Top-10 命中和位置折扣。若排序后 Recall@500 有变化，要先检查是不是比较了不同的候选集合。</p></details>
     <details><summary>目标排第 3 名时，为什么 NDCG 是 0.5？</summary><p>唯一相关项的理想 DCG 为 1；实际折扣为 1/log₂(3+1)=1/2。若 K 小于 3 则目标被截断，NDCG@K 为 0。</p></details>
     <details><summary>当前用户从没见过某广告，就能把它归为 cold_0 吗？</summary><p>不能。cold_0 要求它在所有用户的训练前缀中出现次数为零；当前用户未见只是历史过滤的条件。</p></details>
   </div>

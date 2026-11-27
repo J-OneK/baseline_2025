@@ -1,0 +1,283 @@
+{
+  "seed": 2026,
+  "user_rid": 957879,
+  "budget": 500,
+  "auxiliary_added": 10,
+  "top10": [
+    {
+      "rank": 1,
+      "oid": 20004223036,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 2,
+      "oid": 20005465977,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 3,
+      "oid": 20004114028,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 4,
+      "oid": 20002394842,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 5,
+      "oid": 20001283311,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 6,
+      "oid": 20005404591,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 7,
+      "oid": 20004767242,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 8,
+      "oid": 20002001783,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 9,
+      "oid": 20003534393,
+      "from_auxiliary": false
+    },
+    {
+      "rank": 10,
+      "oid": 20004460148,
+      "from_auxiliary": false
+    }
+  ],
+  "ranking_base": "dcn_only",
+  "ranker": "joint_transformer",
+  "target_audit": {
+    "oid": 20002001783,
+    "ranks": {
+      "original": 16,
+      "augmented_prior": 16,
+      "dcn_v2": 14,
+      "joint_transformer": 8
+    },
+    "from_auxiliary": false
+  },
+  "data_trace": {
+    "cache": {
+      "user_row": 89563,
+      "model_user_id": 89564,
+      "max_history": 100,
+      "cached_events": 93,
+      "validation_boundary": 85,
+      "catalog_items": 1538730
+    },
+    "shapes": {
+      "recall_input_ids": [
+        1,
+        101
+      ],
+      "query_vector": [
+        1,
+        32
+      ],
+      "main_candidates": [
+        1,
+        500
+      ],
+      "auxiliary_proposals": [
+        1,
+        2,
+        80
+      ],
+      "merged_candidates": [
+        1,
+        500
+      ],
+      "static_features": [
+        1,
+        500,
+        15
+      ],
+      "candidate_content": [
+        1,
+        500,
+        32
+      ],
+      "history_content": [
+        1,
+        40,
+        32
+      ],
+      "history_actions": [
+        1,
+        40
+      ],
+      "history_ages": [
+        1,
+        40
+      ],
+      "history_tokens": [
+        1,
+        40,
+        24
+      ],
+      "ranking_scores": [
+        1,
+        500
+      ],
+      "candidate_tokens": [
+        1,
+        500,
+        2,
+        24
+      ]
+    },
+    "sequence_dataset_tail": [
+      {
+        "local_id": 624964,
+        "source_rid": 1942559,
+        "oid": 20003909842,
+        "action": 3,
+        "timestamp": 1747354698
+      },
+      {
+        "local_id": 73902,
+        "source_rid": 229804,
+        "oid": 20002752029,
+        "action": 2,
+        "timestamp": 1747389052
+      },
+      {
+        "local_id": 1202312,
+        "source_rid": 3737186,
+        "oid": 20001663722,
+        "action": 1,
+        "timestamp": 1747444126
+      }
+    ],
+    "sequence_rank_history": {
+      "valid_events": 40,
+      "tail": [
+        {
+          "local_id": 1488213,
+          "source_rid": 4625001,
+          "oid": 20001341921,
+          "action": 1,
+          "log_age_minutes": 7.951559543609619
+        },
+        {
+          "local_id": 270116,
+          "source_rid": 839810,
+          "oid": 20004659512,
+          "action": 1,
+          "log_age_minutes": 7.574960708618164
+        },
+        {
+          "local_id": 73902,
+          "source_rid": 229804,
+          "oid": 20002752029,
+          "action": 2,
+          "log_age_minutes": 6.823177337646484
+        },
+        {
+          "local_id": 1202312,
+          "source_rid": 3737186,
+          "oid": 20001663722,
+          "action": 1,
+          "log_age_minutes": 0.0
+        }
+      ]
+    },
+    "query_head": [
+      -1.463408,
+      -0.807275,
+      2.887459,
+      -1.888005
+    ],
+    "main_top3": [
+      {
+        "local_id": 1149928,
+        "source_rid": 3573543,
+        "oid": 20000790602,
+        "inner_product": 10.493892669677734
+      },
+      {
+        "local_id": 1080495,
+        "source_rid": 3358616,
+        "oid": 20002385990,
+        "inner_product": 10.476158142089844
+      },
+      {
+        "local_id": 181757,
+        "source_rid": 565285,
+        "oid": 20001713129,
+        "inner_product": 10.442211151123047
+      }
+    ],
+    "auxiliary_added_preview": [
+      {
+        "local_id": 586255,
+        "source_rid": 1820779,
+        "oid": 20001378668
+      },
+      {
+        "local_id": 1522658,
+        "source_rid": 4731636,
+        "oid": 20001291481
+      },
+      {
+        "local_id": 806671,
+        "source_rid": 2507085,
+        "oid": 20004571611
+      }
+    ],
+    "focus": {
+      "local_id": 1114811,
+      "source_rid": 3464562,
+      "oid": 20002001783,
+      "train_events": 0,
+      "ranks": {
+        "raw_recall": 19,
+        "original": 16,
+        "augmented_prior": 16,
+        "dcn_v2": 14,
+        "joint_transformer": 8
+      },
+      "candidate_column": 18,
+      "from_auxiliary": false,
+      "static_features": {
+        "retrieval_z": 2.094916820526123,
+        "ctr_z": 1.2388904094696045,
+        "train_events_log": 0.0,
+        "early_clicks_log": 0.0,
+        "content_present": 1.0,
+        "added_channel": 0.0,
+        "click_match_cosine": 0.9870513677597046,
+        "click_match_present": 1.0,
+        "exposure_match_cosine": 0.9976085424423218,
+        "exposure_match_present": 1.0,
+        "best_match_from_click": 1.0,
+        "best_match_age_log": 9.391802787780762,
+        "matched_fields": 2.0,
+        "matched_posting_size_log": 4.430816650390625,
+        "best_content_cosine": 0.9976085424423218
+      },
+      "content_unit_head": [
+        0.174416,
+        0.210445,
+        0.086808,
+        -0.099474
+      ],
+      "reference_fixed_fusion": 2.0093140602111816,
+      "dcn_output": 2.3500068187713623,
+      "dcn_score": 2.3500068187713623,
+      "sequence_residual": 0.07851094752550125,
+      "final_score": 2.4285178184509277
+    }
+  }
+}

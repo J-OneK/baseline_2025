@@ -1,4 +1,4 @@
-"""Run exact retrieval, grouped content recall and locked DCN V2 for one user."""
+"""Run exact retrieval, grouped content recall and DCN V2 for one user."""
 import argparse
 import json
 import os
@@ -26,20 +26,24 @@ from taac_retrieval.ranking_model import digest
 
 
 @torch.inference_mode()
-def recommend(args, sequence_config=None):
-    config = read(args.config if sequence_config is None else sequence_config["base_config"])
+def recommend(args, sequence_config=None, release=None):
+    config = read(release["base_config"] if release else (
+        args.config if sequence_config is None else sequence_config["base_config"]))
     base, group = read(config["ranking_config"]), read(config["group_config"])
     root = Path(config["output"])
-    lock = read(root / "selection.json")
-    chosen = lock["selected"]
+    chosen = release["dcn"] if release else read(root / "selection.json")["selected"]
     seed = args.seed
-    sequence_selection = None
+    arm = None
     if sequence_config is not None:
         sequence_root = Path(sequence_config["output"])
-        check_plan(sequence_config, root)
-        sequence_selection = read(sequence_root / "selection.json")
-        if digest(sequence_root / "plan.json") != sequence_selection["plan_sha256"]:
-            raise ValueError("Sequence selection does not match the frozen plan.")
+        if release:
+            arm = release["joint"]
+        else:
+            check_plan(sequence_config, root)
+            selection = read(sequence_root / "selection.json")
+            if digest(sequence_root / "plan.json") != selection["plan_sha256"]:
+                raise ValueError("Sequence selection does not match the frozen plan.")
+            arm = selection["arms"][args.variant]
     ranker = chosen["checkpoints"][str(seed)]
     if digest(ranker["checkpoint"]) != ranker["sha256"]:
         raise ValueError("Ranking weights differ from the locked checksum.")
@@ -51,8 +55,14 @@ def recommend(args, sequence_config=None):
         raise ValueError("Retrieval artifacts differ from the frozen feature metadata.")
     retriever, data, _ = load_model(metadata["checkpoint"], base["cache"], args.device)
     if args.rid is None:
-        if sequence_selection is not None and args.cohort == "fresh":
-            rows = selected_rows(read(sequence_root / "candidate_config.json"), "fresh")
+        if arm is not None and args.cohort == "fresh":
+            rows_path = sequence_root / "fresh/rows.npy"
+            if release:
+                if digest(rows_path) != release["confirmation_rows_sha256"]:
+                    raise ValueError("Confirmation user list differs from the release manifest.")
+                rows = np.load(rows_path)
+            else:
+                rows = selected_rows(read(sequence_root / "candidate_config.json"), "fresh")
         else:
             rows = np.load(root / args.cohort / "rows.npy")
         if not 0 <= args.index < len(rows):
@@ -79,28 +89,28 @@ def recommend(args, sequence_config=None):
         recall, proposals, base, group, data, seed, args.device)
     x = feature_array(data, merged, rows, changed, rz, cz, base, group, args.device)
     model = load_ranker(ranker["checkpoint"], args.device)
-    delta_dcn = chosen["scale"] * infer(model, x, args.device, batch_size=1)
-    base_scores = fusion + delta_dcn
+    dcn_output = chosen.get("scale", 1.0) * infer(model, x, args.device, batch_size=1)
+    base_scores = dcn_output if release else fusion + dcn_output
     lists = {"candidates": merged}
     fixed, dcn = (ranks_for(lists, values)[0] for values in (fusion, base_scores))
     orders = {"original": original[0], "augmented_prior": fixed, "dcn_v2": dcn}
     final = dcn
-    if sequence_selection is not None:
-        arm = sequence_selection["arms"][args.variant]
+    if arm is not None:
         inputs, context = sequence_inputs(sequence_config, data, rows, merged, x, args.device)
         sequence = load_history_ranker(sequence_config, arm, seed, model, inputs[1].shape[-1], args.device)
         delta_sequence = arm["scale"] * sequence(*inputs).cpu().numpy()
         final_scores = base_scores + delta_sequence
         final = ranks_for(lists, final_scores)[0]
-        orders[args.variant] = final
+        orders[arm["variant"]] = final
     addition = set(merged[changed].tolist())
     result = dict(seed=seed, user_rid=int(data.user_rids[row]), budget=len(final),
                   auxiliary_added=len(addition), top10=[
                       dict(rank=rank, oid=int(data.catalog_oids[item]), from_auxiliary=int(item) in addition)
                       for rank, item in enumerate(final[:10], 1)
                   ])
-    if sequence_selection is not None:
-        result["ranker"] = args.variant
+    result["ranking_base"] = "dcn_only" if release else "fusion_plus_dcn"
+    if arm is not None:
+        result["ranker"] = arm["variant"]
     if args.show_target:
         target = sample["target"]
         ranks = {}
@@ -108,11 +118,11 @@ def recommend(args, sequence_config=None):
             ranks[label] = rank_of(order, target)
         result["target_audit"] = dict(oid=int(data.catalog_oids[target]), ranks=ranks,
                                      from_auxiliary=target in addition)
-    if sequence_selection is not None and args.trace:
+    if arm is not None and args.trace:
         focus = int(sample["target"]) if args.show_target else int(final[0])
         result["data_trace"] = data_trace(
             data, row, sample, recall, proposals, merged, changed, inputs, context, focus,
-            fusion, delta_dcn, delta_sequence, final_scores, sequence, orders)
+            fusion, dcn_output, base_scores, delta_sequence, final_scores, sequence, orders)
     return result
 
 
@@ -134,7 +144,7 @@ def rank_of(order, item):
 
 
 def data_trace(data, row, sample, recall, proposals, merged, changed, inputs, context, focus,
-               fusion, delta_dcn, delta_sequence, final_scores, model, orders):
+               fusion, dcn_output, base_scores, delta_sequence, final_scores, model, orders):
     def identifier(item):
         item = int(item)
         return dict(local_id=item, source_rid=int(data.catalog_rids[item]), oid=int(data.catalog_oids[item]))
@@ -189,18 +199,20 @@ def data_trace(data, row, sample, recall, proposals, merged, changed, inputs, co
             candidate_column=i, from_auxiliary=bool(changed[0, i]),
             static_features={name:float(value) for name, value in zip(FEATURES, inputs[0][0, i].tolist())},
             content_unit_head=first_values(inputs[1][0, i].tolist()),
-            fixed_fusion=float(fusion[0, i]), dcn_residual=float(delta_dcn[0, i]),
-            dcn_score=float(fusion[0, i] + delta_dcn[0, i]),
+            reference_fixed_fusion=float(fusion[0, i]), dcn_output=float(dcn_output[0, i]),
+            dcn_score=float(base_scores[0, i]),
             sequence_residual=float(delta_sequence[0, i]), final_score=float(final_scores[0, i]),
         )
     return trace
 
 
 def main(use_sequence=False):
-    description = "Run the locked sequence ranker on two-channel Top-500 candidates." if use_sequence else __doc__
+    description = "Run pure DCN V2 and OneTrans-style ranking on two-channel Top-500 candidates." if use_sequence else __doc__
     p = argparse.ArgumentParser(description=description)
+    p.add_argument("--release-config", default="configs/ranking_release.json")
+    p.add_argument("--legacy", action="store_true", help="Use the historical fixed-fusion DCN weights.")
     if not use_sequence:
-        p.add_argument("--config", default="configs/channel_rank.json")
+        p.add_argument("--config", help="Historical channel config (implies --legacy).")
     p.add_argument("--device", default="cpu")
     p.add_argument("--seed", type=int, choices=(2026, 2027), default=2026)
     p.add_argument("--cohort", choices=("dev", "fresh"), default="fresh")
@@ -209,15 +221,23 @@ def main(use_sequence=False):
     user.add_argument("--rid", type=int)
     p.add_argument("--show-target", action="store_true")
     if use_sequence:
-        p.add_argument("--sequence-config", default="configs/sequence_rank.json")
-        p.add_argument("--variant", choices=("joint_transformer", "history_attention"),
-                       default="joint_transformer")
+        p.add_argument("--sequence-config", help="Historical sequence config (implies --legacy).")
+        p.add_argument("--variant", choices=("joint_transformer", "history_attention"), default="joint_transformer",
+                       help="History attention uses the historical fixed-fusion base.")
         p.add_argument("--trace", action="store_true", help="Show intermediate shapes and sample data.")
     args = p.parse_args()
     os.chdir(REPO)
     torch.set_num_threads(4)
-    sequence_config = read(args.sequence_config) if use_sequence else None
-    print(json.dumps(recommend(args, sequence_config), indent=2))
+    legacy = args.legacy or (use_sequence and (args.sequence_config or args.variant == "history_attention"))
+    legacy = legacy or (not use_sequence and args.config)
+    release = None if legacy else read(args.release_config)
+    if release and release["base_score"] != "dcn_only":
+        p.error("unsupported release base score")
+    if not use_sequence:
+        args.config = args.config or "configs/channel_rank.json"
+    sequence_config = read(release["sequence_config"] if release else (
+        args.sequence_config or "configs/sequence_rank.json")) if use_sequence else None
+    print(json.dumps(recommend(args, sequence_config, release), indent=2))
 
 
 if __name__ == "__main__":

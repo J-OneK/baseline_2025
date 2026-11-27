@@ -1,0 +1,283 @@
+{
+  "seed": 2026,
+  "user_rid": 311428,
+  "budget": 500,
+  "auxiliary_added": 10,
+  "top10": [
+    {
+      "rank": 1,
+      "oid": 20004481382,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 2,
+      "oid": 20003301361,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 3,
+      "oid": 20004114747,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 4,
+      "oid": 20001748861,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 5,
+      "oid": 20000911355,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 6,
+      "oid": 20005549252,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 7,
+      "oid": 20000513186,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 8,
+      "oid": 20001442540,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 9,
+      "oid": 20005296729,
+      "from_auxiliary": true
+    },
+    {
+      "rank": 10,
+      "oid": 20000184352,
+      "from_auxiliary": true
+    }
+  ],
+  "ranking_base": "dcn_only",
+  "ranker": "joint_transformer",
+  "target_audit": {
+    "oid": 20004114747,
+    "ranks": {
+      "original": null,
+      "augmented_prior": 494,
+      "dcn_v2": 3,
+      "joint_transformer": 3
+    },
+    "from_auxiliary": true
+  },
+  "data_trace": {
+    "cache": {
+      "user_row": 29015,
+      "model_user_id": 29016,
+      "max_history": 100,
+      "cached_events": 24,
+      "validation_boundary": 10,
+      "catalog_items": 1538730
+    },
+    "shapes": {
+      "recall_input_ids": [
+        1,
+        101
+      ],
+      "query_vector": [
+        1,
+        32
+      ],
+      "main_candidates": [
+        1,
+        500
+      ],
+      "auxiliary_proposals": [
+        1,
+        2,
+        80
+      ],
+      "merged_candidates": [
+        1,
+        500
+      ],
+      "static_features": [
+        1,
+        500,
+        15
+      ],
+      "candidate_content": [
+        1,
+        500,
+        32
+      ],
+      "history_content": [
+        1,
+        40,
+        32
+      ],
+      "history_actions": [
+        1,
+        40
+      ],
+      "history_ages": [
+        1,
+        40
+      ],
+      "history_tokens": [
+        1,
+        40,
+        24
+      ],
+      "ranking_scores": [
+        1,
+        500
+      ],
+      "candidate_tokens": [
+        1,
+        500,
+        2,
+        24
+      ]
+    },
+    "sequence_dataset_tail": [
+      {
+        "local_id": 559696,
+        "source_rid": 1738210,
+        "oid": 20002983626,
+        "action": 1,
+        "timestamp": 1731591430
+      },
+      {
+        "local_id": 1031838,
+        "source_rid": 3206824,
+        "oid": 20003582207,
+        "action": 2,
+        "timestamp": 1731673950
+      },
+      {
+        "local_id": 1477171,
+        "source_rid": 4590467,
+        "oid": 20005324549,
+        "action": 1,
+        "timestamp": 1731674319
+      }
+    ],
+    "sequence_rank_history": {
+      "valid_events": 10,
+      "tail": [
+        {
+          "local_id": 1169747,
+          "source_rid": 3635121,
+          "oid": 20004274409,
+          "action": 1,
+          "log_age_minutes": 8.666319847106934
+        },
+        {
+          "local_id": 559696,
+          "source_rid": 1738210,
+          "oid": 20002983626,
+          "action": 1,
+          "log_age_minutes": 7.2316365242004395
+        },
+        {
+          "local_id": 1031838,
+          "source_rid": 3206824,
+          "oid": 20003582207,
+          "action": 2,
+          "log_age_minutes": 1.9671123027801514
+        },
+        {
+          "local_id": 1477171,
+          "source_rid": 4590467,
+          "oid": 20005324549,
+          "action": 1,
+          "log_age_minutes": 0.0
+        }
+      ]
+    },
+    "query_head": [
+      -1.193134,
+      -0.142864,
+      -0.411329,
+      0.656099
+    ],
+    "main_top3": [
+      {
+        "local_id": 247239,
+        "source_rid": 769816,
+        "oid": 20004281921,
+        "inner_product": 8.677026748657227
+      },
+      {
+        "local_id": 941342,
+        "source_rid": 2926410,
+        "oid": 20005856461,
+        "inner_product": 8.524971961975098
+      },
+      {
+        "local_id": 879095,
+        "source_rid": 2732835,
+        "oid": 20004234388,
+        "inner_product": 8.434606552124023
+      }
+    ],
+    "auxiliary_added_preview": [
+      {
+        "local_id": 1319987,
+        "source_rid": 4103420,
+        "oid": 20000513186
+      },
+      {
+        "local_id": 944873,
+        "source_rid": 2936412,
+        "oid": 20005296729
+      },
+      {
+        "local_id": 901365,
+        "source_rid": 2800502,
+        "oid": 20001442540
+      }
+    ],
+    "focus": {
+      "local_id": 1415788,
+      "source_rid": 4400700,
+      "oid": 20004114747,
+      "train_events": 0,
+      "ranks": {
+        "raw_recall": null,
+        "original": null,
+        "augmented_prior": 494,
+        "dcn_v2": 3,
+        "joint_transformer": 3
+      },
+      "candidate_column": 499,
+      "from_auxiliary": true,
+      "static_features": {
+        "retrieval_z": -1.889561653137207,
+        "ctr_z": 0.36468780040740967,
+        "train_events_log": 0.0,
+        "early_clicks_log": 0.0,
+        "content_present": 1.0,
+        "added_channel": 1.0,
+        "click_match_cosine": 0.9938036203384399,
+        "click_match_present": 1.0,
+        "exposure_match_cosine": 0.0,
+        "exposure_match_present": 0.0,
+        "best_match_from_click": 1.0,
+        "best_match_age_log": 1.9671123027801514,
+        "matched_fields": 2.0,
+        "matched_posting_size_log": 4.499809741973877,
+        "best_content_cosine": 0.9938036203384399
+      },
+      "content_unit_head": [
+        0.244077,
+        0.051758,
+        -0.251663,
+        -0.202176
+      ],
+      "reference_fixed_fusion": -1.6641366481781006,
+      "dcn_output": 2.2873895168304443,
+      "dcn_score": 2.2873895168304443,
+      "sequence_residual": -0.04137835651636124,
+      "final_score": 2.246011257171631
+    }
+  }
+}

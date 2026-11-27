@@ -2,7 +2,7 @@
 
 这个项目训练一个用户历史编码器和一个共享广告编码器。用户历史输出查询向量 `q`，广告输出向量 `v`，召回分数是 `q·v`。训练让历史后的真实点击广告分数高于采样负广告，推断时在固定候选库中检索分数最高的十个未见广告。
 
-主召回固定一层编码器。完整推荐通过历史查组补充候选，然后用 DCN V2 基础分和 OneTrans 风格联合残差排序。运行入口见 [README](../README_CN.md)，结果口径见[版本说明](release.md)。
+主召回固定一层编码器。完整推荐通过历史查组补充候选，然后用纯 DCN V2 基础分和 OneTrans 风格联合残差排序。运行入口见 [README](../README_CN.md)，结果口径见[版本说明](release.md)。
 
 ## 1. 代码来源与整体结构
 
@@ -188,7 +188,7 @@ R² = max(所有广告向量的平方范数)
 
 [推荐入口](../scripts/recommend_channel_rank.py)先用验证边界前的历史算查询向量，精确取 500 个广告。同时，辅助通道从最近 40 个已知点击或曝光里查同 102 或 122 属性的候选，并按 81 向量的最大余弦相似度选广告。每个冷尾桶最多填入 5 条，总预算仍为 500。
 
-[候选与特征](../scripts/build_channel_features.py)为合并后每条广告构造 15 维输入，其中有标准化召回分、内容 MLP 分、候选来源、最佳点击和曝光相似度及时间差。[DCN V2](../taac_retrieval/channel_ranker.py)由两层低秩交叉层和一个两层 MLP 并行组成，输出加到原融合分上。训练时用真实召回列表内唯一的留出点击做交叉熵监督。DCN V2 的训练依据与尾部案例见[通道排序报告](../reports/channel_rank/README.md)。
+[候选与特征](../scripts/build_channel_features.py)为合并后每条广告构造 15 维输入，其中有标准化召回分、内容 MLP 分、候选来源、最佳点击和曝光相似度及时间差。[DCN V2](../taac_retrieval/channel_ranker.py)由两层低秩交叉层和一个两层 MLP 并行组成，直接输出基础分。召回分和内容 MLP 分仍作为两个输入，原融合分只保留在候选合并保护和对照中。训练用真实召回列表内唯一的留出点击做交叉熵监督。 [固定融合消融](../reports/channel_prior_ablation/README.md)
 
 
-[联合 Transformer](../taac_retrieval/sequence_ranker.py)将历史内容、动作、位置和时间编码成 `[B,40,24]`。候选侧将 81 号向量、基础分与通道特征整理成 `[B,500,2,24]`。每条候选读取这名用户的历史和自己的特征 token，产生一项额外分数。[完整推荐入口](../scripts/recommend_sequence_rank.py)把新残差加入 DCN V2 基础分并排序，返回 OID。通过 `--trace` 可以查看[真实用户从原始行为到排第 8 的每一步数据](data_flow.md)。
+[联合 Transformer](../taac_retrieval/sequence_ranker.py)将历史内容、动作、位置和时间编码成 `[B,40,24]`。候选侧将 81 号向量、基础分与通道特征整理成 `[B,500,2,24]`。每条候选读取这名用户的历史和自己的特征 token，产生一项额外分数。[完整推荐入口](../scripts/recommend_sequence_rank.py)把新残差加入 DCN V2 基础分并排序，返回 OID。通过 `--trace` 可以查看[两条真实用户轨迹](data_flow.md)。

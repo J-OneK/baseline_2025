@@ -1,19 +1,21 @@
 <section class="chapter" id="channel-ranking">
   <div class="chapter-kicker">07 · 排序阶段：DCN V2</div>
   <h2>候选已经找到了，如何把真正想点的排到前十？</h2>
-  <p class="lead">上一章已经凑齐 500 条候选。本章把每条广告变成 15 项特征，再用 DCN V2 给原融合分加一个修正。候选集合保持不变。</p>
+  <p class="lead">上一章已经凑齐 500 条候选。本章把每条广告变成 15 项特征，再用 DCN V2 直接给每条候选打基础分。候选集合保持不变。</p>
   <pre>固定的 500 条候选 → [B, 500, 15] 静态特征
-原融合分（召回内积 + 内容 MLP） + DCN V2 残差 → 基础排序分</pre>
-  <h3>为什么给原融合分加修正？</h3>
-  <p>辅助广告能进候选，却可能因为原召回得分低，被旧融合分压在榜尾。直接按余弦把一条推入前十，很难区分用户点过的广告与只曝光过的广告。于是给排序器加上匹配动作、时间差、组大小等特征，让它学习什么时候值得加分。<a href="#experiments">实验证据放在第 10 章</a>。</p>
+DCN V2(15 项特征) → [B,500] 基础排序分</pre>
+  <h3>为什么让 DCN 自己决定怎么用旧分？</h3>
+  <p>辅助广告能进候选，却可能因为原召回得分低，被旧融合分压在榜尾。直接按余弦把一条推入前十，很难区分用户点过的广告与只曝光过的广告。于是给排序器加上匹配动作、时间差、组大小等特征，让它学会组合这些线索。早期用旧融合分起步、训练 DCN 去修正；后续用同样的 15 项输入重训纯 DCN。两版分别加联合排序后，指标接近，默认采用更直接的纯 DCN 基础分。旧融合仍负责候选合并保护。<a href="#experiments">实验证据放在第 10 章</a>。</p>
   <h3>模型是怎么学到优先级的？</h3>
   <p>训练时一位用户对应一张真实的 500 候选列表。留出点击在列表中时，给它唯一的正例位置。每条候选有 15 个特征，包括旧召回和内容 MLP 得分、来源、历史点击和曝光相似度、匹配时间差、组大小等。DCN V2 交叉层可以表达“来自辅助通道且与近期点击高度相似”的组合。</p>
-  <div class="formula" role="math"><p>score = 0.9 × z(召回内积) + 0.1 × z(内容 MLP logit) + DCN 残差</p><p>L = −log(exp(score[点击位置]) / Σ exp(score[候选位置]))</p></div>
+  <div class="formula" role="math"><p>score = DCN V2(x)，其中 x 包括召回 z 分和内容 MLP z 分</p><p>L = −log(exp(score[点击位置]) / Σ exp(score[候选位置]))</p></div>
   {{code:taac_retrieval/channel_ranker.py:8:*}}
+  <p>源码里的 <code>list_loss(prior, residual, ...)</code> 为两版复用。纯 DCN 训练将 <code>prior</code> 设成全零，直接监督网络输出；联合模型训练则把冻住的 DCN 分当作 <code>prior</code>，只训练它的修正。</p>
+  {{code:scripts/ablate_channel_prior.py:70:99}}
   <p>交叉式里每轮保留原输入 x₀，和当前变换后的向量逐元素相乘。深层分支与交叉分支拼在一起，末层输出一个标量。排序分在同一用户的列表内比较，曝光点击概率由另一套日志模型学习。</p>
   <h3>为什么选 DCN V2？</h3>
   <p>两条广告的余弦都很高，一条匹配的是用户点过的同组广告，另一条只匹配曝光。分开理解“相似度高”和“有点击”以后，还要判断两件事一起出现时应提高多少分。第一层里的 <code>x₀ ⊙ W x₀</code> 包含了特征之间的乘积，第二层继续交叉。MLP 也可以学到交互，因此实验让通道 MLP 和 DCN V2 都读取同一份 15 维输入，并保持候选、损失和训练预算一致。</p>
-  <h3>看一个确认集里的长尾目标</h3>
+  <h3>历史对照：看旧融合式 DCN 如何修正长尾目标</h3>
   <p>用户 RID 134009 的目标 OID 20004004871 在训练前缀中出现 4 次。两个种子的主召回都漏掉它。它来自辅助通道，和一次同组点击的余弦为 0.999489，两个字段同时匹配。用保存的特征和锁定权重重算得到下表。seed 2026 的新分来自 <code>−5.670 + 8.438 ≈ 2.768</code>，在同一个列表重新排序后进入第 6 位。</p>
   <div class="table-wrap"><table>
     <thead><tr><th>种子</th><th>旧融合分</th><th>学习残差</th><th>新分</th><th>排名</th></tr></thead>
@@ -22,6 +24,6 @@
       <tr><td>2027</td><td>−2.494</td><td>+4.812</td><td>+2.319</td><td>492 → 9</td></tr>
     </tbody>
   </table></div>
-  <pre>python scripts/recommend_channel_rank.py --device cpu --rid 134009 --show-target</pre>
+  <pre>python scripts/recommend_channel_rank.py --legacy --device cpu --rid 134009 --show-target</pre>
   <p><a href="#sequence-ranking">继续看主分支的联合排序</a> · <a href="ranking_extension.md">完整推荐入口</a> · <a href="../reports/channel_rank/README.md">确认集结果与复现协议</a> · <a href="../reports/channel_rank/README.md#遇到的问题与选择依据">方案取舍与失败复盘</a></p>
 </section>
